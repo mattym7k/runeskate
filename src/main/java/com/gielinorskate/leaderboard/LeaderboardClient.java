@@ -27,6 +27,9 @@ public class LeaderboardClient
 {
 	/** Sent as X-Gs-Version and pluginVersion: 1-32 of [A-Za-z0-9._+-]. */
 	public static final String VERSION = "1.0.0";
+	/** The RuneSkate leaderboard server: the only host this plugin talks to, and only while "Submit scores" is on. */
+	public static final String SERVER = "https://runeskate-leaderboard.runeskate.workers.dev";
+	private static final HttpUrl BASE = HttpUrl.get(SERVER);
 	private static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 	/** Biggest answer read (a top-100 board is a few KiB). */
 	private static final long MAX_RESPONSE_BYTES = 256 * 1024;
@@ -56,46 +59,36 @@ public class LeaderboardClient
 		this.gson = gson;
 	}
 
-	public void claim(String baseUrl, RunSubmission.Claim claim, Consumer<Result> done)
+	public void claim(RunSubmission.Claim claim, Consumer<Result> done)
 	{
-		post(baseUrl, "v1/claim", gson.toJson(claim), done);
+		post("v1/claim", gson.toJson(claim), done);
 	}
 
-	public void submit(String baseUrl, RunSubmission.Body body, Consumer<Result> done)
+	public void submit(RunSubmission.Body body, Consumer<Result> done)
 	{
-		post(baseUrl, "v1/runs", gson.toJson(body), done);
+		post("v1/runs", gson.toJson(body), done);
 	}
 
 	/** {@code GET /v1/leaderboard}; {@code accountHash} is the caller's own (for "you"), or null. */
-	public void leaderboard(String baseUrl, String category, String period, String accountHash,
-		Consumer<Result> done)
+	public void leaderboard(String category, String period, String accountHash, Consumer<Result> done)
 	{
-		HttpUrl base = HttpUrl.parse(ServerUrl.base(baseUrl));
-		if (base == null)
-		{
-			done.accept(new Result(0, null, null));
-			return;
-		}
-		HttpUrl.Builder url = base.newBuilder().addPathSegments("v1/leaderboard")
+		HttpUrl url = BASE.newBuilder().addPathSegments("v1/leaderboard")
 			.addQueryParameter("category", category)
-			.addQueryParameter("period", period);
+			.addQueryParameter("period", period)
+			.build();
+		Request.Builder request = new Request.Builder().url(url).header("X-Gs-Version", VERSION).get();
 		if (accountHash != null)
 		{
-			url.addQueryParameter("account", accountHash);
+			// a header, not the query string, so the hash stays out of URLs and access logs
+			request.header("X-Gs-Account", accountHash);
 		}
-		send(new Request.Builder().url(url.build()).header("X-Gs-Version", VERSION).get().build(), done);
+		send(request.build(), done);
 	}
 
-	private void post(String baseUrl, String path, String json, Consumer<Result> done)
+	private void post(String path, String json, Consumer<Result> done)
 	{
-		HttpUrl base = HttpUrl.parse(ServerUrl.base(baseUrl));
-		if (base == null)
-		{
-			done.accept(new Result(0, null, null));
-			return;
-		}
 		Request request = new Request.Builder()
-			.url(base.newBuilder().addPathSegments(path).build())
+			.url(BASE.newBuilder().addPathSegments(path).build())
 			.header("X-Gs-Version", VERSION)
 			.post(RequestBody.create(JSON, json))
 			.build();

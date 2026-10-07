@@ -19,7 +19,6 @@ final class LeaderboardHud
 	static final String COLLAPSED_TITLE = TITLE + " (collapsed)";
 	static final int TOP = 5;
 
-	static final String NOT_CONFIGURED = "Leaderboard server not set up.";
 	static final String NORMAL_WORLDS_ONLY = "Normal worlds only.";
 	static final String LOADING = "Loading...";
 	static final String NO_SCORES = "No scores yet.";
@@ -156,10 +155,6 @@ final class LeaderboardHud
 	/** The line shown instead of rows, or null when there are rows to show. */
 	private static String status(LeaderboardService.Hud hud)
 	{
-		if (hud.state == LeaderboardService.View.State.NOT_CONFIGURED)
-		{
-			return NOT_CONFIGURED;
-		}
 		if (hud.otherWorld)
 		{
 			return NORMAL_WORLDS_ONLY;

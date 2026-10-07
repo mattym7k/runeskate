@@ -185,12 +185,6 @@ public class LeaderboardSection extends JPanel
 			controls.setVisible(false);
 			return;
 		}
-		if (view.state == LeaderboardService.View.State.NOT_CONFIGURED)
-		{
-			status.setText(html("The leaderboard server isn't configured in this version yet."));
-			controls.setVisible(false);
-			return;
-		}
 		controls.setVisible(true);
 		boolean turnedOn = shownState != LeaderboardService.View.State.ON;
 		shownState = view.state;

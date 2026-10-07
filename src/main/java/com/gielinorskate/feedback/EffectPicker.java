@@ -12,7 +12,8 @@ final class EffectPicker
 	static final int LANDING_PUFF = SpotanimID.EMOTE_DUSTSTAMP_SPOT;
 	static final int GRIND_SPARKS = SpotanimID.WARGUILD_SPARKS_SPOTANIM;
 	static final int BAIL_SMOKE = SpotanimID.SMOKEPUFF_LARGE;
-	static final int PET_DROP_BALLOONS = SpotanimID.BALLOON_SPOT;
+	/** The Party emote's confetti: a plain celebration for a huge combo (nothing that looks like a real drop). */
+	static final int BIG_COMBO_CONFETTI = SpotanimID.FX_EMOTE_PARTY01_ACTIVE;
 
 	/** Only landings after more than this many seconds of air raise dust (not curb drops and bumps). */
 	static final float PUFF_MIN_AIRTIME = 0.4f;
@@ -44,7 +45,7 @@ final class EffectPicker
 		}
 		if (newResult != null && newResult.isLanded() && Callout.forValue(newResult.value) == Callout.PET_DROP)
 		{
-			ids.add(PET_DROP_BALLOONS);
+			ids.add(BIG_COMBO_CONFETTI);
 		}
 		return ids;
 	}

@@ -18,10 +18,6 @@ The side panel's **Controller setup** view walks through this, with a live pad t
    a **Controller preset** (Skate 3, Tony Hawk's American Wasteland, or your Custom layout).
 5. Start skating (Ctrl+K, or the sidebar button). Keep the game window focused and the mouse cursor over the game.
 
-**Updating from an older RuneSkate:** the old profile sent different keys (Shift, Q, E, F, R, Esc, H, B), so load
-the new profile again. Chat reminds you once if Controller mode is on. The old "Pad A key" and "Pad X key"
-settings are retired: the pad keys are fixed now.
-
 ## The universal profile
 
 Every button sends its own **pad key**: a key that keyboards don't have or that games rarely use, the same on
@@ -83,9 +79,6 @@ dismount does its new job without a new press.
 | Back | Get up after a bail, or stop | Knocked off: get up |
 | D-pad up | Controls card | Controls card |
 | L3, R3, d-pad down / left / right | (nothing) | (nothing) |
-
-This is exactly the old pad layout: the plugin's tests drive the old profile's keys through the old input and
-the new pad keys through the Skate 3 preset and check they read the same.
 
 ### Custom
 

@@ -10,9 +10,9 @@ import org.junit.Test;
 public class LevelUpTest
 {
 	@Test
-	public void messageUsesTheGameWordingWithTheFinalLevel()
+	public void messageNamesTheFinalLevelInRuneSkateWording()
 	{
-		assertEquals("Congratulations, you've just advanced your Skating level. You are now level 5.",
+		assertEquals("You reached Skating level 5!",
 			new LevelUp(2, 5).message());
 	}
 

@@ -38,12 +38,14 @@ public interface GielinorSkateConfig extends Config
 		position = 4, closedByDefault = true)
 	String ADVANCED = "advanced";
 
-	/**
-	 * RuneLite's required wording for a feature that talks to a third-party server, verbatim, then what else the
-	 * leaderboard sends.
-	 */
+	/** RuneLite's required wording for a feature that talks to a third-party server, verbatim. */
 	String THIRD_PARTY_WARNING = "This feature submits your IP address to a 3rd-party server not controlled or "
-		+ "verified by RuneLite developers. Your RuneScape name is sent with your scores.";
+		+ "verified by RuneLite developers";
+
+	/** The leaderboard setting's description: what it does, the required warning, and what else it sends. */
+	String SUBMIT_SCORES_DESCRIPTION = "Sends your best combos, timed 2-minute runs and Skating XP to the RuneSkate "
+		+ "leaderboard, and shows the leaderboards in the side panel and on screen. " + THIRD_PARTY_WARNING
+		+ ". Your RuneScape name is sent with your scores.";
 
 	/** Which controller layout turns the pad's buttons into actions (see com.gielinorskate.controller). */
 	enum ControllerPreset
@@ -253,8 +255,7 @@ public interface GielinorSkateConfig extends Config
 	@ConfigItem(
 		keyName = "submitScores",
 		name = "Submit scores to the leaderboard",
-		description = "Sends your best combos, timed 2-minute runs and Skating XP to the RuneSkate leaderboard, "
-			+ "and shows the leaderboards in the side panel and on screen. " + THIRD_PARTY_WARNING,
+		description = SUBMIT_SCORES_DESCRIPTION,
 		warning = THIRD_PARTY_WARNING,
 		position = 3,
 		section = GENERAL
@@ -306,8 +307,8 @@ public interface GielinorSkateConfig extends Config
 	@ConfigItem(
 		keyName = "shareCustomDesigns",
 		name = "Share my custom designs",
-		description = "Party members who see your skater also see the board designs you made (needs \"Share my "
-			+ "skater with my party\").",
+		description = "Party members who see your skater also see the board designs you made, if they turned on "
+			+ "\"Show party members' custom designs\" (needs \"Share my skater with my party\").",
 		position = 2,
 		section = PARTY
 	)
@@ -319,14 +320,14 @@ public interface GielinorSkateConfig extends Config
 	@ConfigItem(
 		keyName = "showPartyCustomDesigns",
 		name = "Show party members' custom designs",
-		description = "Shows the board designs party members made themselves (kept in memory only); when off, "
-			+ "their custom parts use the default design.",
+		description = "Off by default. When on, shows the images your party members drew or picked for their own "
+			+ "board designs (kept in memory only); when off, their custom parts use the default design.",
 		position = 3,
 		section = PARTY
 	)
 	default boolean showPartyCustomDesigns()
 	{
-		return true;
+		return false;
 	}
 
 	@ConfigItem(
@@ -772,45 +773,6 @@ public interface GielinorSkateConfig extends Config
 	default String leaderboardOverlayPeriod()
 	{
 		return "week";
-	}
-
-	/** The leaderboard server; set at release. While it is the placeholder, the online feature does nothing. */
-	@ConfigItem(
-		keyName = "leaderboardUrl",
-		name = "",
-		description = "",
-		hidden = true
-	)
-	default String leaderboardUrl()
-	{
-		return "https://runeskate-leaderboard.runeskate.workers.dev";
-	}
-
-	/**
-	 * Retired with controller presets (the universal profile sends a fixed pad key per button): kept hidden so the
-	 * saved key is not lost, and no longer read by the input.
-	 */
-	@ConfigItem(
-		keyName = "padAKey",
-		name = "",
-		description = "",
-		hidden = true
-	)
-	default Keybind padAKey()
-	{
-		return new Keybind(KeyEvent.VK_F13, 0);
-	}
-
-	/** Retired with controller presets, like {@link #padAKey}. */
-	@ConfigItem(
-		keyName = "padXKey",
-		name = "",
-		description = "",
-		hidden = true
-	)
-	default Keybind padXKey()
-	{
-		return new Keybind(KeyEvent.VK_F14, 0);
 	}
 
 	/** The Custom controller preset, as a layout code (com.gielinorskate.controller.LayoutCode); empty: none. */

@@ -49,7 +49,6 @@ import javax.inject.Named;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import lombok.extern.slf4j.Slf4j;
-import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
 import net.runelite.api.GameState;
 import net.runelite.api.Renderable;
@@ -86,8 +85,7 @@ import net.runelite.client.util.LinkBrowser;
 	name = "RuneSkate",
 	description = "Skateboard around Gielinor: Ctrl+K to start, flick the mouse for tricks",
 	tags = {"skate", "skateboard", "fun", "minigame"},
-	internalName = "rune-skate",
-	legacyDataDirectory = "runeskate"
+	internalName = "rune-skate"
 )
 public class GielinorSkatePlugin extends Plugin
 {
@@ -95,6 +93,8 @@ public class GielinorSkatePlugin extends Plugin
 
 	@Inject
 	private Client client;
+	@Inject
+	private SkateChat skateChat;
 
 	@Inject
 	private ClientThread clientThread;
@@ -448,7 +448,7 @@ public class GielinorSkatePlugin extends Plugin
 		if (e.getGameState() == GameState.LOGGED_IN && !config.seenIntro())
 		{
 			configManager.setConfiguration(GielinorSkateConfig.GROUP, "seenIntro", true);
-			client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", ComfortHints.welcome(config.toggleKey().toString()), null);
+			skateChat.send(ComfortHints.welcome(config.toggleKey().toString()));
 		}
 		if (e.getGameState() == GameState.LOGGED_IN)
 		{
@@ -521,7 +521,7 @@ public class GielinorSkatePlugin extends Plugin
 					}
 				});
 			}
-			if ("submitScores".equals(key) || "leaderboardUrl".equals(key))
+			if ("submitScores".equals(key))
 			{
 				clientThread.invoke(leaderboard::onConfigChanged);
 			}
@@ -616,17 +616,15 @@ public class GielinorSkatePlugin extends Plugin
 		List<String> lines = partyGhosts.ghostStatusLines();
 		if (!session.isActive())
 		{
-			client.addChatMessage(ChatMessageType.GAMEMESSAGE, "",
-				"Skate ghosts: you are not skating (ghosts are drawn only while you skate).", null);
+			skateChat.send("Skate ghosts: you are not skating (ghosts are drawn only while you skate).");
 		}
 		if (lines.isEmpty())
 		{
-			client.addChatMessage(ChatMessageType.GAMEMESSAGE, "",
-				"Skate ghosts: none (no party member is skating, or none shares with the party).", null);
+			skateChat.send("Skate ghosts: none (no party member is skating, or none shares with the party).");
 		}
 		for (String line : lines)
 		{
-			client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "Skate ghost " + line, null);
+			skateChat.send("Skate ghost " + line);
 		}
 	}
 
@@ -646,14 +644,14 @@ public class GielinorSkatePlugin extends Plugin
 			configManager.setConfiguration(GielinorSkateConfig.GROUP, "controllerSetupHint", true);
 			configManager.setConfiguration(GielinorSkateConfig.GROUP, "controllerProfileNotice",
 				ComfortHints.CONTROLLER_PROFILE_VERSION);
-			client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", ComfortHints.CONTROLLER_SETUP, null);
+			skateChat.send(ComfortHints.CONTROLLER_SETUP);
 			return;
 		}
 		if (config.controllerProfileNotice() < ComfortHints.CONTROLLER_PROFILE_VERSION)
 		{
 			configManager.setConfiguration(GielinorSkateConfig.GROUP, "controllerProfileNotice",
 				ComfortHints.CONTROLLER_PROFILE_VERSION);
-			client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", ComfortHints.NEW_CONTROLLER_PROFILE, null);
+			skateChat.send(ComfortHints.NEW_CONTROLLER_PROFILE);
 		}
 	}
 

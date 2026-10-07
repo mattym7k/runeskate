@@ -112,7 +112,7 @@ public class GielinorSkateConfigTest
 		assertEquals("combo", defaults.leaderboardOverlayBoard());
 		assertEquals("week", defaults.leaderboardOverlayPeriod());
 		assertTrue(defaults.shareCustomDesigns());
-		assertTrue(defaults.showPartyCustomDesigns());
+		assertFalse(defaults.showPartyCustomDesigns());
 		assertTrue(defaults.duelEndings());
 		assertEquals(GielinorSkateConfig.CameraHeight.HIGH, defaults.cameraHeight());
 	}
@@ -180,7 +180,7 @@ public class GielinorSkateConfigTest
 				hidden.add(key(body));
 			}
 		}
-		for (String k : Arrays.asList("padAKey", "padXKey", "customControllerLayout", "controllerProfileNotice"))
+		for (String k : Arrays.asList("customControllerLayout", "controllerProfileNotice"))
 		{
 			assertTrue(k + " is hidden", hidden.contains(k));
 		}
@@ -190,8 +190,6 @@ public class GielinorSkateConfigTest
 		assertEquals(GielinorSkateConfig.ControllerPreset.SKATE_3, defaults.controllerPreset());
 		assertEquals("", defaults.customControllerLayout());
 		assertEquals(0, defaults.controllerProfileNotice());
-		assertEquals(java.awt.event.KeyEvent.VK_F13, defaults.padAKey().getKeyCode());
-		assertEquals(java.awt.event.KeyEvent.VK_F14, defaults.padXKey().getKeyCode());
 	}
 
 	@Test
@@ -200,7 +198,8 @@ public class GielinorSkateConfigTest
 		// plugin/AGENTS.md: the exact sentence the Plugin Hub requires for a third-party server feature
 		String required = "This feature submits your IP address to a 3rd-party server not controlled or verified by "
 			+ "RuneLite developers";
-		assertTrue(GielinorSkateConfig.THIRD_PARTY_WARNING.startsWith(required));
-		assertTrue(GielinorSkateConfig.THIRD_PARTY_WARNING.contains("RuneScape name"));
+		assertEquals(required, GielinorSkateConfig.THIRD_PARTY_WARNING);
+		assertTrue(GielinorSkateConfig.SUBMIT_SCORES_DESCRIPTION.contains(required));
+		assertTrue(GielinorSkateConfig.SUBMIT_SCORES_DESCRIPTION.contains("RuneScape name"));
 	}
 }

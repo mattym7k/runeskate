@@ -118,5 +118,8 @@ public class DesignShareTest
 		}
 		assertEquals(24, DesignShare.cleanName(longName.toString()).length());
 		assertEquals("ab", DesignShare.cleanName("a\nb"));
+		assertEquals("colredHi", DesignShare.cleanName("<col=red>Hi"));
+		assertEquals("ltgtimg1 Kev's deck", DesignShare.cleanName("<lt><gt><img=1> Kev's deck"));
+		assertEquals("Rune-deck_2", DesignShare.cleanName("Rune-deck_2é"));
 	}
 }

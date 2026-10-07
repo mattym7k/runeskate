@@ -40,12 +40,6 @@ tasks.register('run', JavaExec) {
 
 	jvmArgs "-ea"
 	args "--developer-mode", "--debug"
-
-	// opt-in profiling: ./gradlew run -Pjfr writes runeskate.jfr and runeskate-gc.log into plugin/
-	if (project.hasProperty('jfr')) {
-		jvmArgs "-XX:StartFlightRecording=duration=900s,filename=runeskate.jfr,settings=profile",
-			"-Xlog:gc*,safepoint:file=runeskate-gc.log:uptime,time,level,tags"
-	}
 }
 
 tasks.register('shadowJar', Jar) {

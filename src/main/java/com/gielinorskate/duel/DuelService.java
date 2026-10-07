@@ -1,5 +1,6 @@
 package com.gielinorskate.duel;
 
+import com.gielinorskate.SkateChat;
 import com.gielinorskate.GielinorSkateConfig;
 import com.gielinorskate.duel.DuelStateMachine.Cause;
 import com.gielinorskate.duel.DuelStateMachine.Outcome;
@@ -19,7 +20,6 @@ import java.util.function.Consumer;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
-import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
 import net.runelite.api.GameState;
 import net.runelite.api.Player;
@@ -52,6 +52,8 @@ public class DuelService
 	private static final float FIGHT_SHOW = 1f;
 
 	private final Client client;
+	@Inject
+	private SkateChat skateChat;
 	private final ClientThread clientThread;
 	private final GielinorSkateConfig config;
 	private final ScoreClock clock;
@@ -73,6 +75,8 @@ public class DuelService
 	private float bannerAt = Float.NEGATIVE_INFINITY;
 	/** The plugin is stopping: no chat or sounds from here on. */
 	private boolean muted;
+	/** A failed tick was logged (only the first one is). */
+	private boolean tickFailureLogged;
 	private Consumer<DuelView> viewListener;
 	private DuelView lastView;
 	private float nextView;
@@ -186,7 +190,12 @@ public class DuelService
 			}
 			catch (RuntimeException e)
 			{
-				log.warn("Skate Duel tick failed", e);
+				// once: the tick runs every frame, so a lasting fault would flood the log
+				if (!tickFailureLogged)
+				{
+					tickFailureLogged = true;
+					log.warn("Skate Duel tick failed", e);
+				}
 			}
 		}
 		// in a PvP area or instance only a forfeit's one last word goes out
@@ -533,7 +542,7 @@ public class DuelService
 	{
 		if (!muted)
 		{
-			client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", line, null);
+			skateChat.send(line);
 		}
 	}
 

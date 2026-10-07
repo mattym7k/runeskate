@@ -407,7 +407,7 @@ final class LegacyInputController extends MouseAdapter implements KeyListener, M
 	{
 		configureBoardKey(config.boardKey().getKeyCode());
 		configureToggleKey(config.toggleKey().getKeyCode(), config.toggleKey().getModifiers());
-		configurePadKeys(config.padAKey().getKeyCode(), config.padXKey().getKeyCode());
+		configurePadKeys(KeyEvent.VK_F13, KeyEvent.VK_F14);
 		configureController(config.controllerMode(), config.brakeKey().getKeyCode());
 		configureLeanKeys(config.leanForwardKey().getKeyCode(), config.leanBackKey().getKeyCode());
 		configureTricks(config.trickControls(), config.flickButton(), config.mirrorFlicks());

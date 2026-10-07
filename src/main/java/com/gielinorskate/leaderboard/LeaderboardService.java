@@ -80,8 +80,6 @@ public class LeaderboardService
 		{
 			/** The setting is off: "turn on in settings". */
 			OFF,
-			/** The server URL is still the placeholder. */
-			NOT_CONFIGURED,
 			ON
 		}
 
@@ -197,12 +195,10 @@ public class LeaderboardService
 		this.store = new LeaderboardStore(new ProgressionService.ConfigProfileStore(configManager));
 	}
 
-	/**
-	 * The plugin is on, the setting is on and the server is configured: the only case in which anything is sent.
-	 */
+	/** The plugin is on and the setting is on: the only case in which anything is sent. */
 	public boolean isEnabled()
 	{
-		return !stopped && config.submitScores() && ServerUrl.isConfigured(config.leaderboardUrl());
+		return !stopped && config.submitScores();
 	}
 
 	/** Plugin start: sending may begin. Any thread. */
@@ -222,16 +218,7 @@ public class LeaderboardService
 
 	private View.State state()
 	{
-		if (!config.submitScores())
-		{
-			return View.State.OFF;
-		}
-		return ServerUrl.isConfigured(config.leaderboardUrl()) ? View.State.ON : View.State.NOT_CONFIGURED;
-	}
-
-	private String url()
-	{
-		return ServerUrl.base(config.leaderboardUrl());
+		return config.submitScores() ? View.State.ON : View.State.OFF;
 	}
 
 	/** Whether a world of profile type {@code type} submits: normal worlds only. */
@@ -390,7 +377,7 @@ public class LeaderboardService
 				lastSecret, id.name, LeaderboardClient.VERSION, lastDev);
 			int xp = lastXp;
 			long hash = id.hash;
-			api.submit(url(), body, r ->
+			api.submit(body, r ->
 			{
 				log.debug("Leaderboard: logout XP submit answered {}", r.status);
 				String error = r.body == null ? null : LeaderboardPage.errorCode(gson, r.body);
@@ -516,7 +503,7 @@ public class LeaderboardService
 			LeaderboardClient.VERSION, progression.devLevelSet());
 		int gen = generation;
 		inFlight = true;
-		api.submit(url(), body, r -> clientThread.invoke(() -> onSubmitted(gen, item, id, secret, r)));
+		api.submit(body, r -> clientThread.invoke(() -> onSubmitted(gen, item, id, secret, r)));
 	}
 
 	private void onSubmitted(int gen, SubmitQueue.Item item, Identity id, String secret, LeaderboardClient.Result r)
@@ -579,7 +566,7 @@ public class LeaderboardService
 		inFlight = true;
 		item.claimed = true;
 		RunSubmission.Claim body = new RunSubmission.Claim(Long.toString(id.hash), id.name, secret);
-		api.claim(url(), body, r -> clientThread.invoke(() ->
+		api.claim(body, r -> clientThread.invoke(() ->
 		{
 			if (gen != generation)
 			{
@@ -711,7 +698,7 @@ public class LeaderboardService
 	{
 		long hash = client.getAccountHash();
 		String account = hash == -1 ? null : Long.toString(hash);
-		api.leaderboard(url(), category, period, account, r ->
+		api.leaderboard(category, period, account, r ->
 		{
 			LeaderboardPage page = r.status == 200 && r.body != null ? LeaderboardPage.parse(gson, r.body) : null;
 			clientThread.invoke(() ->

@@ -57,7 +57,5 @@ public class SettingsApplyTest
 	{
 		assertEquals(SettingsApply.Kind.LIVE, SettingsApply.classify("controllerPreset"));
 		assertEquals(SettingsApply.Kind.LIVE, SettingsApply.classify("customControllerLayout"));
-		// the retired pad A / X keys are read by nothing
-		assertEquals(SettingsApply.Kind.ALREADY_LIVE, SettingsApply.classify("padAKey"));
 	}
 }

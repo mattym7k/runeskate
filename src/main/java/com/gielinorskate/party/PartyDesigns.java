@@ -51,7 +51,8 @@ public final class PartyDesigns implements GhostHub.MemberDesigns
 	private final Set<String> baking = new HashSet<>();
 	/** Bumped by {@link #clear}: a bake finishing after it is thrown away. */
 	private int generation;
-	private boolean showOthers = true;
+	/** "Show party members' custom designs": off until the setting says otherwise. */
+	private boolean showOthers;
 
 	/**
 	 * @param background where pictures are decoded and baked (RuneLite's executor)

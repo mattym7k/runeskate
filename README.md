@@ -42,7 +42,7 @@ second and get up on foot, about a second and a half in all (never over two). Th
 lands nearby. A move key or Space while you are down gets you up at once; **F** while down gets your board back
 straight away; **R** puts you straight back on the board where you fell. The combo is lost and a Skate Duel bail
 costs 4 HP, as always. In a Skate Duel the whole knockdown plays and R does nothing, so it is the same for both
-of you. Prefer the old quick fall and straight back on? Set **After a bail** (Gameplay) to **Hop straight back
+of you. Prefer a quick fall and straight back on? Set **After a bail** (Gameplay) to **Hop straight back
 on**.
 
 ### On foot
@@ -62,8 +62,8 @@ Jump onto the dropped board (a jump that starts or lands within a tile of it), o
 board carried: that is a bigger hop, the board comes under your feet on the way down, and you land on it rolling
 fast (at least 65% of push top speed from a sprint, 35% from a walk). F while walking or running keeps your speed.
 Your skater walks with your own character's walk and run animations, played faster to match its brisker walk and
-sprint, and the carried board stays in your hand as it swings. Getting on and off is a short blend, never a jump cut. Party members with this version see you
-walking, carrying the board or leaving it on the ground; older versions show you standing on your board.
+sprint, and the carried board stays in your hand as it swings. Getting on and off is a short blend, never a jump
+cut. Party members see you walking, carrying the board or leaving it on the ground.
 
 ### Flick tricks (mouse)
 
@@ -129,8 +129,7 @@ Same tricks, points and animations as the flicks; only the input differs.
 code and shows what it changes before using it.
 
 The card, hints, Trick Book and panel then show the preset's buttons. Every binding is one button to one key,
-with no macros or turbo. Setup and details: [controller/README.md](controller/README.md). Updating from an older
-RuneSkate: load the new profile (chat reminds you once).
+with no macros or turbo. Setup and details: [controller/README.md](controller/README.md).
 
 ### Grinds
 
@@ -140,7 +139,7 @@ land across the rail for slides.
 ## Skating level, board designs and goals
 
 - Every landed combo gives Skating XP (its value / 10) on the game's XP table, saved per account. Level-ups get
-  the game's message, the level-up graphic, bells and a RuneLite notification; every ten levels a banner shows.
+  a RuneSkate chat line, the level-up graphic, bells and a RuneLite notification; every ten levels a banner shows.
 - Your board is image-textured: pick its **grip**, **deck** and **wheels** designs separately under **Board** in
   the side panel (thumbnails; locked ones show their level). Changes show at once and are saved per account;
   party members see them on your skater.
@@ -152,9 +151,9 @@ land across the rail for slides.
   BMP, up to 4096 px a side and 20 MB). Place it under the part's outline (drag, mouse wheel, arrow keys, Rotate,
   Flip, Fit, Fill), watch the in-game preview, name it and Save: it goes on your board at once. Right-click a
   custom design to edit, rename or delete it. Up to 50 are kept on this computer (in RuneLite's plugin data
-  folder). Party members with this version see them on your skater (a small picture of each goes through
-  RuneLite's party; they show the default until it arrives, and keep it in memory only); older versions see the
-  default. **Download template** saves the part's outline to paint on.
+  folder). Party members who turn on **Show party members' custom designs** see them on your skater (a small
+  picture of each goes through RuneLite's party; they show the default until it arrives, and keep it in memory
+  only). **Download template** saves the part's outline to paint on.
 - Each session gets three random goals ("Land 5 different flips"), each worth 2,000 Skating XP.
 - Variety pays: the first landing of each trick in a session scores 25% more, and a combo longer than 8 seconds
   gets one more multiplier.
@@ -164,10 +163,11 @@ land across the rail for slides.
 - **RuneSkate**: the skate mode key, **Controller mode**, **Controller preset** (Skate 3, Tony Hawk's American Wasteland or Custom), **Submit
   scores to the leaderboard** (opt-in) and showing the leaderboard on screen.
 - **Play together**: to skate with friends, join a RuneLite Party (Party plugin, Create/Join party) on the same
-  world. Then share your skater and see theirs, share your custom designs and see theirs, and allow Skate Duel
-  challenges (all on by default; sharing designs needs sharing your skater). Friends on this version are played
-  back smoothly a little under a second behind (every update carries their last few positions and when their
-  tricks happened, so jumps, flips and pushes line up with the path); older versions are shown as before.
+  world. Then share your skater and see theirs, share your custom designs, and allow Skate Duel challenges (all
+  on by default; sharing designs needs sharing your skater). **Show party members' custom designs** is off by
+  default: turn it on to see the images your party members made for their boards. Friends are played back
+  smoothly a little under a second behind (every update carries their last few positions and when their tricks
+  happened, so jumps, flips and pushes line up with the path).
 - **Gameplay**: trick controls (mouse flicks, keyboard or both), **Easy mode** (fewer bails) and **After a bail**
   (get knocked off and walk back to your board, or hop straight back on).
 - **Camera & effects**: zoom (the mouse wheel changes it while skating), height (High by default), sounds and
@@ -184,25 +184,25 @@ Skating is blocked in combat, in instances and PvP minigames, and (unless you op
 PvP worlds. Taking damage, moving your real character or a loading screen ends skating. Your real character
 stands still while you skate.
 
+## Leaderboards
+
+The online leaderboards (best combo, timed 2-minute run and Skating XP, weekly and all time) are opt-in: turn on
+**Submit scores to the leaderboard** in the RuneSkate settings. This sends your scores and your RuneScape name to
+the RuneSkate leaderboard server, a 3rd-party server not controlled or verified by RuneLite developers, which also
+sees your IP address. Scores are only sent from normal worlds. With the setting off, nothing is sent.
+
+## Chat messages
+
+Every chat line from the plugin (level-ups, goals, duel calls, bail jokes, hints) starts with **[RuneSkate]**, so
+it is never mistaken for a game message.
+
 ## Development
 
 `./gradlew run` launches a developer RuneLite client with the plugin loaded. In developer mode the
 `::skatepose`, `::skategrinds`, `::skateboxes` and `::skategesture` commands turn on debug views, and
 `::skatelevel [1-99]` shows or sets your Skating level to try the designs (the account is marked as set by hand);
 `::skateboard runeskate|classic` switches your board model until the setting changes.
-`::skateghosts` prints one line per party ghost: distance, detail level, what its body is drawn as (none, static,
-procedural, anim, anim+procedural), the exact reason for any fallback, and how it moves (played back how far behind,
-the member's jitter and update interval, or dead reckoning for an older version).
+`::skateghosts` prints one line per party ghost: distance, detail level, what its body is drawn as, the reason for
+any fallback, and how it moves.
 
-### Board designs
-
-The designs live in `tools/designs/designs.json` (id, name, part, unlock level, source image). To add one: put
-its image in the part's design layout (`tools/designs/layout.json`; the ladder's are drawn by
-`python tools/gen_ladder_designs.py`), add an entry, then bake with
-`blender -b --factory-startup "E:/blender shi/osrs/skate.blend" --python tools/blend_to_board_baked.py`, which
-writes the board geometry, every design's colour files and thumbnails into the plugin's resources.
-`python tools/test_designs.py` checks the manifest; `python tools/design_sheet.py` draws a contact sheet.
-The bake also writes `design_layout.json` (each part's layout size and blur radius), which the plugin uses to bake
-players' own designs the same way at runtime; `python tools/custom_designs.py layout` rewrites it without Blender
-and `python tools/custom_designs.py fixture` rewrites the runtime bake's test fixture (run it after re-baking the
-board).
+The board model and the bundled board designs ship pre-baked in the plugin's resources.

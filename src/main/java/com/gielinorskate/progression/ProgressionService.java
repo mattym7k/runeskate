@@ -1,5 +1,6 @@
 package com.gielinorskate.progression;
 
+import com.gielinorskate.SkateChat;
 import com.gielinorskate.GielinorSkateConfig;
 import com.gielinorskate.duel.DuelRecord;
 import com.gielinorskate.feedback.HudAnim;
@@ -20,7 +21,6 @@ import java.util.function.Consumer;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
-import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
 import net.runelite.client.Notifier;
 import net.runelite.client.config.ConfigManager;
@@ -35,6 +35,8 @@ import net.runelite.client.config.ConfigManager;
 public class ProgressionService
 {
 	private final Client client;
+	@Inject
+	private SkateChat skateChat;
 	private final Notifier notifier;
 	private final GielinorSkateConfig config;
 	private final SkateFeedback feedback;
@@ -129,8 +131,8 @@ public class ProgressionService
 		for (SessionGoals.Goal g : daily.onLanded(combo, today(), random))
 		{
 			float now = clock.now();
-			client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "Daily goal complete: " + g.type.text
-				+ " (+" + String.format("%,d", SessionGoals.BONUS_XP) + " Skating XP).", null);
+			skateChat.send("Daily goal complete: " + g.type.text
+				+ " (+" + String.format("%,d", SessionGoals.BONUS_XP) + " Skating XP).");
 			feedback.onGoalComplete(now);
 			goalFlashText = "Goal complete: " + g.type.text;
 			goalFlashAt = now;
@@ -178,7 +180,7 @@ public class ProgressionService
 	private void levelUp(LevelUp up, float now)
 	{
 		String message = up.message();
-		client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", message, null);
+		skateChat.send(message);
 		feedback.onLevelUp(up.to, now);
 		// follows the player's RuneLite notification settings (and this setting's own overrides)
 		notifier.notify(config.levelUpNotification(), message);
@@ -191,7 +193,7 @@ public class ProgressionService
 		String unlocked = unlockMessage(designs.unlockedBetween(up.from, up.to));
 		if (unlocked != null)
 		{
-			client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", unlocked, null);
+			skateChat.send(unlocked);
 		}
 	}
 
@@ -326,7 +328,7 @@ public class ProgressionService
 				reply = SkateLevelCommand.USAGE;
 				break;
 		}
-		client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", reply, null);
+		skateChat.send(reply);
 	}
 
 	public int level()

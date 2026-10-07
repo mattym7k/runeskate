@@ -190,7 +190,10 @@ public final class DesignShare
 		return true;
 	}
 
-	/** A design name as sent or kept: printable, at most the editor's length, never null. */
+	/**
+	 * A design name as sent or kept: only what the editor allows (ASCII letters, digits, spaces and - _ '), so a
+	 * name from a party member can never carry tags or markup; at most the editor's length, never null.
+	 */
 	static String cleanName(String name)
 	{
 		if (name == null)
@@ -201,7 +204,8 @@ public final class DesignShare
 		for (int i = 0; i < name.length() && sb.length() < CustomDesignRules.MAX_NAME; i++)
 		{
 			char c = name.charAt(i);
-			if (!Character.isISOControl(c))
+			if (c >= 'A' && c <= 'Z' || c >= 'a' && c <= 'z' || c >= '0' && c <= '9' || c == ' ' || c == '_'
+				|| c == '\'' || c == '-')
 			{
 				sb.append(c);
 			}

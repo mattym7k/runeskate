@@ -1,5 +1,6 @@
 package com.gielinorskate.feedback;
 
+import com.gielinorskate.SkateChat;
 import com.gielinorskate.GielinorSkateConfig;
 import com.gielinorskate.physics.SkateEvent;
 import com.gielinorskate.physics.SkatePhysics;
@@ -12,7 +13,6 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
-import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
 import net.runelite.api.SoundEffectID;
 import net.runelite.api.gameval.SpotanimID;
@@ -28,6 +28,8 @@ import net.runelite.api.gameval.SpotanimID;
 public class SkateFeedback
 {
 	private final Client client;
+	@Inject
+	private SkateChat skateChat;
 	private final GielinorSkateConfig config;
 	private final ComboScorer scorer;
 	private final SoundPicker soundPicker = new SoundPicker();
@@ -138,7 +140,7 @@ public class SkateFeedback
 				String line = bailLines.onBail(now, hitThisFrame, newResult.value);
 				if (line != null)
 				{
-					client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", line, null);
+					skateChat.send(line);
 				}
 			}
 		}

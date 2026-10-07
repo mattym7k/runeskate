@@ -1,5 +1,6 @@
 package com.gielinorskate.session;
 
+import com.gielinorskate.SkateChat;
 import com.gielinorskate.GielinorSkateConfig;
 import com.gielinorskate.camera.BoardOrbit;
 import com.gielinorskate.camera.FootCamera;
@@ -76,7 +77,6 @@ import java.util.function.Consumer;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
-import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
 import net.runelite.api.NPC;
 import net.runelite.api.Player;
@@ -106,6 +106,8 @@ public class SkateSession
 	private static final String RELAX_PITCH_KEY = "relaxCameraPitch";
 
 	private final Client client;
+	@Inject
+	private SkateChat skateChat;
 	private final GielinorSkateConfig config;
 	private final InputController input;
 	private final SkateTuning baseTuning;
@@ -1900,7 +1902,7 @@ public class SkateSession
 
 	private void chat(String msg)
 	{
-		client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", msg, null);
+		skateChat.send(msg);
 	}
 
 	/** The rail a grind lock would catch right now, for the ::skategrinds view; null when not skating or none. */

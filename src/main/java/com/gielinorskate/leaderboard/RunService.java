@@ -1,12 +1,12 @@
 package com.gielinorskate.leaderboard;
 
+import com.gielinorskate.SkateChat;
 import com.gielinorskate.progression.ProgressionService;
 import com.gielinorskate.scoring.ComboScorer;
 import com.gielinorskate.scoring.ScoreClock;
 import java.util.function.Consumer;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
 import net.runelite.client.config.ConfigManager;
 
@@ -38,6 +38,8 @@ public class RunService
 	}
 
 	private final Client client;
+	@Inject
+	private SkateChat skateChat;
 	private final ScoreClock clock;
 	private final LeaderboardService leaderboard;
 	private final LeaderboardStore store;
@@ -152,7 +154,7 @@ public class RunService
 
 	private void chat(String message)
 	{
-		client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", message, null);
+		skateChat.send(message);
 	}
 
 	private void publish()

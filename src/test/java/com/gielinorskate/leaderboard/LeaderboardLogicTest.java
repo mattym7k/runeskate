@@ -263,19 +263,12 @@ public class LeaderboardLogicTest
 		assertNull(RunSubmission.displayName(null));
 	}
 
-	// ---- server URL
+	// ---- server
 
 	@Test
-	public void placeholderUrlIsNotConfigured()
+	public void theServerIsOneFixedHttpsOrigin()
 	{
-		assertFalse(ServerUrl.isConfigured(ServerUrl.PLACEHOLDER));
-		assertFalse(ServerUrl.isConfigured(""));
-		assertFalse(ServerUrl.isConfigured(null));
-		assertFalse(ServerUrl.isConfigured("http://gielinor-skate.example.workers.dev"));
-		assertFalse(ServerUrl.isConfigured("https://evil.example/v1?x=1"));
-		assertTrue(ServerUrl.isConfigured("https://gielinor-skate.someone.workers.dev"));
-		assertTrue(ServerUrl.isConfigured("https://gielinor-skate.someone.workers.dev/"));
-		assertEquals("https://a.dev", ServerUrl.base("https://a.dev/"));
+		assertEquals("https://runeskate-leaderboard.runeskate.workers.dev", LeaderboardClient.SERVER);
 	}
 
 	@Test
@@ -347,12 +340,6 @@ public class LeaderboardLogicTest
 			public boolean submitScores()
 			{
 				return true;
-			}
-
-			@Override
-			public String leaderboardUrl()
-			{
-				return "https://gielinor-skate.example.workers.dev";
 			}
 		};
 		LeaderboardService service = new LeaderboardService(null, null, on, null, null, new Gson(), null);

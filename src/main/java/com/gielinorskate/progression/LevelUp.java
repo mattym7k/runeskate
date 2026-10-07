@@ -15,10 +15,10 @@ public final class LevelUp
 		this.to = to;
 	}
 
-	/** The game's own level-up wording. */
+	/** The level-up chat line (sent tagged as a RuneSkate message). */
 	public String message()
 	{
-		return "Congratulations, you've just advanced your Skating level. You are now level " + to + ".";
+		return "You reached Skating level " + to + "!";
 	}
 
 	/** The HUD banner for reaching a multiple of ten (or 99), or null. */

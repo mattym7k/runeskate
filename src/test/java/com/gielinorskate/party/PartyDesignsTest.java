@@ -96,6 +96,7 @@ public class PartyDesignsTest
 				colours.remove(id);
 			}
 		}, () -> { });
+		designs.setShowOthers(true);
 		DesignShare.Outgoing d = deck();
 		feed(designs, d, 0f);
 		pump();

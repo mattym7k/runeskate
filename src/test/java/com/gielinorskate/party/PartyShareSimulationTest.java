@@ -96,6 +96,8 @@ public class PartyShareSimulationTest
 			}, () -> this.hub.relook());
 			hub.setMemberDesigns(designs);
 			hub.setDesignSharing(true);
+			// the receiver has opted in to seeing party members' designs (off by default)
+			designs.setShowOthers(true);
 		}
 
 		/** Runs what is waiting on the executor, then on the client thread. */

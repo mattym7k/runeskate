@@ -40,13 +40,13 @@ public class EffectPickerTest
 	}
 
 	@Test
-	public void bailSmokeAndPetDropBalloons()
+	public void bailSmokeAndBigComboConfetti()
 	{
 		EffectPicker picker = new EffectPicker();
 		assertEquals(Arrays.asList(EffectPicker.BAIL_SMOKE), picker.pick(Arrays.asList(SkateEvent.BAIL), false, 0f,
 			null, DT));
 		assertTrue(picker.pick(NONE, false, 0f, ComboScorer.Result.landed(249_999), DT).isEmpty());
-		assertEquals(Arrays.asList(EffectPicker.PET_DROP_BALLOONS),
+		assertEquals(Arrays.asList(EffectPicker.BIG_COMBO_CONFETTI),
 			picker.pick(NONE, false, 0f, ComboScorer.Result.landed(250_000), DT));
 		assertTrue("a lost combo drops no pet", picker.pick(NONE, false, 0f, ComboScorer.Result.bailed(300_000), DT)
 			.isEmpty());

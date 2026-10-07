@@ -123,16 +123,11 @@ public class LeaderboardHudTest
 	@Test
 	public void statusLinesReplaceTheRows()
 	{
-		LeaderboardHud.Model notSet = LeaderboardHud.build(
-			new Hud(State.NOT_CONFIGURED, false, "combo", "week", null, null), false);
-		assertEquals(1, notSet.lines.size());
-		assertEquals(LeaderboardHud.Kind.STATUS, notSet.lines.get(0).kind);
-		assertEquals(LeaderboardHud.NOT_CONFIGURED, notSet.lines.get(0).left);
-
 		// another world: the status, even with a board in hand
 		LeaderboardHud.Model other = LeaderboardHud.build(
 			new Hud(State.ON, true, "combo", "week", page("combo", 3, null), null), false);
 		assertEquals(1, other.lines.size());
+		assertEquals(LeaderboardHud.Kind.STATUS, other.lines.get(0).kind);
 		assertEquals(LeaderboardHud.NORMAL_WORLDS_ONLY, other.lines.get(0).left);
 
 		LeaderboardHud.Model loading = LeaderboardHud.build(on(null), false);
@@ -150,7 +145,7 @@ public class LeaderboardHudTest
 	public void collapsedHidesStatusLinesToo()
 	{
 		LeaderboardHud.Model m = LeaderboardHud.build(
-			new Hud(State.NOT_CONFIGURED, false, "combo", "week", null, null), true);
+			new Hud(State.ON, true, "combo", "week", null, null), true);
 		assertTrue(m.lines.isEmpty());
 	}
 
