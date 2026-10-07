@@ -1,0 +1,94 @@
+package com.gielinorskate.ui;
+
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import javax.imageio.ImageIO;
+import lombok.extern.slf4j.Slf4j;
+
+/**
+ * The board designs' thumbnails (designs/thumbs/ID.png, drawn by the bake at about in-game size; players' own designs
+ * drawn at runtime and {@link #put}), and their greyed "locked" look. Loaded once each. EDT only.
+ */
+@Slf4j
+final class DesignThumbs
+{
+	private static final String DIR = "/com/gielinorskate/designs/thumbs/";
+	/** A locked design's picture: grey, at this opacity. */
+	private static final float LOCKED_ALPHA = 0.45f;
+
+	private final Map<String, BufferedImage> plain = new HashMap<>();
+	private final Map<String, BufferedImage> locked = new HashMap<>();
+
+	/** The design's thumbnail, or a 1x1 transparent image if it is missing. */
+	BufferedImage get(String id)
+	{
+		return plain.computeIfAbsent(id, DesignThumbs::load);
+	}
+
+	/** The design's thumbnail greyed out, for a locked design. */
+	BufferedImage locked(String id)
+	{
+		return locked.computeIfAbsent(id, k -> grey(get(k)));
+	}
+
+	/** A custom design's thumbnail (drawn at runtime), replacing any before. */
+	void put(String id, BufferedImage img)
+	{
+		plain.put(id, img);
+		locked.remove(id);
+	}
+
+	/** Drops the thumbnails of players' own designs not in {@code ids} (deleted ones). */
+	void retainCustom(Set<String> ids)
+	{
+		plain.keySet().removeIf(id -> id.startsWith("CUSTOM_") && !ids.contains(id));
+		locked.keySet().removeIf(id -> id.startsWith("CUSTOM_") && !ids.contains(id));
+	}
+
+	/** How many thumbnails are kept, plain and locked (tests). */
+	int size()
+	{
+		return plain.size() + locked.size();
+	}
+
+	private static BufferedImage load(String id)
+	{
+		try (InputStream in = DesignThumbs.class.getResourceAsStream(DIR + id + ".png"))
+		{
+			BufferedImage img = in == null ? null : ImageIO.read(in);
+			if (img != null)
+			{
+				return img;
+			}
+		}
+		catch (IOException e)
+		{
+			log.debug("RuneSkate: no thumbnail for design {}", id, e);
+		}
+		return new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
+	}
+
+	/** {@code src} in grey (its luminance) at {@link #LOCKED_ALPHA} of its opacity. */
+	static BufferedImage grey(BufferedImage src)
+	{
+		BufferedImage out = new BufferedImage(src.getWidth(), src.getHeight(), BufferedImage.TYPE_INT_ARGB);
+		for (int y = 0; y < src.getHeight(); y++)
+		{
+			for (int x = 0; x < src.getWidth(); x++)
+			{
+				int argb = src.getRGB(x, y);
+				int a = Math.round((argb >>> 24) * LOCKED_ALPHA);
+				int r = argb >> 16 & 255;
+				int g = argb >> 8 & 255;
+				int b = argb & 255;
+				int l = (r * 299 + g * 587 + b * 114) / 1000;
+				out.setRGB(x, y, a << 24 | l << 16 | l << 8 | l);
+			}
+		}
+		return out;
+	}
+}

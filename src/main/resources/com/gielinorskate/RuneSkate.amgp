@@ -1,0 +1,310 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  RuneSkate: the universal AntiMicroX profile for Xbox-layout (SDL GameController) pads. It never changes between
+  controller presets: every button sends its own pad key (F13 to F24, Insert, Delete, Home, End), and the plugin's
+  "Controller preset" setting decides what each one does. The left stick sends the arrow keys (four-way) and the
+  right stick moves the mouse.
+  Every binding is one button to one key or one mouse direction: no macros, turbo, set changes or sequences.
+  Turn on "Controller mode" in the plugin settings (RuneSkate section) to use it. See README.md.
+-->
+<gamecontroller configversion="19" appversion="3.4.0">
+    <!--The SDL name for a joystick is included for informational purposes only.-->
+    <sdlname>Xbox Controller</sdlname>
+    <profilename>RuneSkate</profilename>
+    <stickAxisAssociation index="1" xAxis="1" yAxis="2"/>
+    <stickAxisAssociation index="2" xAxis="3" yAxis="4"/>
+    <vdpadButtonAssociations index="1">
+        <vdpadButtonAssociation axis="0" button="12" direction="1"/>
+        <vdpadButtonAssociation axis="0" button="13" direction="4"/>
+        <vdpadButtonAssociation axis="0" button="14" direction="8"/>
+        <vdpadButtonAssociation axis="0" button="15" direction="2"/>
+    </vdpadButtonAssociations>
+    <names>
+        <controlstickname index="1">Arrows (steer / lean / walk)</controlstickname>
+        <controlstickname index="2">Mouse (flicks / aim)</controlstickname>
+    </names>
+    <sets>
+        <set index="1">
+            <!-- Left stick: the arrow keys, four-way, so a steer is never also a lean. Left / right steer (and spin
+                 in the air); up / down are the lean keys (a lean with a grab held flips); on foot it walks. -->
+            <stick index="1">
+                <deadZone>8000</deadZone>
+                <mode>four-way</mode>
+                <stickbutton index="1">
+                    <actionname>Up arrow</actionname>
+                    <slots>
+                        <slot>
+                            <code>0x1000013</code>
+                            <mode>keyboard</mode>
+                        </slot>
+                    </slots>
+                </stickbutton>
+                <stickbutton index="3">
+                    <actionname>Right arrow</actionname>
+                    <slots>
+                        <slot>
+                            <code>0x1000014</code>
+                            <mode>keyboard</mode>
+                        </slot>
+                    </slots>
+                </stickbutton>
+                <stickbutton index="5">
+                    <actionname>Down arrow</actionname>
+                    <slots>
+                        <slot>
+                            <code>0x1000015</code>
+                            <mode>keyboard</mode>
+                        </slot>
+                    </slots>
+                </stickbutton>
+                <stickbutton index="7">
+                    <actionname>Left arrow</actionname>
+                    <slots>
+                        <slot>
+                            <code>0x1000012</code>
+                            <mode>keyboard</mode>
+                        </slot>
+                    </slots>
+                </stickbutton>
+            </stick>
+            <!-- Right stick: mouse movement in "Mouse (Normal)" cursor mode. Full tilt is 60 x 20 = 1200 px/s; the
+                 quadratic curve makes a small tilt slow (a quarter tilt is about 75 px/s), which the plugin reads
+                 as a manual. The plugin's flick and manual detection is tuned to these values. -->
+            <stick index="2">
+                <deadZone>8000</deadZone>
+                <diagonalRange>90</diagonalRange>
+                <stickbutton index="1">
+                    <actionname>Mouse up</actionname>
+                    <mousespeedx>60</mousespeedx>
+                    <mousespeedy>60</mousespeedy>
+                    <mousemode>cursor</mousemode>
+                    <mouseacceleration>quadratic</mouseacceleration>
+                    <slots>
+                        <slot>
+                            <code>1</code>
+                            <mode>mousemovement</mode>
+                        </slot>
+                    </slots>
+                </stickbutton>
+                <stickbutton index="2">
+                    <mousespeedx>60</mousespeedx>
+                    <mousespeedy>60</mousespeedy>
+                    <mousemode>cursor</mousemode>
+                    <mouseacceleration>quadratic</mouseacceleration>
+                </stickbutton>
+                <stickbutton index="3">
+                    <actionname>Mouse right</actionname>
+                    <mousespeedx>60</mousespeedx>
+                    <mousespeedy>60</mousespeedy>
+                    <mousemode>cursor</mousemode>
+                    <mouseacceleration>quadratic</mouseacceleration>
+                    <slots>
+                        <slot>
+                            <code>4</code>
+                            <mode>mousemovement</mode>
+                        </slot>
+                    </slots>
+                </stickbutton>
+                <stickbutton index="4">
+                    <mousespeedx>60</mousespeedx>
+                    <mousespeedy>60</mousespeedy>
+                    <mousemode>cursor</mousemode>
+                    <mouseacceleration>quadratic</mouseacceleration>
+                </stickbutton>
+                <stickbutton index="5">
+                    <actionname>Mouse down</actionname>
+                    <mousespeedx>60</mousespeedx>
+                    <mousespeedy>60</mousespeedy>
+                    <mousemode>cursor</mousemode>
+                    <mouseacceleration>quadratic</mouseacceleration>
+                    <slots>
+                        <slot>
+                            <code>2</code>
+                            <mode>mousemovement</mode>
+                        </slot>
+                    </slots>
+                </stickbutton>
+                <stickbutton index="6">
+                    <mousespeedx>60</mousespeedx>
+                    <mousespeedy>60</mousespeedy>
+                    <mousemode>cursor</mousemode>
+                    <mouseacceleration>quadratic</mouseacceleration>
+                </stickbutton>
+                <stickbutton index="7">
+                    <actionname>Mouse left</actionname>
+                    <mousespeedx>60</mousespeedx>
+                    <mousespeedy>60</mousespeedy>
+                    <mousemode>cursor</mousemode>
+                    <mouseacceleration>quadratic</mouseacceleration>
+                    <slots>
+                        <slot>
+                            <code>3</code>
+                            <mode>mousemovement</mode>
+                        </slot>
+                    </slots>
+                </stickbutton>
+                <stickbutton index="8">
+                    <mousespeedx>60</mousespeedx>
+                    <mousespeedy>60</mousespeedy>
+                    <mousemode>cursor</mousemode>
+                    <mouseacceleration>quadratic</mouseacceleration>
+                </stickbutton>
+            </stick>
+            <!-- D-pad: Insert / End / Delete / Home (the navigation keys, sent as the real ones, not the number pad) -->
+            <dpad index="1">
+                <dpadbutton index="1">
+                    <actionname>D-pad up: Insert</actionname>
+                    <slots>
+                        <slot>
+                            <code>0x1000006</code>
+                            <mode>keyboard</mode>
+                        </slot>
+                    </slots>
+                </dpadbutton>
+                <dpadbutton index="2">
+                    <actionname>D-pad right: End</actionname>
+                    <slots>
+                        <slot>
+                            <code>0x1000011</code>
+                            <mode>keyboard</mode>
+                        </slot>
+                    </slots>
+                </dpadbutton>
+                <dpadbutton index="4">
+                    <actionname>D-pad down: Delete</actionname>
+                    <slots>
+                        <slot>
+                            <code>0x1000007</code>
+                            <mode>keyboard</mode>
+                        </slot>
+                    </slots>
+                </dpadbutton>
+                <dpadbutton index="8">
+                    <actionname>D-pad left: Home</actionname>
+                    <slots>
+                        <slot>
+                            <code>0x1000010</code>
+                            <mode>keyboard</mode>
+                        </slot>
+                    </slots>
+                </dpadbutton>
+            </dpad>
+            <trigger index="5">
+                <deadZone>4000</deadZone>
+                <throttle>positivehalf</throttle>
+                <triggerbutton index="2">
+                    <actionname>LT: F19</actionname>
+                    <slots>
+                        <slot>
+                            <code>0x1000042</code>
+                            <mode>keyboard</mode>
+                        </slot>
+                    </slots>
+                </triggerbutton>
+            </trigger>
+            <trigger index="6">
+                <deadZone>4000</deadZone>
+                <throttle>positivehalf</throttle>
+                <triggerbutton index="2">
+                    <actionname>RT: F20</actionname>
+                    <slots>
+                        <slot>
+                            <code>0x1000043</code>
+                            <mode>keyboard</mode>
+                        </slot>
+                    </slots>
+                </triggerbutton>
+            </trigger>
+            <button index="1">
+                <actionname>A: F13</actionname>
+                <slots>
+                    <slot>
+                        <code>0x100003c</code>
+                        <mode>keyboard</mode>
+                    </slot>
+                </slots>
+            </button>
+            <button index="2">
+                <actionname>B: F14</actionname>
+                <slots>
+                    <slot>
+                        <code>0x100003d</code>
+                        <mode>keyboard</mode>
+                    </slot>
+                </slots>
+            </button>
+            <button index="3">
+                <actionname>X: F15</actionname>
+                <slots>
+                    <slot>
+                        <code>0x100003e</code>
+                        <mode>keyboard</mode>
+                    </slot>
+                </slots>
+            </button>
+            <button index="4">
+                <actionname>Y: F16</actionname>
+                <slots>
+                    <slot>
+                        <code>0x100003f</code>
+                        <mode>keyboard</mode>
+                    </slot>
+                </slots>
+            </button>
+            <button index="5">
+                <actionname>Back / View: F21</actionname>
+                <slots>
+                    <slot>
+                        <code>0x1000044</code>
+                        <mode>keyboard</mode>
+                    </slot>
+                </slots>
+            </button>
+            <button index="7">
+                <actionname>Start / Menu: F22</actionname>
+                <slots>
+                    <slot>
+                        <code>0x1000045</code>
+                        <mode>keyboard</mode>
+                    </slot>
+                </slots>
+            </button>
+            <button index="8">
+                <actionname>L3 (left stick click): F23</actionname>
+                <slots>
+                    <slot>
+                        <code>0x1000046</code>
+                        <mode>keyboard</mode>
+                    </slot>
+                </slots>
+            </button>
+            <button index="9">
+                <actionname>R3 (right stick click): F24</actionname>
+                <slots>
+                    <slot>
+                        <code>0x1000047</code>
+                        <mode>keyboard</mode>
+                    </slot>
+                </slots>
+            </button>
+            <button index="10">
+                <actionname>LB: F17</actionname>
+                <slots>
+                    <slot>
+                        <code>0x1000040</code>
+                        <mode>keyboard</mode>
+                    </slot>
+                </slots>
+            </button>
+            <button index="11">
+                <actionname>RB: F18</actionname>
+                <slots>
+                    <slot>
+                        <code>0x1000041</code>
+                        <mode>keyboard</mode>
+                    </slot>
+                </slots>
+            </button>
+        </set>
+    </sets>
+</gamecontroller>
