@@ -333,16 +333,17 @@ public class GhostHubTest
 		frame(0f, frame(0f), 0, false, true);
 		assertEquals(null, lastUpdate().dk);
 		// the first update after starting names the grip and wheels
-		assertEquals("RUNESKATE.DEATH", lastUpdate().gw);
+		assertEquals("BLACK.NATURAL", lastUpdate().gw);
 		hub.setLocalLook(look("GRIP_RUNE", "RUNE", "WHEELS_NATURAL"));
 		// a design change alone is a change worth sending
 		frame(5f, frame(0f), 0, false, true);
 		assertEquals("RUNE", lastUpdate().dk);
 		assertEquals("RUNE.NATURAL", lastUpdate().gw);
-		// a new deck design's wire name drops its DECK_ prefix
+		// back on the default deck (DECK_TROPICAL): left out again
 		hub.setLocalLook(look("GRIP_RUNE", "DECK_TROPICAL", "WHEELS_NATURAL"));
 		frame(10f, frame(0f), 0, false, true);
-		assertEquals("TROPICAL", lastUpdate().dk);
+		assertNull(lastUpdate().dk);
+		assertEquals("RUNE.NATURAL", lastUpdate().gw);
 	}
 
 	@Test
@@ -398,7 +399,7 @@ public class GhostHubTest
 		hub.onLocalSkateEnd(1f);
 		audience();
 		frame(2f, frame(0f), 0, false, true);
-		assertEquals("RUNESKATE.DEATH", lastUpdate().gw);
+		assertEquals("BLACK.NATURAL", lastUpdate().gw);
 	}
 
 	@Test
@@ -430,9 +431,15 @@ public class GhostHubTest
 		hub.onRemoteUpdate(5L, odd, 0.2f, null);
 		assertEquals(BoardLook.defaults(DESIGNS), hub.ghosts().get(5L).look());
 		SkateGhostUpdate half = remote(0f, 4);
-		half.gw = "BLACK";
+		half.gw = "BRONZE";
 		hub.onRemoteUpdate(5L, half, 0.3f, null);
-		assertEquals("GRIP_BLACK/DECK_RED_CAMO/WHEELS_DEATH", hub.ghosts().get(5L).look().toString());
+		assertEquals("GRIP_BRONZE/DECK_TROPICAL/WHEELS_NATURAL", hub.ghosts().get(5L).look().toString());
+		// an older version naming the removed test designs: the defaults
+		SkateGhostUpdate removedTest = remote(0f, 5);
+		removedTest.dk = "RED_CAMO";
+		removedTest.gw = "RUNESKATE.DEATH";
+		hub.onRemoteUpdate(5L, removedTest, 0.4f, null);
+		assertEquals(BoardLook.defaults(DESIGNS), hub.ghosts().get(5L).look());
 		// an older version sends neither: the defaults
 		hub.onRemoteUpdate(6L, remote(0f, 1), 0f, null);
 		assertEquals(BoardLook.defaults(DESIGNS), hub.ghosts().get(6L).look());

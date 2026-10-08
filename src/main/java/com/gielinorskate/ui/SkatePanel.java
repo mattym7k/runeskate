@@ -14,6 +14,8 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.Insets;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
@@ -49,8 +51,11 @@ import net.runelite.client.util.LinkBrowser;
  */
 public class SkatePanel extends PluginPanel
 {
-	/** The project's optional Ko-fi page, opened by the button at the bottom of the panel. */
+	/** The project's optional Ko-fi page, opened by the button at the top of the panel. */
 	static final String SUPPORT_URL = "https://ko-fi.com/runeskate_project";
+	/** The support button's text and outline, and its fill under the mouse. */
+	private static final Color SUPPORT_COLOR = new Color(255, 200, 40);
+	private static final Color SUPPORT_HOVER_COLOR = new Color(90, 72, 20);
 
 	private static final Color REFUSAL_COLOR = new Color(255, 150, 120);
 	/** The XP bar's fill: the green of the game's skill progress bars. */
@@ -178,6 +183,9 @@ public class SkatePanel extends PluginPanel
 		content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
 		content.setBackground(ColorScheme.DARK_GRAY_COLOR);
 
+		// an optional support link at the very top, picked out in yellow; nothing in the plugin depends on it
+		addRow(content, supportRow());
+
 		JLabel title = new JLabel("RuneSkate");
 		title.setFont(FontManager.getRunescapeBoldFont());
 		title.setForeground(Color.WHITE);
@@ -264,19 +272,6 @@ public class SkatePanel extends PluginPanel
 		grindEdges.addActionListener(e -> setOption.accept("showGrindEdges", grindEdges.isSelected()));
 		controlsCard.addActionListener(e -> setOption.accept("showControlsCard", controlsCard.isSelected()));
 
-		// a small, optional support link at the very bottom; nothing in the plugin depends on it
-		JButton support = new JButton("Support RuneSkate on Ko-fi");
-		support.setName("support:kofi");
-		support.setFocusable(false);
-		support.setToolTipText(SUPPORT_URL);
-		support.setMaximumSize(new Dimension(Integer.MAX_VALUE, 26));
-		support.addActionListener(e -> LinkBrowser.browse(SUPPORT_URL));
-		JPanel supportGap = new JPanel(new BorderLayout());
-		supportGap.setBackground(ColorScheme.DARK_GRAY_COLOR);
-		supportGap.setBorder(new EmptyBorder(12, 0, 0, 0));
-		supportGap.add(support, BorderLayout.CENTER);
-		supportGap.setMaximumSize(new Dimension(Integer.MAX_VALUE, 38));
-		addRow(content, supportGap);
 
 		add(content, BorderLayout.NORTH);
 		update(new PanelState(false, null, 0, 0, 0));
@@ -461,6 +456,43 @@ public class SkatePanel extends PluginPanel
 	public void onActivate()
 	{
 		onActivate.run();
+	}
+
+	/** The Ko-fi button in its row: yellow text and outline, a dark yellow fill under the mouse. */
+	private static JPanel supportRow()
+	{
+		JButton support = new JButton("Support RuneSkate on Ko-fi");
+		support.setName("support:kofi");
+		support.setFocusable(false);
+		support.setToolTipText(SUPPORT_URL);
+		support.setForeground(SUPPORT_COLOR);
+		support.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+		support.setContentAreaFilled(false);
+		support.setOpaque(true);
+		support.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(SUPPORT_COLOR, 2),
+			new EmptyBorder(4, 6, 4, 6)));
+		support.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
+		support.addMouseListener(new MouseAdapter()
+		{
+			@Override
+			public void mouseEntered(MouseEvent e)
+			{
+				support.setBackground(SUPPORT_HOVER_COLOR);
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e)
+			{
+				support.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+			}
+		});
+		support.addActionListener(e -> LinkBrowser.browse(SUPPORT_URL));
+		JPanel row = new JPanel(new BorderLayout());
+		row.setBackground(ColorScheme.DARK_GRAY_COLOR);
+		row.setBorder(new EmptyBorder(0, 0, 8, 0));
+		row.add(support, BorderLayout.CENTER);
+		row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 38));
+		return row;
 	}
 
 	private static void addRow(JPanel content, JComponent c)

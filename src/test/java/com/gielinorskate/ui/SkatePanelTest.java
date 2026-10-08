@@ -2,6 +2,7 @@ package com.gielinorskate.ui;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import com.gielinorskate.progression.BoardDesign;
@@ -95,11 +96,11 @@ public class SkatePanelTest
 		BoardDesigns designs = BoardDesigns.bundled();
 		SkatePanel panel = new SkatePanel(() -> { }, (k, v) -> { }, d -> { });
 		panel.updateProgress(new ProgressState(99, 13_034_431, 0, 1f, BoardLook.defaults(designs)));
-		assertTrue(byName(buttons(panel, new ArrayList<>()), "design:DECK_RED_CAMO").isSelected());
+		assertTrue(byName(buttons(panel, new ArrayList<>()), "design:DECK_TROPICAL").isSelected());
 		panel.updateProgress(new ProgressState(99, 13_034_431, 0, 1f,
 			BoardLook.defaults(designs).with(designs.byId("TORVA"))));
 		List<AbstractButton> found = buttons(panel, new ArrayList<>());
-		assertFalse(byName(found, "design:DECK_RED_CAMO").isSelected());
+		assertFalse(byName(found, "design:DECK_TROPICAL").isSelected());
 		assertTrue(byName(found, "design:TORVA").isSelected());
 		assertTrue(byName(found, "design:TORVA").isEnabled());
 	}
@@ -182,10 +183,15 @@ public class SkatePanelTest
 	}
 
 	@Test
-	public void theKoFiSupportLinkSitsAtTheBottomOfThePanel()
+	public void theKoFiSupportLinkSitsAtTheTopOfThePanel()
 	{
 		SkatePanel panel = new SkatePanel(() -> { }, (k, v) -> { });
 		AbstractButton support = named(panel, "support:kofi");
+		// its row is the first thing in the panel's content, above the title and Start
+		java.awt.Container row = support.getParent();
+		assertSame(row, row.getParent().getComponent(0));
+		assertEquals(1, buttons(panel, new ArrayList<>()).stream().filter(b -> "support:kofi".equals(b.getName()))
+			.count());
 		assertTrue(support.getText().contains("Ko-fi"));
 		assertEquals("https://ko-fi.com/runeskate_project", SkatePanel.SUPPORT_URL);
 		assertEquals(SkatePanel.SUPPORT_URL, support.getToolTipText());

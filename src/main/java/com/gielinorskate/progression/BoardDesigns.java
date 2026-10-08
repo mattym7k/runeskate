@@ -133,9 +133,9 @@ public final class BoardDesigns
 			}
 		}
 		List<BoardDesign> fallback = new ArrayList<>();
-		fallback.add(new BoardDesign("GRIP_RUNESKATE", "RuneSkate", DesignPart.GRIP, 1, null));
-		fallback.add(new BoardDesign("DECK_RED_CAMO", "Red Camo", DesignPart.DECK, 1, null));
-		fallback.add(new BoardDesign("WHEELS_DEATH", "Death Grips", DesignPart.WHEELS, 1, null));
+		fallback.add(new BoardDesign("GRIP_BLACK", "Classic black", DesignPart.GRIP, 1, null));
+		fallback.add(new BoardDesign("DECK_TROPICAL", "Tropical", DesignPart.DECK, 1, null));
+		fallback.add(new BoardDesign("WHEELS_NATURAL", "Natural", DesignPart.WHEELS, 1, null));
 		return new BoardDesigns(fallback);
 	}
 

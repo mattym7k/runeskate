@@ -157,9 +157,9 @@ public class BoardDesignsTest
 	public void theBundledManifestKeepsTheOldDeckNames()
 	{
 		BoardDesigns d = BoardDesigns.bundled();
-		assertEquals("GRIP_RUNESKATE", d.defaultFor(DesignPart.GRIP).id);
-		assertEquals("DECK_RED_CAMO", d.defaultFor(DesignPart.DECK).id);
-		assertEquals("WHEELS_DEATH", d.defaultFor(DesignPart.WHEELS).id);
+		assertEquals("GRIP_BLACK", d.defaultFor(DesignPart.GRIP).id);
+		assertEquals("DECK_TROPICAL", d.defaultFor(DesignPart.DECK).id);
+		assertEquals("WHEELS_NATURAL", d.defaultFor(DesignPart.WHEELS).id);
 		// every rung of the old ladder is a deck design under the same name and level, so a saved skateDeck or
 		// a party member's deck name keeps working
 		for (Deck old : Deck.values())
@@ -181,11 +181,28 @@ public class BoardDesignsTest
 			}
 		}
 		// the old starter deck (and decks removed from the ladder long ago) are the default deck now
-		assertEquals("DECK_RED_CAMO", d.find(DesignPart.DECK, "CLASSIC").id);
-		assertEquals("DECK_RED_CAMO", d.find(DesignPart.DECK, "PARTYHAT_PURPLE").id);
+		assertEquals("DECK_TROPICAL", d.find(DesignPart.DECK, "CLASSIC").id);
+		assertEquals("DECK_TROPICAL", d.find(DesignPart.DECK, "PARTYHAT_PURPLE").id);
 		assertEquals("DECK_TROPICAL", d.find(DesignPart.DECK, "DECK_TROPICAL").id);
 		assertEquals("GRIP_BLACK", d.find(DesignPart.GRIP, "GRIP_BLACK").id);
 		assertEquals("WHEELS_NATURAL", d.find(DesignPart.WHEELS, "WHEELS_NATURAL").id);
+	}
+
+	@Test
+	public void removedTestDesignsFallBackToTheDefaults()
+	{
+		// the early test designs are gone: saved or received names for them draw the part's default
+		BoardDesigns d = BoardDesigns.bundled();
+		assertNull(d.byId("GRIP_RUNESKATE"));
+		assertNull(d.byId("DECK_RED_CAMO"));
+		assertNull(d.byId("WHEELS_DEATH"));
+		assertSame(d.defaultFor(DesignPart.GRIP), d.find(DesignPart.GRIP, "GRIP_RUNESKATE"));
+		assertSame(d.defaultFor(DesignPart.DECK), d.find(DesignPart.DECK, "DECK_RED_CAMO"));
+		assertSame(d.defaultFor(DesignPart.WHEELS), d.find(DesignPart.WHEELS, "WHEELS_DEATH"));
+		assertSame(d.defaultFor(DesignPart.GRIP), d.fromWire(DesignPart.GRIP, "RUNESKATE"));
+		assertSame(d.defaultFor(DesignPart.DECK), d.fromWire(DesignPart.DECK, "RED_CAMO"));
+		assertSame(d.defaultFor(DesignPart.WHEELS), d.fromWire(DesignPart.WHEELS, "DEATH"));
+		assertSame(d.defaultFor(DesignPart.DECK), d.usable(DesignPart.DECK, "DECK_RED_CAMO", 99));
 	}
 
 	@Test

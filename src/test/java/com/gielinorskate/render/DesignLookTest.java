@@ -146,11 +146,11 @@ public class DesignLookTest
 	{
 		BakedBoardGeometry.Mesh deck = BakedBoardGeometry.sharedBoard(false)[1];
 		assertEquals(BakedBoardGeometry.DECK, deck.part);
-		short[] red = BakedBoardModel.partHsl(deck, BoardLook.defaults(DESIGNS), false, 0.8);
-		short[] rune = BakedBoardModel.partHsl(deck, look("GRIP_RUNESKATE", "RUNE", "WHEELS_DEATH"), false, 0.8);
+		short[] base = BakedBoardModel.partHsl(deck, BoardLook.defaults(DESIGNS), false, 0.8);
+		short[] rune = BakedBoardModel.partHsl(deck, look("GRIP_BLACK", "RUNE", "WHEELS_NATURAL"), false, 0.8);
 		int faces = deck.faceCount();
 		int[][] lit = new int[2][];
-		short[][] looks = {red, rune};
+		short[][] looks = {base, rune};
 		for (int k = 0; k < 2; k++)
 		{
 			// a lit probe at full intensity on every corner

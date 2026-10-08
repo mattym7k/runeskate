@@ -1,7 +1,6 @@
 {
   "generatedBy": "tools/blend_to_board_baked.py from tools/designs/designs.json - do not edit",
   "designs": [
-    {"id": "GRIP_RUNESKATE", "name": "RuneSkate", "part": "grip", "unlock": 1},
     {"id": "GRIP_BLACK", "name": "Classic black", "part": "grip", "unlock": 1},
     {"id": "GRIP_BRONZE", "name": "Bronze", "part": "grip", "unlock": 1},
     {"id": "GRIP_IRON", "name": "Iron", "part": "grip", "unlock": 10},
@@ -16,7 +15,6 @@
     {"id": "GRIP_ZAMORAK", "name": "Zamorak", "part": "grip", "unlock": 70},
     {"id": "GRIP_SARADOMIN", "name": "Saradomin", "part": "grip", "unlock": 70},
     {"id": "GRIP_TORVA", "name": "Torva", "part": "grip", "unlock": 99},
-    {"id": "DECK_RED_CAMO", "name": "Red Camo", "part": "deck", "unlock": 1},
     {"id": "DECK_TROPICAL", "name": "Tropical", "part": "deck", "unlock": 1},
     {"id": "BRONZE", "name": "Bronze", "part": "deck", "unlock": 1},
     {"id": "IRON", "name": "Iron", "part": "deck", "unlock": 10},
@@ -31,7 +29,6 @@
     {"id": "ZAMORAK", "name": "Zamorak", "part": "deck", "unlock": 70},
     {"id": "SARADOMIN", "name": "Saradomin", "part": "deck", "unlock": 70},
     {"id": "TORVA", "name": "Torva", "part": "deck", "unlock": 99},
-    {"id": "WHEELS_DEATH", "name": "Death Grips", "part": "wheels", "unlock": 1},
     {"id": "WHEELS_NATURAL", "name": "Natural", "part": "wheels", "unlock": 1},
     {"id": "WHEELS_BRONZE", "name": "Bronze", "part": "wheels", "unlock": 1},
     {"id": "WHEELS_IRON", "name": "Iron", "part": "wheels", "unlock": 10},

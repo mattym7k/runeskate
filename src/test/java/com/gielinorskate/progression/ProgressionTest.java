@@ -210,7 +210,7 @@ public class ProgressionTest
 		progression.load();
 		assertEquals(BoardLook.defaults(DESIGNS), progression.look());
 		progression.setLevelForDev(99);
-		assertEquals("GRIP_TORVA/TORVA/WHEELS_DEATH", progression.look().toString());
+		assertEquals("GRIP_TORVA/TORVA/WHEELS_NATURAL", progression.look().toString());
 	}
 
 	@Test
@@ -225,7 +225,19 @@ public class ProgressionTest
 		assertEquals(BoardLook.defaults(DESIGNS), progression.look());
 		store.values.put("rsprofile.a.skateDeck", "MAX_CAPE");
 		progression.load();
-		assertEquals("DECK_RED_CAMO", progression.design(DesignPart.DECK).id);
+		assertEquals("DECK_TROPICAL", progression.design(DesignPart.DECK).id);
+	}
+
+	@Test
+	public void savedRemovedTestDesignsShowTheDefaults()
+	{
+		store.values.put("rsprofile.a.skateGrip", "GRIP_RUNESKATE");
+		store.values.put("rsprofile.a.skateDeck", "DECK_RED_CAMO");
+		store.values.put("rsprofile.a.skateWheels", "WHEELS_DEATH");
+		progression.load();
+		progression.setLevelForDev(99);
+		assertEquals(BoardLook.defaults(DESIGNS), progression.look());
+		assertEquals("GRIP_BLACK/DECK_TROPICAL/WHEELS_NATURAL", progression.look().toString());
 	}
 
 	@Test

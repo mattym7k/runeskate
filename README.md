@@ -143,8 +143,7 @@ land across the rail for slides.
 - Your board is image-textured: pick its **grip**, **deck** and **wheels** designs separately under **Board** in
   the side panel (thumbnails; locked ones show their level). Changes show at once and are saved per account;
   party members see them on your skater.
-- From the start: RuneSkate grip, Red Camo deck and Death Grips wheels (the defaults), Classic black grip, Tropical
-  deck, Natural wheels and the Bronze set. Then a set (grip, deck graphic and wheels) per level: Iron (10), Steel
+- From the start: Classic black grip, Tropical deck and Natural wheels (the defaults) and the Bronze set. Then a set (grip, deck graphic and wheels) per level: Iron (10), Steel
   (20), Mithril (30), Adamant (40), Rune (50), Dragon (60), the gods (70: Bandos, Armadyl, Guthix, Zamorak and
   Saradomin) and Torva (99). Mix them freely. A level-up names the designs it unlocks.
 - **Your own designs**: the **+ Custom** tile after each part's designs makes one from an image (PNG, JPG, GIF or
