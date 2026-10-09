@@ -67,7 +67,7 @@ public class BoardPoseScratchTest
 	@Test
 	public void posingIntoAReusedArrayMatchesAFreshPoseBitForBit()
 	{
-		float[] base = BoardGeometry.defaultBoard().tris;
+		float[] base = ClassicBoard.defaultBoard().tris;
 		float[] scratch = new float[base.length];
 		for (float[] p : POSES)
 		{
@@ -85,7 +85,7 @@ public class BoardPoseScratchTest
 	@Test
 	public void rotateIntoMatchesRotate()
 	{
-		float[] base = BoardGeometry.defaultBoard().tris;
+		float[] base = ClassicBoard.defaultBoard().tris;
 		float[] scratch = new float[base.length];
 		float[] fresh = BoardGeometry.rotate(base, 0.7f, -0.3f);
 		BoardGeometry.rotateInto(base, 0.7f, -0.3f, scratch);

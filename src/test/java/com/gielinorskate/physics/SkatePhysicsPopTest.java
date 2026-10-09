@@ -20,7 +20,7 @@ public class SkatePhysicsPopTest
 	private SkatePhysics rolling(float speed)
 	{
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.flat(), 0, 0, 0);
-		p.setSpeed(speed);
+		p.setRollingSpeed(speed);
 		return p;
 	}
 
@@ -41,7 +41,7 @@ public class SkatePhysicsPopTest
 		in.gestures.add(new Gesture(Direction.UP, false, 0f));
 		p.step(DT, in);
 		assertEquals(SkaterState.AIRBORNE, p.getState());
-		assertEquals(820f, p.getVerticalSpeed(), 1e-3f);
+		assertEquals(820f, p.getVerticalVelocity(), 1e-3f);
 	}
 
 	@Test
@@ -58,7 +58,7 @@ public class SkatePhysicsPopTest
 		in.crouch = false;
 		in.gestures.add(new Gesture(Direction.UP, false, 0f));
 		p.step(DT, in);
-		assertEquals(820f, p.getVerticalSpeed(), 1e-3f);
+		assertEquals(820f, p.getVerticalVelocity(), 1e-3f);
 	}
 
 	@Test
@@ -69,7 +69,7 @@ public class SkatePhysicsPopTest
 		SkateInput in = new SkateInput();
 		in.gestures.add(new Gesture(Direction.UP, false, 0f));
 		p.step(DT, in);
-		assertEquals(0.92f * 820f, p.getVerticalSpeed(), 1e-2f);
+		assertEquals(0.92f * 820f, p.getVerticalVelocity(), 1e-2f);
 	}
 
 	@Test
@@ -85,7 +85,7 @@ public class SkatePhysicsPopTest
 		in.charge = false;
 		in.gestures.add(new Gesture(Direction.DOWN, true, 0f));
 		p.step(DT, in);
-		assertEquals(820f, p.getVerticalSpeed(), 1e-3f);
+		assertEquals(820f, p.getVerticalVelocity(), 1e-3f);
 		assertTrue(p.isLastPopNollie());
 	}
 

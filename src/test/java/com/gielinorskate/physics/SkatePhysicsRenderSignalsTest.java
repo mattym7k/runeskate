@@ -16,7 +16,7 @@ public class SkatePhysicsRenderSignalsTest
 	public void popChargeRisesWithCrouchAndCapsAtOne()
 	{
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.flat(), 0, 0, 0);
-		p.setSpeed(500);
+		p.setRollingSpeed(500);
 		SkateInput in = new SkateInput();
 		assertEquals(0f, p.getPopCharge(), 0f);
 		in.crouch = true;
@@ -44,12 +44,11 @@ public class SkatePhysicsRenderSignalsTest
 	public void verticalVelocityAndLandingSpeedOfAnOllie()
 	{
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.flat(), 0, 0, 0);
-		p.setSpeed(500);
+		p.setRollingSpeed(500);
 		SkateInput in = new SkateInput();
 		in.gestures.add(new Gesture(Direction.UP, false, 0f));
 		p.step(DT, in);
 		assertEquals(SkaterState.AIRBORNE, p.getState());
-		assertEquals(p.getVerticalSpeed(), p.getVerticalVelocity(), 0f);
 		assertEquals(0f, p.getPopCharge(), 0f);
 		int guard = 0;
 		while (p.getState() == SkaterState.AIRBORNE && guard++ < 200)

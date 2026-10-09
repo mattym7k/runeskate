@@ -20,7 +20,7 @@ public class GridBlockersTest
 		{
 			for (int y = 0; y <= 6; y++)
 			{
-				w.setCornerHeight(x, y, ground);
+				WorldTests.setCornerHeight(w, x, y, ground);
 			}
 		}
 		return w;
@@ -48,7 +48,7 @@ public class GridBlockersTest
 		GridCollisionWorld w = world(0);
 		w.setTile(2, 2, GridCollisionWorld.FULL, height);
 		w.markShaped(2, 2);
-		w.addObjectBlocker(2.5f * T, 2.5f * T, new float[]{-half, half, -half, half}, 0, height, pass);
+		w.addObjectBlocker(2.5f * T, 2.5f * T, new float[]{-half, half, -half, half}, 0, height, pass, true);
 		return w;
 	}
 
@@ -74,7 +74,7 @@ public class GridBlockersTest
 		w.setTile(2, 2, GridCollisionWorld.FULL, 200);
 		w.markShaped(2, 2);
 		// 120 x 40 slab turned an eighth (256 JAU): it runs from south-east to north-west
-		w.addObjectBlocker(2.5f * T, 2.5f * T, new float[]{-60, 60, -20, 20}, 256, 200, false);
+		w.addObjectBlocker(2.5f * T, 2.5f * T, new float[]{-60, 60, -20, 20}, 256, 200, false, true);
 		Contact c = new Contact();
 		float d = 40 * (float) Math.sqrt(0.5);
 		assertTrue("on the slab's axis, 40 from the centre", w.contact(2.5f * T - d, 2.5f * T + d, 1, 0, 24, c));
@@ -87,7 +87,7 @@ public class GridBlockersTest
 		GridCollisionWorld w = world(20);
 		w.setTile(2, 2, GridCollisionWorld.FULL, 100);
 		w.markShaped(2, 2);
-		assertEquals(BlockerSet.LOW, w.addObjectBlocker(2.5f * T, 2.5f * T, new float[]{-40, 40, -40, 40}, 0, 100, false));
+		assertEquals(BlockerSet.LOW, w.addObjectBlocker(2.5f * T, 2.5f * T, new float[]{-40, 40, -40, 40}, 0, 100, false, true));
 		assertEquals(120f, w.groundHeight(2.5f * T + 39, 2.5f * T), 1e-3f);
 		assertEquals("just outside the crate is plain ground (was the whole tile)", 20f, w.groundHeight(2.5f * T + 41, 2.5f * T), 1e-3f);
 		assertEquals(20f, w.groundHeight(2.1f * T, 2.1f * T), 1e-3f);
@@ -127,7 +127,7 @@ public class GridBlockersTest
 	public void plantsAreRiddenThrough()
 	{
 		GridCollisionWorld w = oneObject(40, 90, true);
-		assertEquals(BlockerSet.PASS, w.getBlockers().kind(0));
+		assertEquals(BlockerSet.PASS, WorldTests.kind(w.getBlockers(), 0));
 		assertEquals(0f, w.groundHeight(2.5f * T, 2.5f * T), 0f);
 		assertFalse(w.contact(2.5f * T, 2.5f * T, BlockerSet.SKATER_R, 0, 24, new Contact()));
 		assertEquals(NEG, w.blockerTop(2.5f * T - 60, 2.5f * T, 2.5f * T, 2.5f * T), 0f);
@@ -210,7 +210,7 @@ public class GridBlockersTest
 		GridCollisionWorld w = world(0);
 		// 200 x 8 bench, 100 tall, on a tile the collision flags leave open
 		w.addGrindableBlocker(2.5f * T, 2.5f * T, new float[]{-100, 100, -4, 4}, 0, 100);
-		assertEquals(BlockerSet.LOW, w.getBlockers().kind(0));
+		assertEquals(BlockerSet.LOW, WorldTests.kind(w.getBlockers(), 0));
 		assertEquals("thin side inflated to 12 either side", 100f, w.groundHeight(2.5f * T, 2.5f * T + 11), 1e-3f);
 		assertEquals(0f, w.groundHeight(2.5f * T, 2.5f * T + 13), 1e-3f);
 		Contact c = new Contact();
@@ -219,7 +219,7 @@ public class GridBlockersTest
 		// a 150-tall counter is SOLID (blocks in blockerTop) but still landable
 		GridCollisionWorld w2 = world(0);
 		w2.addGrindableBlocker(2.5f * T, 2.5f * T, new float[]{-100, 100, -4, 4}, 0, 150);
-		assertEquals(BlockerSet.SOLID, w2.getBlockers().kind(0));
+		assertEquals(BlockerSet.SOLID, WorldTests.kind(w2.getBlockers(), 0));
 		assertEquals(150f, w2.groundHeight(2.5f * T, 2.5f * T), 1e-3f);
 		assertEquals(150f, w2.blockerTop(2.5f * T, 2.5f * T - 30, 2.5f * T, 2.5f * T - 22), 0f);
 	}

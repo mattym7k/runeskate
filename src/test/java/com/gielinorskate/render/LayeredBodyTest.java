@@ -112,11 +112,10 @@ public class LayeredBodyTest
 	private final MeshSnapshot snap = new MeshSnapshot();
 	private final BufferProbe.Probe<Fake> probe = new BufferProbe.Probe<>();
 	private final BodyPose neutral = new BodyPose();
-	private final LayeredBody.Report report = new LayeredBody.Report();
 
 	private Fake draw(Member m, int key, boolean mayTake, LayeredBody.Layer<Fake> layer, BodyPose pose)
 	{
-		return LayeredBody.drawable(m, MESH, snap, key, mayTake, layer, pose, probe, report);
+		return LayeredBody.drawable(m, MESH, snap, key, mayTake, layer, pose, probe);
 	}
 
 	@Test
@@ -155,7 +154,7 @@ public class LayeredBodyTest
 		lean.legScale = 0.7f;
 		Fake f = draw(m, 7, false, LIFT, lean);
 		assertSame(m.shared, f);
-		assertFalse(snap.valid());
+		assertFalse((snap.count >= 0));
 		// not lifted: no layer without a snapshot of the plain frame
 		assertTrue("not lifted: " + f.ys[2], f.ys[2] > -250f);
 		assertEquals(1, f.deformedCalls);
@@ -197,7 +196,7 @@ public class LayeredBodyTest
 		m.persistent = true;
 		Fake f = draw(m, 7, true, LIFT, neutral);
 		assertSame(m.base, f);
-		assertFalse(snap.valid());
+		assertFalse((snap.count >= 0));
 		assertEquals(0f, m.base.xs[0], 0f);
 		assertEquals(0f, m.base.ys[0], 0f);
 	}
@@ -249,41 +248,8 @@ public class LayeredBodyTest
 		assertEquals(4f, out[3], 0f);
 		s.take(a, a, a, 2, 1, 2);
 		assertTrue(s.matches(2, 1, 2));
-		assertEquals(4, s.capacity());
+		assertEquals(4, s.xs.length);
 		s.clear();
-		assertFalse(s.valid());
-	}
-
-	@Test
-	public void theReportSaysWhichPathTheDrawTook()
-	{
-		Member m = new Member();
-		m.persistent = true;
-		draw(m, 7, true, LIFT, neutral);
-		assertEquals(LayeredBody.Outcome.NOT_PROVEN, report.outcome());
-
-		m.persistent = false;
-		draw(m, 7, false, LIFT, neutral);
-		assertEquals(LayeredBody.Outcome.LIVE, report.outcome());
-
-		draw(m, 7, true, null, neutral);
-		assertEquals(LayeredBody.Outcome.SNAPSHOT, report.outcome());
-
-		draw(m, 7, false, LIFT, neutral);
-		assertEquals(LayeredBody.Outcome.LAYERED, report.outcome());
-
-		draw(m, 7, false, b -> null, neutral);
-		assertEquals(LayeredBody.Outcome.LAYER_SKIPPED, report.outcome());
-
-		Fake other = new Fake();
-		draw(m, 7, false, b -> other, neutral);
-		assertEquals(LayeredBody.Outcome.NOT_IN_PLACE, report.outcome());
-
-		draw(m, 7, false, b ->
-		{
-			b.xs = new float[8];
-			return b;
-		}, neutral);
-		assertEquals(LayeredBody.Outcome.CANVAS_CHANGED, report.outcome());
+		assertFalse((s.count >= 0));
 	}
 }

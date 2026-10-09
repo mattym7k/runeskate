@@ -20,7 +20,7 @@ public class SkatePhysicsHudTest
 	private SkatePhysics popped(CollisionWorld w, GrindMap m, Direction flick)
 	{
 		SkatePhysics p = new SkatePhysics(t, w, m, 0, 0, 0);
-		p.setSpeed(600);
+		p.setRollingSpeed(600);
 		SkateInput in = new SkateInput();
 		in.gestures.add(new Gesture(flick, false, 0f));
 		p.step(DT, in);
@@ -40,10 +40,10 @@ public class SkatePhysicsHudTest
 	public void aStraightOllieLandsClean()
 	{
 		SkatePhysics p = popped(TestWorlds.flat(), new GrindMap(), Direction.UP);
-		assertNull(p.getLastLandingQuality());
+		assertNull(p.lastLandingQuality);
 		land(p, new SkateInput());
 		assertEquals(SkaterState.ROLLING, p.getState());
-		assertEquals(LandingQuality.CLEAN, p.getLastLandingQuality());
+		assertEquals(LandingQuality.CLEAN, p.lastLandingQuality);
 	}
 
 	@Test
@@ -51,7 +51,7 @@ public class SkatePhysicsHudTest
 	{
 		SkatePhysics p = popped(TestWorlds.flat(), new GrindMap(), Direction.UP_LEFT);
 		land(p, new SkateInput());
-		assertEquals(LandingQuality.CLEAN, p.getLastLandingQuality());
+		assertEquals(LandingQuality.CLEAN, p.lastLandingQuality);
 	}
 
 	@Test
@@ -70,14 +70,14 @@ public class SkatePhysicsHudTest
 			p.step(DT, in);
 		}
 		assertEquals(SkaterState.ROLLING, p.getState());
-		assertEquals(LandingQuality.SLOPPY, p.getLastLandingQuality());
+		assertEquals(LandingQuality.SLOPPY, p.lastLandingQuality);
 	}
 
 	@Test
 	public void rollingOffALedgeHasNoQuality()
 	{
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.stepAtY(0, 0, 100), 0, 100, (float) Math.PI);
-		p.setSpeed(600);
+		p.setRollingSpeed(600);
 		SkateInput in = new SkateInput();
 		for (int i = 0; i < 20 && p.getState() == SkaterState.ROLLING; i++)
 		{
@@ -86,7 +86,7 @@ public class SkatePhysicsHudTest
 		assertEquals(SkaterState.AIRBORNE, p.getState());
 		land(p, in);
 		assertEquals(SkaterState.ROLLING, p.getState());
-		assertNull(p.getLastLandingQuality());
+		assertNull(p.lastLandingQuality);
 	}
 
 	@Test

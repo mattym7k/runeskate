@@ -25,16 +25,16 @@ public class GhostOffBoardTest
 			.registerSubtype(SkateGhostStop.class))
 		.create();
 
-	private static GhostFrame walker(BoardState board, float bx, float by, float bh, float bd)
+	private static GhostState walker(BoardState board, float bx, float by, float bh, float bd)
 	{
-		return GhostFrame.onFoot(330, 2, 409_600f, 411_200f, 40f, 1.5f, 120f, -150f, 0f, false, 0.4f, board, bx, by,
+		return GhostFeed.onFoot(330, 2, 409_600f, 411_200f, 40f, 1.5f, 120f, -150f, 0f, false, 0.4f, board, bx, by,
 			bh, bd);
 	}
 
 	@Test
 	public void onTheBoardNothingNewGoesOnTheWire()
 	{
-		GhostFrame f = new GhostFrame(330, 2, 1f, 2f, 3f, 0f, 0f, 0f, 0f, SkaterState.ROLLING, null, null, 0f);
+		GhostState f = GhostFeed.frame(330, 2, 1f, 2f, 3f, 0f, 0f, 0f, 0f, SkaterState.ROLLING, null, null, 0f);
 		SkateGhostUpdate m = GhostCodec.encode(f, 0, null);
 		String json = GSON.toJson(m, WebsocketMessage.class);
 		assertFalse(json, json.contains("\"ob\""));
@@ -76,7 +76,7 @@ public class GhostOffBoardTest
 	@Test
 	public void anOnFootUpdateStaysSmall()
 	{
-		GhostFrame f = GhostFrame.onFoot(330, 2, 1_409_664f, 1_411_200f, -1237f, -3.14159f, -384f, -384f, -1820f,
+		GhostState f = GhostFeed.onFoot(330, 2, 1_409_664f, 1_411_200f, -1237f, -3.14159f, -384f, -384f, -1820f,
 			true, -TurnRateMeter.MAX_RATE, BoardState.DROPPED, 1_409_000f, 1_411_999f, -1237f, -3.14159f);
 		SkateGhostUpdate m = GhostCodec.encode(f, 0x3ff, null);
 		m.seq = 1_234_567_890;

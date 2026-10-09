@@ -75,12 +75,12 @@ public class DesignOutboxTest
 		int all = deck.messages().size();
 		// nothing of it sent yet: queueing again changes nothing
 		out.queueAll();
-		assertEquals(all, out.queued());
+		assertEquals(all, out.queue.size());
 		out.poll(0f);
 		out.poll(1f);
 		// a new member: it never saw the offer or the first chunk
 		out.queueAll();
-		assertEquals(all, out.queued());
+		assertEquals(all, out.queue.size());
 		assertTrue(out.poll(2f) instanceof SkateDesignOffer);
 		assertEquals(0, index(out.poll(3f)));
 	}

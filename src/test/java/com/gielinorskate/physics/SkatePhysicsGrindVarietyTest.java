@@ -36,7 +36,7 @@ public class SkatePhysicsGrindVarietyTest
 	{
 		// 30 high at y = 30 rising to 130 at y = 1030 (0.1 per unit)
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.flat(), map(new GrindSegment(10, 30, 10, 1030, 30, 130)), 0, 0, 0);
-		p.setSpeed(600);
+		p.setRollingSpeed(600);
 		SkateInput in = new SkateInput();
 		in.gestures.add(new Gesture(Direction.UP, false, 0f));
 		p.step(DT, in);
@@ -59,7 +59,7 @@ public class SkatePhysicsGrindVarietyTest
 		int k = 0;
 		for (SkatePhysics p : new SkatePhysics[]{up, down})
 		{
-			p.setSpeed(600);
+			p.setRollingSpeed(600);
 			SkateInput in = new SkateInput();
 			in.gestures.add(new Gesture(Direction.UP, false, 0f));
 			p.step(DT, in);
@@ -78,7 +78,7 @@ public class SkatePhysicsGrindVarietyTest
 	private SkatePhysics slideOn(int spinSteps, SkateInput keys)
 	{
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.flat(), map(new GrindSegment(10, 300, 10, 1500, 30)), 0, 0, 0);
-		p.setSpeed(500);
+		p.setRollingSpeed(500);
 		SkateInput in = keys;
 		in.gestures.add(new Gesture(Direction.UP, false, 0f));
 		p.step(DT, in);
@@ -99,7 +99,7 @@ public class SkatePhysicsGrindVarietyTest
 		float sx = (float) Math.sin(Math.toRadians(40)) * 300;
 		float sy = (float) Math.cos(Math.toRadians(40)) * 300;
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.flat(), map(new GrindSegment(-sx, 300 - sy, sx, 300 + sy, 30)), 0, 0, 0);
-		p.setSpeed(500);
+		p.setRollingSpeed(500);
 		in.gestures.add(new Gesture(Direction.UP, false, 0f));
 		p.step(DT, in);
 		flyOut(p, in);

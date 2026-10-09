@@ -1,7 +1,6 @@
 package com.gielinorskate.render;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
@@ -13,8 +12,8 @@ public class BoardSplitTest
 	@Test
 	public void everyTriangleOfTheClassicBoardIsInExactlyOneHalf()
 	{
-		BoardGeometry.Mesh mesh = BoardGeometry.standardBoard();
-		BoardSplit s = BoardSplit.split(new float[][]{mesh.tris}, null);
+		ClassicBoard.Mesh mesh = ClassicBoard.standardBoard();
+		BoardSplit s = BoardSplit.split(new float[][]{mesh.tris}, new int[][]{ClassicBoard.faces(mesh)});
 		int faces = mesh.faceCount();
 		assertEquals(faces, s.nose.faceIn[0].length);
 		for (int i = 0; i < faces; i++)
@@ -58,8 +57,8 @@ public class BoardSplitTest
 	@Test
 	public void theHalvesMeetAtTheMiddleAndTogetherSpanTheBoard()
 	{
-		BoardGeometry.Mesh mesh = BoardGeometry.standardBoard();
-		BoardSplit s = BoardSplit.split(new float[][]{mesh.tris}, null);
+		ClassicBoard.Mesh mesh = ClassicBoard.standardBoard();
+		BoardSplit s = BoardSplit.split(new float[][]{mesh.tris}, new int[][]{ClassicBoard.faces(mesh)});
 		float minZ = Float.POSITIVE_INFINITY;
 		float maxZ = Float.NEGATIVE_INFINITY;
 		float maxY = Float.NEGATIVE_INFINITY;
@@ -69,14 +68,16 @@ public class BoardSplitTest
 			maxZ = Math.max(maxZ, mesh.tris[i]);
 			maxY = Math.max(maxY, mesh.tris[i - 1]);
 		}
-		assertEquals(maxZ, s.nose.maxZ, 1e-4f);
-		assertEquals(minZ, s.tail.minZ, 1e-4f);
+		float[] nose = zRange(s.nose, mesh);
+		float[] tail = zRange(s.tail, mesh);
+		assertEquals(maxZ, nose[1], 1e-4f);
+		assertEquals(minZ, tail[0], 1e-4f);
 		// the nose half is in front of the cut, the tail behind it (a long deck triangle across the cut goes with its
 		// centroid, so the break is a sawtooth and each half reaches a little past the middle)
 		assertTrue(s.nose.cz > 0f);
 		assertTrue(s.tail.cz < 0f);
-		assertTrue(s.nose.minZ < s.nose.maxZ && s.nose.maxZ > 0f);
-		assertTrue(s.tail.maxZ > s.tail.minZ && s.tail.minZ < 0f);
+		assertTrue(nose[0] < nose[1] && nose[1] > 0f);
+		assertTrue(tail[1] > tail[0] && tail[0] < 0f);
 		assertEquals(-s.nose.cz, s.tail.cz, 1e-3f);
 		// each half keeps a truck and its wheels: it rests on them, as low as the whole board
 		assertEquals(maxY, s.nose.maxY, 1e-4f);
@@ -88,8 +89,8 @@ public class BoardSplitTest
 	@Test
 	public void aHalfsVerticesAreAboutItsOwnCentreAndUnusedOnesAreParked()
 	{
-		BoardGeometry.Mesh mesh = BoardGeometry.standardBoard();
-		BoardSplit s = BoardSplit.split(new float[][]{mesh.tris}, null);
+		ClassicBoard.Mesh mesh = ClassicBoard.standardBoard();
+		BoardSplit s = BoardSplit.split(new float[][]{mesh.tris}, new int[][]{ClassicBoard.faces(mesh)});
 		BoardSplit.Half h = s.nose;
 		for (int i = 0; i < mesh.faceCount(); i++)
 		{
@@ -130,8 +131,6 @@ public class BoardSplitTest
 	@Test
 	public void theSplitIsMadeOnceAndKept()
 	{
-		BoardGeometry.Mesh mesh = BoardGeometry.sharedDefaultBoard();
-		assertSame(BoardSplit.of(mesh), BoardSplit.of(mesh));
 		BakedBoardGeometry.Mesh[] parts = BakedBoardGeometry.sharedBoard(false);
 		if (parts != null)
 		{
@@ -154,9 +153,9 @@ public class BoardSplitTest
 		int[] w1 = c1.clone();
 		int[] w2 = c2.clone();
 		int[] w3 = c3.clone();
-		BakedBoardModel.shade(w1, w2, w3, corners);
+		BakedBoardModel.shade(w1, w2, w3, corners, null);
 		boolean[] in = {true, false, true};
-		BoardSplit.shadeHalf(c1, c2, c3, corners, in);
+		BakedBoardModel.shade(c1, c2, c3, corners, in);
 		for (int i = 0; i < 3; i++)
 		{
 			if (in[i])
@@ -170,15 +169,6 @@ public class BoardSplitTest
 				assertEquals(-2, c3[i]);
 			}
 		}
-		// the classic board: the client's own lit colours stay, the other half and leftovers are hidden
-		int[] k1 = {5, 6, 7, 8};
-		int[] k3 = {5, 6, 7, 8};
-		BoardSplit.shadeHalf(k1, k1.clone(), k3, null, new boolean[]{false, true, true});
-		assertEquals(-2, k3[0]);
-		assertEquals(6, k3[1]);
-		assertEquals(7, k3[2]);
-		assertEquals(-2, k3[3]);
-		assertFalse(k1[0] == -2);
 	}
 
 	/** A probe corner lit to intensity 128 (unchanged). */
@@ -188,10 +178,26 @@ public class BoardSplitTest
 	public void anEmptyHalfIsAPoint()
 	{
 		// a single triangle wholly at the nose: the tail is empty
-		BoardSplit s = BoardSplit.split(new float[][]{{0, 0, 5, 1, 0, 6, 0, 1, 7}}, null);
+		BoardSplit s = BoardSplit.split(new float[][]{{0, 0, 5, 1, 0, 6, 0, 1, 7}}, new int[][]{{0, 1, 2}});
 		assertEquals(1, s.nose.faceCount);
 		assertEquals(0, s.tail.faceCount);
 		assertEquals(0f, s.tail.cx, 0f);
 		assertNotNull(s.tail.vertices[0]);
+	}
+
+	/** The z range (min, max) of a half's faces. */
+	private static float[] zRange(BoardSplit.Half h, ClassicBoard.Mesh mesh)
+	{
+		float[] r = {Float.POSITIVE_INFINITY, Float.NEGATIVE_INFINITY};
+		for (int i = 0; i < h.faceIn[0].length; i++)
+		{
+			for (int k = 0; h.faceIn[0][i] && k < 3; k++)
+			{
+				float z = mesh.tris[i * 9 + k * 3 + 2];
+				r[0] = Math.min(r[0], z);
+				r[1] = Math.max(r[1], z);
+			}
+		}
+		return r;
 	}
 }

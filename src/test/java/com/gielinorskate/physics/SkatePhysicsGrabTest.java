@@ -24,7 +24,7 @@ public class SkatePhysicsGrabTest
 	private SkatePhysics airborne(SkateInput in)
 	{
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.flat(), 0, 0, 0);
-		p.setSpeed(500);
+		p.setRollingSpeed(500);
 		in.crouch = true;
 		steps(p, in, 20);
 		in.crouch = false;

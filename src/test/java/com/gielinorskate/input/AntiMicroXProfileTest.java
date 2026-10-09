@@ -40,10 +40,23 @@ public class AntiMicroXProfileTest
 	/**
 	 * The Qt key code AntiMicroX stores for a Java key code: letters, digits and B / F / ... are the same; the
 	 * function keys are Qt::Key_F1 + n (on Windows AntiMicroX sends them as VK_F1 + n, which Java reads as
-	 * KeyEvent.VK_F1 + n for F1 to F12 and VK_F13 + n from F13).
+	 * KeyEvent.VK_F1 + n for F1 to F12 and VK_F13 + n from F13); Insert / Delete / Home / End from qnamespace.h.
 	 */
 	private static int qt(int javaCode)
 	{
+		switch (javaCode)
+		{
+			case KeyEvent.VK_INSERT:
+				return 0x1000006;
+			case KeyEvent.VK_DELETE:
+				return 0x1000007;
+			case KeyEvent.VK_HOME:
+				return 0x1000010;
+			case KeyEvent.VK_END:
+				return 0x1000011;
+			default:
+				break;
+		}
 		if (javaCode >= KeyEvent.VK_F13 && javaCode <= KeyEvent.VK_F24)
 		{
 			return QT_F1 + 12 + (javaCode - KeyEvent.VK_F13);
@@ -176,7 +189,7 @@ public class AntiMicroXProfileTest
 		assertEquals(PadButton.values().length, SLOTS.size());
 		for (PadButton p : PadButton.values())
 		{
-			assertEquals(p.label, key(p.qtCode), b.get(SLOTS.get(p)));
+			assertEquals(p.label, key(qt(p.keyCode)), b.get(SLOTS.get(p)));
 		}
 		// the F keys are Qt::Key_F1 + n, which AntiMicroX sends on Windows as VK_F1 + n
 		assertEquals(key(qt(KeyEvent.VK_F13)), b.get("button1"));

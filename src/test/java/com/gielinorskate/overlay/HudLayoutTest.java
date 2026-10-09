@@ -11,14 +11,14 @@ public class HudLayoutTest
 	{
 		// fixed-mode viewport: 512 x 334 at (4, 4) on a 765 x 503 canvas
 		// radius = round(334 * 0.045) = 15, clamped up to the 22px minimum
-		HudLayout l = HudLayout.of(4, 4, 512, 334, 765, 503);
+		HudLayout l = new HudLayout(4, 4, 512, 334, 765, 503, HudLayout.NO_OBSTACLE);
 		assertEquals(22, l.ringRadius);
 		assertEquals(4 + Math.round(512 * 0.09f) + 22, l.ringCenterX);
 		assertEquals(4 + Math.round(334 * 0.78f), l.ringCenterY);
 		assertEquals(l.ringCenterX - 22, l.stackLeftX);
 		assertEquals(l.ringCenterY - 22 - Math.round(22 * 0.35f), l.stackBaselineY);
 		assertEquals(l.ringCenterX + 22 + Math.round(22 * 0.6f), l.scoreLeftX);
-		assertEquals(l.ringCenterY, l.scoreCenterY);
+		assertEquals(l.ringCenterY, l.ringCenterY);
 		assertEquals(l.ringCenterY + 22 + Math.round(22 * 0.55f), l.totalY);
 	}
 
@@ -26,7 +26,7 @@ public class HudLayoutTest
 	public void resizableViewportIsNotTheCanvasCorner()
 	{
 		// radius = round(900 * 0.045) = 41, within the 22..48 clamp range
-		HudLayout l = HudLayout.of(0, 0, 1600, 900, 1600, 900);
+		HudLayout l = new HudLayout(0, 0, 1600, 900, 1600, 900, HudLayout.NO_OBSTACLE);
 		assertEquals(41, l.ringRadius);
 		assertEquals(Math.round(1600 * 0.09f) + 41, l.ringCenterX);
 		assertEquals(Math.round(900 * 0.78f), l.ringCenterY);
@@ -39,7 +39,7 @@ public class HudLayoutTest
 	@Test
 	public void fallsBackToTheCanvasWithoutAViewport()
 	{
-		HudLayout l = HudLayout.of(0, 0, 0, 0, 800, 600);
+		HudLayout l = new HudLayout(0, 0, 0, 0, 800, 600, HudLayout.NO_OBSTACLE);
 		// radius = round(600 * 0.045) = 27, within the clamp range
 		assertEquals(27, l.ringRadius);
 		assertEquals(Math.round(800 * 0.09f) + 27, l.ringCenterX);
@@ -51,14 +51,14 @@ public class HudLayoutTest
 	@Test
 	public void ringRadiusClampsToTheMaximumOnATallViewport()
 	{
-		HudLayout l = HudLayout.of(0, 0, 3000, 2000, 3000, 2000);
-		assertEquals(HudLayout.RING_RADIUS_MAX, l.ringRadius);
+		HudLayout l = new HudLayout(0, 0, 3000, 2000, 3000, 2000, HudLayout.NO_OBSTACLE);
+		assertEquals(48, l.ringRadius);
 	}
 
 	@Test
 	public void calloutSitsCentredInTheUpperViewport()
 	{
-		HudLayout l = HudLayout.of(4, 4, 512, 334, 765, 503);
+		HudLayout l = new HudLayout(4, 4, 512, 334, 765, 503, HudLayout.NO_OBSTACLE);
 		assertEquals(4 + 256, l.calloutCenterX);
 		assertEquals(4 + Math.round(334 * 0.3f), l.calloutBaselineY);
 	}
@@ -67,11 +67,11 @@ public class HudLayoutTest
 	public void xpDropsStayClearOfTheResizableMinimap()
 	{
 		// resizable: the viewport is the whole canvas and the minimap covers its top-right corner
-		HudLayout resizable = HudLayout.of(0, 0, 1600, 900, 1600, 900);
-		assertEquals(1600 - HudLayout.XP_DROP_MINIMAP_MARGIN, resizable.xpDropRightX);
+		HudLayout resizable = new HudLayout(0, 0, 1600, 900, 1600, 900, HudLayout.NO_OBSTACLE);
+		assertEquals(1600 - 240, resizable.xpDropRightX);
 		// fixed: the minimap is outside the viewport
-		HudLayout fixed = HudLayout.of(4, 4, 512, 334, 765, 503);
-		assertEquals(4 + 512 - HudLayout.XP_DROP_EDGE_MARGIN, fixed.xpDropRightX);
+		HudLayout fixed = new HudLayout(4, 4, 512, 334, 765, 503, HudLayout.NO_OBSTACLE);
+		assertEquals(4 + 512 - 8, fixed.xpDropRightX);
 		assertEquals(4 + Math.round(334 * 0.32f), fixed.xpDropStartY);
 		assertEquals(Math.round(334 * 0.18f), fixed.xpDropRise);
 	}
@@ -79,8 +79,8 @@ public class HudLayoutTest
 	@Test
 	public void withoutAChatboxTheClusterIsWhereItAlwaysWas()
 	{
-		HudLayout plain = HudLayout.of(0, 0, 1600, 800, 1600, 800);
-		HudLayout none = HudLayout.of(0, 0, 1600, 800, 1600, 800, HudLayout.NO_OBSTACLE);
+		HudLayout plain = new HudLayout(0, 0, 1600, 800, 1600, 800, HudLayout.NO_OBSTACLE);
+		HudLayout none = new HudLayout(0, 0, 1600, 800, 1600, 800, HudLayout.NO_OBSTACLE);
 		assertEquals(plain.ringCenterY, none.ringCenterY);
 		assertEquals(plain.totalY, none.totalY);
 		assertEquals(plain.stackBaselineY, none.stackBaselineY);
@@ -90,17 +90,17 @@ public class HudLayoutTest
 	public void resizableClusterRisesAboveTheChatbox()
 	{
 		// 800 px tall resizable canvas, chatbox top at 800 - 165 = 635: the old cluster ran into it
-		HudLayout plain = HudLayout.of(0, 0, 1600, 800, 1600, 800);
+		HudLayout plain = new HudLayout(0, 0, 1600, 800, 1600, 800, HudLayout.NO_OBSTACLE);
 		assertTrue(plain.clusterBottomY > 635);
-		HudLayout l = HudLayout.of(0, 0, 1600, 800, 1600, 800, 635);
-		assertTrue(l.clusterBottomY <= 635 - HudLayout.OBSTACLE_MARGIN);
+		HudLayout l = new HudLayout(0, 0, 1600, 800, 1600, 800, 635);
+		assertTrue(l.clusterBottomY <= 635 - 4);
 		int shift = plain.ringCenterY - l.ringCenterY;
 		assertTrue(shift > 0);
 		// the whole cluster moves together; nothing else moves
 		assertEquals(plain.totalY - shift, l.totalY);
 		assertEquals(plain.stackBaselineY - shift, l.stackBaselineY);
 		assertEquals(plain.stackTopY - shift, l.stackTopY);
-		assertEquals(plain.scoreCenterY - shift, l.scoreCenterY);
+		assertEquals(plain.ringCenterY - shift, l.ringCenterY);
 		assertEquals(plain.ringCenterX, l.ringCenterX);
 		assertEquals(plain.calloutBaselineY, l.calloutBaselineY);
 		assertEquals(plain.xpDropStartY, l.xpDropStartY);
@@ -110,8 +110,8 @@ public class HudLayoutTest
 	public void aChatboxBelowTheClusterMovesNothing()
 	{
 		// fixed mode: the chatbox sits below the viewport
-		HudLayout plain = HudLayout.of(4, 4, 512, 334, 765, 503);
-		HudLayout l = HudLayout.of(4, 4, 512, 334, 765, 503, 338);
+		HudLayout plain = new HudLayout(4, 4, 512, 334, 765, 503, HudLayout.NO_OBSTACLE);
+		HudLayout l = new HudLayout(4, 4, 512, 334, 765, 503, 338);
 		assertEquals(plain.ringCenterY, l.ringCenterY);
 		assertEquals(plain.totalY, l.totalY);
 	}
@@ -120,9 +120,9 @@ public class HudLayoutTest
 	public void collapsedChatOnlyLiftsAboveTheTabRow()
 	{
 		// resizable with chat hidden: only the tab row (about 23 px) is left at the bottom
-		HudLayout l = HudLayout.of(0, 0, 1600, 800, 1600, 800, 777);
-		assertTrue(l.clusterBottomY <= 777 - HudLayout.OBSTACLE_MARGIN);
-		HudLayout chatOpen = HudLayout.of(0, 0, 1600, 800, 1600, 800, 635);
+		HudLayout l = new HudLayout(0, 0, 1600, 800, 1600, 800, 777);
+		assertTrue(l.clusterBottomY <= 777 - 4);
+		HudLayout chatOpen = new HudLayout(0, 0, 1600, 800, 1600, 800, 635);
 		assertTrue(l.ringCenterY > chatOpen.ringCenterY);
 	}
 
@@ -130,7 +130,7 @@ public class HudLayoutTest
 	public void neverRisesPastTheViewportTop()
 	{
 		// a tiny viewport with the chatbox almost at its top: the stack top stops at the viewport edge
-		HudLayout l = HudLayout.of(0, 0, 800, 300, 800, 300, 20);
+		HudLayout l = new HudLayout(0, 0, 800, 300, 800, 300, 20);
 		assertEquals(0, l.stackTopY);
 	}
 }

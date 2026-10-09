@@ -36,14 +36,14 @@ public class DuelLinesTest
 		assertFalse(off.canChallenge());
 		assertTrue(view(true, true, false, Phase.IDLE).status().contains("party"));
 		DuelView ready = new DuelView(true, true, true, Collections.singletonList(new DuelView.Member(5L, "Bob")),
-			Phase.IDLE, null, 99, 99, 0, 0, null);
+			Phase.IDLE, null, 99, 99, 0, 0, null, false, true);
 		assertTrue(ready.canChallenge());
 		DuelView walking = new DuelView(true, false, true, Collections.singletonList(new DuelView.Member(5L, "Bob")),
-			Phase.IDLE, null, 99, 99, 0, 0, null);
+			Phase.IDLE, null, 99, 99, 0, 0, null, false, true);
 		assertFalse(walking.canChallenge());
 		assertTrue(walking.status().contains("Start skating"));
 		DuelView fight = new DuelView(true, true, true, Collections.emptyList(), Phase.FIGHT, "Bob", 80, 41, 0, 0,
-			null);
+			null, false, true);
 		assertEquals("Duelling Bob: you 80 HP, them 41 HP.", fight.status());
 		assertFalse(fight.canChallenge());
 		DuelView blocked = new DuelView(true, true, true, Collections.singletonList(new DuelView.Member(5L, "Bob")),
@@ -56,12 +56,13 @@ public class DuelLinesTest
 		assertFalse(notSharing.canChallenge());
 		assertTrue(notSharing.status().contains("Share my skater"));
 		assertEquals(fight, new DuelView(true, true, true, Collections.emptyList(), Phase.FIGHT, "Bob", 80, 41, 0, 0,
-			null));
+			null, false, true));
 	}
 
 	private static DuelView view(boolean allowed, boolean skating, boolean inParty, Phase phase)
 	{
-		return new DuelView(allowed, skating, inParty, Collections.emptyList(), phase, null, 99, 99, 0, 0, null);
+		return new DuelView(allowed, skating, inParty, Collections.emptyList(), phase, null, 99, 99, 0, 0, null, false,
+			true);
 	}
 
 	@Test

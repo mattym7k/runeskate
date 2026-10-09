@@ -5,6 +5,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import com.gielinorskate.tricks.Gesture;
 import com.gielinorskate.world.GridCollisionWorld;
+import com.gielinorskate.world.WorldTests;
 import java.util.List;
 import java.util.Random;
 import org.junit.Test;
@@ -99,7 +100,7 @@ public class SkatePhysicsSteepRegressionTest
 		{
 			for (int cy = 0; cy <= 200; cy++)
 			{
-				w.setCornerHeight(cx, cy, 40f * (float) Math.sin(cx * 0.4) + (float) r.nextGaussian() * 6f);
+				WorldTests.setCornerHeight(w, cx, cy, 40f * (float) Math.sin(cx * 0.4) + (float) r.nextGaussian() * 6f);
 			}
 		}
 		return w;

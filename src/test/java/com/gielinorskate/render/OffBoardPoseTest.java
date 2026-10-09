@@ -11,8 +11,8 @@ public class OffBoardPoseTest
 {
 	private static OffBoardPose walker(SkateMode mode, float x, float heading)
 	{
-		return new OffBoardPose(mode, BoardState.DROPPED, 1, 2, 3, 4, x, 0, 0, heading, 192f, false, false, false, 0f,
-			0f, BoardTransition.DISMOUNT, 0.5f);
+		return new OffBoardPose(mode, BoardState.DROPPED, 1, 2, 3, 4, x, 0, 0, heading, 192f, false, false, 0f,
+			BoardTransition.DISMOUNT, 0.5f, false);
 	}
 
 	@Test

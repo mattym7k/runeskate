@@ -17,79 +17,58 @@ import org.junit.Test;
 /** What a ghost's body plays and derives from its updates: pushes, crouch, knockdown, OSRS layer, detail. */
 public class GhostAnimationTest
 {
-	private static final GhostPredictor.Ground FLAT = (x, y) -> 0f;
+	private static final GhostFeed.Frame DRAW = (p, t) -> p.pose(t, GhostFeed.FLAT);
 	private static final float HALF_PI = (float) (Math.PI / 2);
 
 	private static GhostState rolling(float speed, int seq)
 	{
-		return new GhostState(420, 0, 0f, 0f, 0f, 0f, 0f, speed, 0f, SkaterState.ROLLING, null, 0, null, 0f, seq);
+		return GhostFeed.state(420, 0, 0f, 0f, 0f, 0f, 0f, speed, 0f, SkaterState.ROLLING, null, 0, null, 0f, seq);
 	}
 
 	@Test
-	public void speedGainedWhileRollingIsAPush()
+	public void theChargeIsTheDrawnUpdates()
 	{
-		GhostPredictor p = new GhostPredictor();
-		p.accept(rolling(300f, 1), 0f, FLAT);
-		assertEquals(0, p.pushCount());
-		p.accept(rolling(300f + GhostPredictor.PUSH_GAIN + 1f, 2), 0.6f, FLAT);
-		assertEquals(1, p.pushCount());
-		// coasting (slowing) or a tiny gain is no push
-		p.accept(rolling(320f, 3), 1.2f, FLAT);
-		p.accept(rolling(325f, 4), 1.8f, FLAT);
-		assertEquals(1, p.pushCount());
-	}
-
-	@Test
-	public void speedGainedInTheAirOrOnFootIsNoPush()
-	{
-		GhostPredictor p = new GhostPredictor();
-		p.accept(rolling(300f, 1), 0f, FLAT);
-		p.accept(new GhostState(420, 0, 0f, 0f, 50f, 0f, 0f, 900f, 300f, SkaterState.AIRBORNE, null, 0, null, 0f, 2),
-			0.6f, FLAT);
-		assertEquals(0, p.pushCount());
-		GhostState walk = new GhostState(420, 0, 0f, 0f, 0f, 0f, 0f, 100f, 0f, SkaterState.ROLLING, null, 0, null, 0f,
-			3, 0f, 0f, 0f, BoardState.CARRIED, 0f, 0f, 0f, 0f);
-		GhostState run = new GhostState(420, 0, 0f, 0f, 0f, 0f, 0f, 700f, 0f, SkaterState.ROLLING, null, 0, null, 0f,
-			4, 0f, 0f, 0f, BoardState.CARRIED, 0f, 0f, 0f, 0f);
-		p.accept(walk, 1.2f, FLAT);
-		p.accept(run, 1.8f, FLAT);
-		assertEquals(0, p.pushCount());
-		// a stale update is not one either
-		p.accept(rolling(0f, 5), 2.4f, FLAT);
-		p.accept(rolling(900f, 5), 2.5f, FLAT);
-		assertEquals(0, p.pushCount());
-	}
-
-	@Test
-	public void theChargeIsTheLatestUpdatesOnTheGroundOnly()
-	{
-		GhostPredictor p = new GhostPredictor();
+		GhostFeed f = new GhostFeed();
+		f.warmUp();
+		GhostPredictor p = f.predictor;
 		assertEquals(0f, p.charge(), 0f);
-		p.accept(rolling(300f, 1).withBody(0.5f, null, 0f), 0f, FLAT);
+		f.send(GhostFeed.withBody(rolling(300f, 1), 0.5f, null, 0f));
+		f.run(GhostFeed.DELAY + 0.2f, DRAW);
 		assertEquals(0.5f, p.charge(), 0f);
-		p.accept(rolling(300f, 2), 0.6f, FLAT);
+		f.send(rolling(300f, 2));
+		f.run(GhostFeed.DELAY + 0.2f, DRAW);
 		assertEquals(0f, p.charge(), 0f);
 	}
 
 	private static GhostState knocked(KnockdownPose.Stage stage, int seq)
 	{
-		return new GhostState(420, 0, 0f, 0f, 0f, 0f, 0f, 0f, 0f, SkaterState.BAILED, null, 0, null, 0f, seq, 0f, 0f,
-			0f, BoardState.DROPPED, 50f, 0f, 0f, 0f).withBody(0f, stage, 3 * HALF_PI);
+		return GhostFeed.withBody(GhostFeed.state(420, 0, 0f, 0f, 0f, 0f, 0f, 0f, 0f, SkaterState.BAILED, null, 0, null,
+			0f, seq, 0f, 0f, 0f, BoardState.DROPPED, 50f, 0f, 0f, 0f), 0f, stage, 3 * HALF_PI);
 	}
 
 	@Test
-	public void eachKnockdownStageIsTimedFromWhenItWasFirstSeen()
+	public void eachKnockdownStageIsTimedFromWhenItWasFirstPlayed()
 	{
-		GhostPredictor p = new GhostPredictor();
-		assertNull(p.knockStage());
-		p.accept(knocked(KnockdownPose.Stage.AIR, 1), 1f, FLAT);
-		p.accept(knocked(KnockdownPose.Stage.AIR, 2), 1.5f, FLAT);
-		assertSame(KnockdownPose.Stage.AIR, p.knockStage());
-		assertEquals(0.6f, p.knockStageAge(1.6f), 1e-6f);
-		p.accept(knocked(KnockdownPose.Stage.LIE, 3), 2f, FLAT);
-		assertEquals(0.1f, p.knockStageAge(2.1f), 1e-6f);
-		p.accept(rolling(0f, 4), 3f, FLAT);
-		assertNull(p.knockStage());
+		GhostFeed f = new GhostFeed();
+		f.warmUp();
+		GhostPredictor p = f.predictor;
+		assertNull(p.current().knockStage);
+		f.send(knocked(KnockdownPose.Stage.AIR, 1));
+		f.run(GhostFeed.DELAY + 0.2f, DRAW);
+		assertSame(KnockdownPose.Stage.AIR, p.current().knockStage);
+		float age = p.knockStageAge(f.now);
+		assertTrue("air for " + age, age > 0f && age <= 0.25f);
+		// later updates of the same stage do not start it again
+		f.run(0.3f, DRAW);
+		assertEquals(age + 0.3f, p.knockStageAge(f.now), 0.02f);
+		f.send(knocked(KnockdownPose.Stage.LIE, 2));
+		f.run(GhostFeed.DELAY + 0.2f, DRAW);
+		assertSame(KnockdownPose.Stage.LIE, p.current().knockStage);
+		age = p.knockStageAge(f.now);
+		assertTrue("lying for " + age, age > 0f && age <= 0.25f);
+		f.send(rolling(0f, 3));
+		f.run(GhostFeed.DELAY + 0.2f, DRAW);
+		assertNull(p.current().knockStage);
 	}
 
 	@Test
@@ -138,8 +117,8 @@ public class GhostAnimationTest
 		assertEquals(AnimationID.HUMAN_WALK_F, GhostAnim.WALK.id(-1, -1));
 		assertEquals(AnimationID.HUMAN_RUNNING, GhostAnim.RUN.id(1234, -1));
 		assertEquals(-1, GhostAnim.NONE.id(1, 2));
-		assertTrue(GhostAnim.STANCE.loops());
-		assertFalse(GhostAnim.GET_UP.loops());
+		assertTrue(GhostAnim.STANCE.loops);
+		assertFalse(GhostAnim.GET_UP.loops);
 	}
 
 	@Test
@@ -148,48 +127,40 @@ public class GhostAnimationTest
 		int[] gear = {256 + 1, 512 + 4151, 0, 0, 256 + 18, 512 + 1127, 256 + 26, 512 + 1079, 256 + 33, 256 + 42,
 			256 + 48, 256 + 10};
 		int[] colours = {1, 2, 3, 4, 5};
-		int k = GhostAppearance.key(gear, colours, 0, -1, AnimationID.HUMAN_READY);
-		assertEquals(k, GhostAppearance.key(gear.clone(), colours.clone(), 0, -1, AnimationID.HUMAN_READY));
+		int k = GhostBodyController.key(gear, colours, 0, -1, AnimationID.HUMAN_READY);
+		assertEquals(k, GhostBodyController.key(gear.clone(), colours.clone(), 0, -1, AnimationID.HUMAN_READY));
 		int[] other = gear.clone();
 		other[1] = 512 + 4587;
-		assertNotEquals(k, GhostAppearance.key(other, colours, 0, -1, AnimationID.HUMAN_READY));
-		assertNotEquals(k, GhostAppearance.key(gear, new int[]{1, 2, 3, 4, 6}, 0, -1, AnimationID.HUMAN_READY));
-		assertNotEquals(k, GhostAppearance.key(gear, colours, 1, -1, AnimationID.HUMAN_READY));
-		assertNotEquals(k, GhostAppearance.key(gear, colours, 0, 2, AnimationID.HUMAN_READY));
-		assertNotEquals(k, GhostAppearance.key(gear, colours, 0, -1, AnimationID.HUMAN_DS_READY));
-		assertEquals(GhostAppearance.key(null, null, 0, -1, 808), GhostAppearance.key(null, null, 0, -1, 808));
+		assertNotEquals(k, GhostBodyController.key(other, colours, 0, -1, AnimationID.HUMAN_READY));
+		assertNotEquals(k, GhostBodyController.key(gear, new int[]{1, 2, 3, 4, 6}, 0, -1, AnimationID.HUMAN_READY));
+		assertNotEquals(k, GhostBodyController.key(gear, colours, 1, -1, AnimationID.HUMAN_READY));
+		assertNotEquals(k, GhostBodyController.key(gear, colours, 0, 2, AnimationID.HUMAN_READY));
+		assertNotEquals(k, GhostBodyController.key(gear, colours, 0, -1, AnimationID.HUMAN_DS_READY));
+		assertEquals(GhostBodyController.key(null, null, 0, -1, 808), GhostBodyController.key(null, null, 0, -1, 808));
 	}
 
 	@Test
 	public void aSnapshotIsTakenOnlyOfThePlainStandingCharacter()
 	{
 		int ready = AnimationID.HUMAN_READY;
-		assertTrue(GhostAppearance.mayTake(-1, ready, ready, -1));
+		assertTrue(GhostBodyController.mayTake(-1, ready, ready, -1));
 		// mid action, walking or turning, or as an NPC (a transformation): not a standing body
-		assertFalse(GhostAppearance.mayTake(AnimationID.HUMAN_GETUP, ready, ready, -1));
-		assertFalse(GhostAppearance.mayTake(-1, AnimationID.HUMAN_WALK_F, ready, -1));
-		assertFalse(GhostAppearance.mayTake(-1, ready, ready, 2));
+		assertFalse(GhostBodyController.mayTake(AnimationID.HUMAN_GETUP, ready, ready, -1));
+		assertFalse(GhostBodyController.mayTake(-1, AnimationID.HUMAN_WALK_F, ready, -1));
+		assertFalse(GhostBodyController.mayTake(-1, ready, ready, 2));
 		// OSRS animations go on top only of the game's own standing frame: a weapon's stance would double up
-		assertTrue(GhostAppearance.layerable(ready));
-		assertFalse(GhostAppearance.layerable(AnimationID.HUMAN_DS_READY));
+		assertTrue(GhostBodyController.layerable(ready));
+		assertFalse(GhostBodyController.layerable(AnimationID.HUMAN_DS_READY));
 	}
 
 	@Test
 	public void theNearestGhostsGetTheFullBody()
 	{
 		float near = 5 * 128f;
-		float far = GhostDetail.FULL_RANGE + 1f;
-		assertTrue(GhostDetail.full(0, near));
-		assertTrue(GhostDetail.full(GhostDetail.MAX_FULL - 1, near));
-		assertFalse(GhostDetail.full(GhostDetail.MAX_FULL, near));
-		assertFalse(GhostDetail.full(0, far));
-		// ranks by distance, nearest first; ties keep their order
-		float[] d = {900f, 100f, 500f, 100f};
-		int[] rank = new int[4];
-		GhostDetail.rank(d, 4, rank);
-		assertEquals(3, rank[0]);
-		assertEquals(0, rank[1]);
-		assertEquals(2, rank[2]);
-		assertEquals(1, rank[3]);
+		float far = GhostVisibility.FULL_RANGE + 1f;
+		assertTrue(GhostVisibility.full(0, near));
+		assertTrue(GhostVisibility.full(GhostVisibility.MAX_FULL - 1, near));
+		assertFalse(GhostVisibility.full(GhostVisibility.MAX_FULL, near));
+		assertFalse(GhostVisibility.full(0, far));
 	}
 }

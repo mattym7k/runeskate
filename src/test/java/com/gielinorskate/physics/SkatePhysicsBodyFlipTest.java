@@ -26,7 +26,7 @@ public class SkatePhysicsBodyFlipTest
 	private SkatePhysics rolling(float speed)
 	{
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.flat(), 0, 0, 0);
-		p.setSpeed(speed);
+		p.setRollingSpeed(speed);
 		return p;
 	}
 
@@ -286,7 +286,7 @@ public class SkatePhysicsBodyFlipTest
 	public void noFlipsOnARail()
 	{
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.flat(), rail(50, 1500), 0, 0, 0);
-		p.setSpeed(500);
+		p.setRollingSpeed(500);
 		SkateInput in = new SkateInput();
 		in.gestures.add(new Gesture(Direction.UP, false, 0f));
 		p.step(DT, in);
@@ -306,7 +306,7 @@ public class SkatePhysicsBodyFlipTest
 	private SkatePhysics towardLateRail(SkateInput in)
 	{
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.flat(), rail(300, 1500), 0, 0, 0);
-		p.setSpeed(500);
+		p.setRollingSpeed(500);
 		in.gestures.add(new Gesture(Direction.UP, false, 0f));
 		p.step(DT, in);
 		assertEquals(SkaterState.AIRBORNE, p.getState());

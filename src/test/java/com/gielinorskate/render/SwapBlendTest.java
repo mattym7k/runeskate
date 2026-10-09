@@ -70,7 +70,7 @@ public class SwapBlendTest
 		Placement board = at(0f, 0f, 0f, 0f);
 		b.apply(0.5f, body, board);
 		// RuneLite z grows downward
-		assertEquals(-SwapBlend.HOP, body.z, 1e-3f);
+		assertEquals(-Tuning.HOP, body.z, 1e-3f);
 		assertEquals(0f, board.z, 0f);
 	}
 

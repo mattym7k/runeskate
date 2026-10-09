@@ -9,6 +9,7 @@ import com.gielinorskate.progression.BoardDesign;
 import com.gielinorskate.progression.BoardDesigns;
 import com.gielinorskate.progression.BoardLook;
 import com.gielinorskate.progression.DesignPart;
+import java.util.function.BiFunction;
 import org.junit.Test;
 
 /** Custom designs in ghost updates: "C:" and the shared image's 8-hex hash, only while sharing them. */
@@ -45,10 +46,10 @@ public class GhostDesignRefTest
 	public void withoutSharingTheyGoAsTheDefaults()
 	{
 		assertNull(GhostCodec.deckWire(mine, null));
-		assertEquals(GhostCodec.lookWire(BoardLook.defaults(designs)), GhostCodec.lookWire(mine, null));
+		assertEquals(GhostCodec.lookWire(BoardLook.defaults(designs), null), GhostCodec.lookWire(mine, null));
 		// a design whose shared image isn't ready yet (or failed) goes as the default
 		assertNull(GhostCodec.deckWire(mine, d -> null));
-		assertEquals(GhostCodec.lookWire(BoardLook.defaults(designs)), GhostCodec.lookWire(mine, d -> null));
+		assertEquals(GhostCodec.lookWire(BoardLook.defaults(designs), null), GhostCodec.lookWire(mine, d -> null));
 		// junk from the hash source never reaches the wire
 		assertNull(GhostCodec.deckWire(mine, d -> "not-a-hash"));
 	}
@@ -67,7 +68,7 @@ public class GhostDesignRefTest
 	public void receiversResolveCompleteDesignsAndShowDefaultsOtherwise()
 	{
 		BoardDesign theirs = BoardDesign.custom("PARTY_1_4567ef01", "Theirs", DesignPart.DECK, 0);
-		GhostCodec.CustomDesigns ready = (part, hash) -> part == DesignPart.DECK && hash.equals("4567ef01")
+		BiFunction<DesignPart, String, BoardDesign> ready = (part, hash) -> part == DesignPart.DECK && hash.equals("4567ef01")
 			? theirs : null;
 		BoardLook got = GhostCodec.decodeLook("C:4567ef01", "C:0123abcd.C:89abcdef", null, designs, ready);
 		assertSame(theirs, got.deck);
@@ -75,7 +76,7 @@ public class GhostDesignRefTest
 		assertEquals(designs.defaultFor(DesignPart.GRIP), got.grip);
 		assertEquals(designs.defaultFor(DesignPart.WHEELS), got.wheels);
 		// a resolver answering with another part's design is not believed
-		GhostCodec.CustomDesigns wrong = (part, hash) -> theirs;
+		BiFunction<DesignPart, String, BoardDesign> wrong = (part, hash) -> theirs;
 		assertEquals(designs.defaultFor(DesignPart.GRIP),
 			GhostCodec.decodeLook(null, "C:0123abcd.C:89abcdef", null, designs, wrong).grip);
 	}
@@ -83,7 +84,7 @@ public class GhostDesignRefTest
 	@Test
 	public void junkReferencesAreDefaults()
 	{
-		GhostCodec.CustomDesigns any = (part, hash) -> BoardDesign.custom("PARTY_X", "x", part, 0);
+		BiFunction<DesignPart, String, BoardDesign> any = (part, hash) -> BoardDesign.custom("PARTY_X", "x", part, 0);
 		for (String junk : new String[]{"C:", "C:0123abc", "C:0123abcde", "C:0123ABCD", "C:0123abcg", "c:0123abcd"})
 		{
 			assertEquals(junk, designs.defaultFor(DesignPart.DECK),

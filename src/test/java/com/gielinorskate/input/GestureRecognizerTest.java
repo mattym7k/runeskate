@@ -28,18 +28,6 @@ public class GestureRecognizerTest
 		assertEquals(Direction.UP, g.direction);
 		assertFalse(g.nollie);
 		assertEquals(0f, g.turnDegrees, 0.01f);
-		StrokeSnapshot snapshot = r.getLastStrokeSnapshot();
-		assertEquals(g, snapshot.gesture);
-		assertEquals(100f, snapshot.extremeX, 0.01f);
-		assertEquals(230f, snapshot.extremeY, 0.01f);
-		assertEquals(120L, snapshot.firedAtMs);
-		assertTrue("path should include the wind-up and the flick", snapshot.path.size() >= 2);
-		// the path starts fresh at the wind-up (the extreme), not the pre-wind-up base point
-		assertEquals(100f, snapshot.path.get(0)[0], 0.01f);
-		assertEquals(230f, snapshot.path.get(0)[1], 0.01f);
-		float[] last = snapshot.path.get(snapshot.path.size() - 1);
-		assertEquals(100f, last[0], 0.01f);
-		assertEquals(195f, last[1], 0.01f);
 		assertNull(r.poll());
 	}
 

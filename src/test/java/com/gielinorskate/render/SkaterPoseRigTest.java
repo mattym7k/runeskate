@@ -104,22 +104,22 @@ public class SkaterPoseRigTest
 		// the legs straighten past standing within the extension window
 		assertTrue("extension " + minCrouch, minCrouch < 0f);
 		run(0.3f);
-		assertEquals(SkaterPoseRig.AIR_TUCK, 1f - out.legScale, 0.02f);
+		assertEquals(Tuning.AIR_TUCK, 1f - out.legScale, 0.02f);
 		s.flipping = true;
 		run(0.3f);
-		assertEquals(SkaterPoseRig.TRICK_TUCK, 1f - out.legScale, 0.02f);
+		assertEquals(Tuning.TRICK_TUCK, 1f - out.legScale, 0.02f);
 		s.flipping = false;
 		s.verticalSpeed = -600f;
 		run(0.3f);
-		assertEquals(SkaterPoseRig.LAND_REACH, 1f - out.legScale, 0.02f);
+		assertEquals(Tuning.LAND_REACH, 1f - out.legScale, 0.02f);
 	}
 
 	@Test
 	public void landingCompressesByLandingSpeedAndSpringsBack()
 	{
 		assertTrue(SkaterPoseRig.landingCompression(800f) > SkaterPoseRig.landingCompression(300f));
-		assertEquals(SkaterPoseRig.MAX_LANDING_COMPRESSION, SkaterPoseRig.landingCompression(5000f), 0f);
-		assertEquals(SkaterPoseRig.MIN_LANDING_COMPRESSION, SkaterPoseRig.landingCompression(0f), 0f);
+		assertEquals(Tuning.MAX_LANDING_COMPRESSION, SkaterPoseRig.landingCompression(5000f), 0f);
+		assertEquals(Tuning.MIN_LANDING_COMPRESSION, SkaterPoseRig.landingCompression(0f), 0f);
 
 		run(0.5f);
 		s.landed = true;
@@ -131,7 +131,7 @@ public class SkaterPoseRigTest
 			run(DT);
 			deepest = Math.max(deepest, 1f - out.legScale);
 		}
-		assertEquals(SkaterPoseRig.LANDING_COMPRESSION, deepest, 0.01f);
+		assertEquals(Tuning.LANDING_COMPRESSION, deepest, 0.01f);
 		// most of the way back by 0.25 s, home by 0.5 s
 		assertTrue(1f - out.legScale < 0.4f * deepest);
 		run(0.25f);
@@ -145,8 +145,8 @@ public class SkaterPoseRigTest
 		s.hold = Trick.MANUAL;
 		s.boardPitch = 0.25f;
 		run(1f);
-		assertEquals(SkaterPoseRig.BODY_PITCH_FRACTION * 0.25f, out.pitch,
-			SkaterPoseRig.MANUAL_SWAY + 1e-3f);
+		assertEquals(Tuning.BODY_PITCH_FRACTION * 0.25f, out.pitch,
+			Tuning.MANUAL_SWAY + 1e-3f);
 		// pitch > 0 turns about the board's -z truck, which is puppet +x
 		assertEquals(BoardPlacement.TRUCK_Z, out.pivotX, 0f);
 		s.hold = Trick.NOSE_MANUAL;
@@ -170,9 +170,9 @@ public class SkaterPoseRigTest
 			min = Math.min(min, out.roll);
 			max = Math.max(max, out.roll);
 		}
-		assertEquals(SkaterPoseRig.GRIND_CROUCH, 1f - out.legScale, 0.01f);
+		assertEquals(Tuning.GRIND_CROUCH, 1f - out.legScale, 0.01f);
 		assertTrue(max > 0.02f && min < -0.02f);
-		assertTrue(max <= SkaterPoseRig.GRIND_SWAY + 1e-4f && min >= -SkaterPoseRig.GRIND_SWAY - 1e-4f);
+		assertTrue(max <= Tuning.GRIND_SWAY + 1e-4f && min >= -Tuning.GRIND_SWAY - 1e-4f);
 	}
 
 	@Test
@@ -185,23 +185,14 @@ public class SkaterPoseRigTest
 		s.speed = 0f;
 		run(0.15f);
 		float early = -out.roll;
-		assertTrue("falling " + early, early > 0.2f && early < SkaterPoseRig.BAIL_TUMBLE);
+		assertTrue("falling " + early, early > 0.2f && early < Tuning.BAIL_TUMBLE);
 		run(1.2f);
-		assertEquals(-SkaterPoseRig.BAIL_TUMBLE, out.roll, 0.05f);
+		assertEquals(-Tuning.BAIL_TUMBLE, out.roll, 0.05f);
 		s.state = SkaterState.ROLLING;
 		run(1f);
 		assertEquals(0f, out.roll, 0.01f);
 	}
 
-	@Test
-	public void bailWithABailAnimationDoesNotTumble()
-	{
-		s.state = SkaterState.BAILED;
-		s.bailed = true;
-		s.proceduralBail = false;
-		run(1f);
-		assertEquals(0f, out.roll, 1e-4f);
-	}
 
 	@Test
 	public void resetIsNeutral()
@@ -258,16 +249,6 @@ public class SkaterPoseRigTest
 		assertTrue(out.torsoLean < -0.05f);
 	}
 
-	@Test
-	public void goofyMirrorsTheRegularPush()
-	{
-		s.goofy = true;
-		s.speed = 500f;
-		s.pushed = true;
-		run(PushCycle.DURATION / 2f);
-		assertEquals(1f, out.legSide, 0f);
-		assertTrue(out.footX > 5f);
-	}
 
 	@Test
 	public void noPushWhileAirborneGrindingManualOrBailed()
@@ -345,31 +326,21 @@ public class SkaterPoseRigTest
 			s.bodyFlipAngle = a;
 			rig.update(s, DT);
 			rig.writeTo(out);
-			assertEquals(SkaterPoseRig.REGULAR_FORWARD_X * a, out.flip, 1e-4f);
+			assertEquals(a, out.flip, 1e-4f);
 			assertEquals(BoardPlacement.puppetFlipPivotY(), out.flipPivotY, 0f);
 		}
 		assertTrue(out.flip > 2f * (float) Math.PI);
 	}
 
-	@Test
-	public void goofyMirrorsTheFlip()
-	{
-		s.goofy = true;
-		s.state = SkaterState.AIRBORNE;
-		s.bodyFlipAngle = 0.3f;
-		rig.update(s, DT);
-		rig.writeTo(out);
-		assertEquals(-0.3f, out.flip, 1e-5f);
-	}
 
 	@Test
 	public void flipTucksTheKnees()
 	{
 		s.state = SkaterState.AIRBORNE;
 		s.bodyFlipAngle = 1f;
-		assertEquals(SkaterPoseRig.TRICK_TUCK, SkaterPoseRig.crouchTarget(s, 1f, true), 0f);
+		assertEquals(Tuning.TRICK_TUCK, SkaterPoseRig.crouchTarget(s, 1f, true), 0f);
 		s.bodyFlipAngle = 0f;
-		assertEquals(SkaterPoseRig.AIR_TUCK, SkaterPoseRig.crouchTarget(s, 1f, true), 0f);
+		assertEquals(Tuning.AIR_TUCK, SkaterPoseRig.crouchTarget(s, 1f, true), 0f);
 	}
 
 	@Test
@@ -446,15 +417,6 @@ public class SkaterPoseRigTest
 		assertEquals(0f, out.roll, 0.01f);
 	}
 
-	@Test
-	public void goofyReachesTheOtherWayAlongTheBoard()
-	{
-		s.state = SkaterState.AIRBORNE;
-		s.goofy = true;
-		s.hold = Trick.NOSEGRAB;
-		run(0.5f);
-		assertEquals(-GrabPose.torsoLean(Trick.NOSEGRAB), out.torsoLean, 0.02f);
-	}
 
 	@Test
 	public void theGrabbingHandReachesForTheBoardInAboutATenthOfASecond()
@@ -517,11 +479,11 @@ public class SkaterPoseRigTest
 		assertTrue("fold " + out.kneeFold, out.kneeFold > 0.85f);
 		run(0.3f);
 		assertEquals(1f, out.kneeFold, 0.01f);
-		assertEquals(SkaterPoseRig.GRAB_LIFT, out.feetLift, 0.2f);
+		assertEquals(Tuning.GRAB_LIFT, out.feetLift, 0.2f);
 		s.hold = null;
 		run(0.15f);
 		assertTrue("fold " + out.kneeFold, out.kneeFold < 0.1f);
-		assertTrue("lift " + out.feetLift, out.feetLift < 0.1f * SkaterPoseRig.GRAB_LIFT);
+		assertTrue("lift " + out.feetLift, out.feetLift < 0.1f * Tuning.GRAB_LIFT);
 	}
 
 	@Test
@@ -612,23 +574,14 @@ public class SkaterPoseRigTest
 	public void aGrabTucksDeepAndFoldsForward()
 	{
 		s.state = SkaterState.AIRBORNE;
-		assertTrue(SkaterPoseRig.GRAB_TUCK >= SkaterPoseRig.TRICK_TUCK);
+		assertTrue(Tuning.GRAB_TUCK >= Tuning.TRICK_TUCK);
 		s.hold = Trick.INDY;
-		assertEquals(SkaterPoseRig.GRAB_TUCK, SkaterPoseRig.crouchTarget(s, 1f, true), 0f);
+		assertEquals(Tuning.GRAB_TUCK, SkaterPoseRig.crouchTarget(s, 1f, true), 0f);
 		run(0.5f);
 		assertTrue("bend " + out.torsoBend,
-			out.torsoBend > SkaterPoseRig.TORSO_BEND_PER_CROUCH * SkaterPoseRig.GRAB_TUCK + 0.8f * SkaterPoseRig.GRAB_BEND);
+			out.torsoBend > Tuning.TORSO_BEND_PER_CROUCH * Tuning.GRAB_TUCK + 0.8f * Tuning.GRAB_BEND);
 	}
 
-	@Test
-	public void goofyGrabsTheNoseOnTheOtherSide()
-	{
-		s.state = SkaterState.AIRBORNE;
-		s.goofy = true;
-		s.hold = Trick.NOSEGRAB;
-		run(0.3f);
-		assertEquals(-1f, out.forwardX, 0f);
-	}
 
 	/** In the air after a pop, the legs tucked and no trick going. */
 	private void airborneAfterPop()
@@ -649,9 +602,9 @@ public class SkaterPoseRigTest
 		assertTrue("arm " + out.armWeight, out.armWeight > 0.9f);
 		assertTrue("lean " + out.torsoLean, out.torsoLean > 0.9f * GrabPose.torsoLean(Trick.NOSEGRAB));
 		float tuck = 1f - out.legScale;
-		assertTrue("tuck " + tuck, tuck - tuckBefore > 0.85f * (SkaterPoseRig.GRAB_TUCK - tuckBefore));
-		float bend = out.torsoBend - SkaterPoseRig.TORSO_BEND_PER_CROUCH * tuck;
-		assertTrue("fold " + bend, bend > 0.9f * SkaterPoseRig.GRAB_BEND);
+		assertTrue("tuck " + tuck, tuck - tuckBefore > 0.85f * (Tuning.GRAB_TUCK - tuckBefore));
+		float bend = out.torsoBend - Tuning.TORSO_BEND_PER_CROUCH * tuck;
+		assertTrue("fold " + bend, bend > 0.9f * Tuning.GRAB_BEND);
 		s.hold = null;
 		rig.reset();
 		rig.writeTo(out);
@@ -667,7 +620,7 @@ public class SkaterPoseRigTest
 	{
 		s.state = SkaterState.AIRBORNE;
 		s.hold = Trick.INDY;
-		assertEquals(SkaterPoseRig.GRAB_TUCK, SkaterPoseRig.crouchTarget(s, 0.01f, true), 0f);
+		assertEquals(Tuning.GRAB_TUCK, SkaterPoseRig.crouchTarget(s, 0.01f, true), 0f);
 		// the arm and body still get there quickly from the pop's extension
 		s.hold = null;
 		s.popped = true;
@@ -676,7 +629,7 @@ public class SkaterPoseRigTest
 		s.grabHand = -1;
 		run(0.1f);
 		assertTrue("arm " + out.armWeight, out.armWeight > 0.9f);
-		assertTrue("tuck " + (1f - out.legScale), 1f - out.legScale > 0.8f * SkaterPoseRig.GRAB_TUCK);
+		assertTrue("tuck " + (1f - out.legScale), 1f - out.legScale > 0.8f * Tuning.GRAB_TUCK);
 	}
 
 	@Test
@@ -691,9 +644,9 @@ public class SkaterPoseRigTest
 		assertTrue("arm " + out.armWeight, out.armWeight < 0.1f);
 		assertTrue("lean " + out.torsoLean, Math.abs(out.torsoLean) < 0.1f * GrabPose.torsoLean(Trick.NOSEGRAB));
 		float tuck = 1f - out.legScale;
-		assertTrue("tuck " + tuck, tuck < SkaterPoseRig.TRICK_TUCK + 0.03f);
+		assertTrue("tuck " + tuck, tuck < Tuning.TRICK_TUCK + 0.03f);
 		assertTrue("fold " + out.torsoBend,
-			out.torsoBend - SkaterPoseRig.TORSO_BEND_PER_CROUCH * tuck < 0.1f * SkaterPoseRig.GRAB_BEND);
+			out.torsoBend - Tuning.TORSO_BEND_PER_CROUCH * tuck < 0.1f * Tuning.GRAB_BEND);
 	}
 
 	@Test

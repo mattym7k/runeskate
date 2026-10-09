@@ -92,7 +92,7 @@ public class CameraSteadinessTest
 	static Run ride(GridCollisionWorld w, float x, float y, float headingDeg, float speed, int input)
 	{
 		SkatePhysics p = new SkatePhysics(new SkateTuning(), w, x, y, (float) Math.toRadians(headingDeg));
-		p.setSpeed(speed);
+		p.setRollingSpeed(speed);
 		CameraRig rig = new CameraRig();
 		rig.reset(x, y, 0, p.getCameraHeading());
 		SkateInput in = new SkateInput();
@@ -255,7 +255,7 @@ public class CameraSteadinessTest
 		{
 			SkatePhysics p = new SkatePhysics(new SkateTuning(), fence(), 20 * T + 10, 21 * T - 60,
 				(float) Math.toRadians(ang));
-			p.setSpeed(600f);
+			p.setRollingSpeed(600f);
 			SkateInput in = new SkateInput();
 			in.gestures.add(new Gesture(Gesture.Direction.UP, false, 0f));
 			for (int i = 0; i < 40; i++)

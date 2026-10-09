@@ -9,7 +9,6 @@ import static org.junit.Assert.assertTrue;
 
 import com.gielinorskate.progression.ProfileStore;
 import com.google.gson.Gson;
-import java.security.SecureRandom;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
@@ -156,10 +155,6 @@ public class LeaderboardLogicTest
 			+ "{\"rank\":2,\"displayName\":\"Me\",\"score\":5000,\"updatedAt\":\"2026-10-05T11:00:00.000Z\"}],"
 			+ "\"you\":{\"rank\":2,\"displayName\":\"Me\",\"score\":5000,\"updatedAt\":\"2026-10-05T11:00:00.000Z\"}}";
 		LeaderboardPage p = LeaderboardPage.parse(new Gson(), json);
-		assertEquals("combo", p.category);
-		assertEquals("week", p.period);
-		assertEquals("2026-10-05", p.weekStart);
-		assertEquals(3, p.total);
 		assertEquals(2, p.entries.size());
 		assertEquals(90000, p.entries.get(0).score);
 		assertTrue(p.entries.get(1).sameAs(p.you));
@@ -215,7 +210,7 @@ public class LeaderboardLogicTest
 	public void secretIsMadeOncePerAccountAndIsUrlSafe()
 	{
 		MapStore store = new MapStore();
-		LeaderboardStore lb = new LeaderboardStore(store, new SecureRandom());
+		LeaderboardStore lb = new LeaderboardStore(store);
 		String s = lb.secret();
 		assertTrue(s.matches("^[A-Za-z0-9_-]{43}$"));
 		assertEquals(s, lb.secret());

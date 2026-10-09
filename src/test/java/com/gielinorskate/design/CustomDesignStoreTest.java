@@ -49,6 +49,13 @@ public class CustomDesignStoreTest
 		return img;
 	}
 
+	private static List<CustomDesignStore.Stored> loadAll(CustomDesignStore s)
+	{
+		List<CustomDesignStore.Stored> out = new ArrayList<>();
+		s.loadEach(out::add);
+		return out;
+	}
+
 	private static CustomDesign design(String id, long created)
 	{
 		return new CustomDesign(id, "My grip", DesignPart.GRIP, created, 2000, 1000,
@@ -64,7 +71,7 @@ public class CustomDesignStoreTest
 	public void savedDesignsReadBackTheSame() throws Exception
 	{
 		save("CUSTOM_0000000A", 5);
-		List<CustomDesignStore.Stored> all = store.loadAll();
+		List<CustomDesignStore.Stored> all = loadAll(store);
 		assertEquals(1, all.size());
 		CustomDesignStore.Stored s = all.get(0);
 		CustomDesign d = s.design;
@@ -90,8 +97,8 @@ public class CustomDesignStoreTest
 	public void renameKeepsTheImageAndColours() throws Exception
 	{
 		save("CUSTOM_0000000A", 5);
-		store.save(design("CUSTOM_0000000A", 5).named("Flames"), null, null, null);
-		CustomDesignStore.Stored s = store.loadAll().get(0);
+		store.save(design("CUSTOM_0000000A", 5).withName("Flames"), null, null, null);
+		CustomDesignStore.Stored s = loadAll(store).get(0);
 		assertEquals("Flames", s.design.name);
 		assertArrayEquals(new int[]{1, 2, 3, 4, 5, 6}, s.high);
 	}
@@ -102,11 +109,11 @@ public class CustomDesignStoreTest
 		save("CUSTOM_0000000B", 9);
 		save("CUSTOM_0000000A", 5);
 		save("CUSTOM_0000000C", 7);
-		List<CustomDesignStore.Stored> all = store.loadAll();
+		List<CustomDesignStore.Stored> all = loadAll(store);
 		assertEquals("CUSTOM_0000000A", all.get(0).design.id);
 		assertEquals("CUSTOM_0000000C", all.get(1).design.id);
 		store.delete("CUSTOM_0000000C");
-		assertEquals(2, store.loadAll().size());
+		assertEquals(2, loadAll(store).size());
 		assertFalse(Files.exists(dir.resolve("CUSTOM_0000000C.png")));
 	}
 
@@ -124,7 +131,7 @@ public class CustomDesignStoreTest
 			.getBytes(StandardCharsets.UTF_8));
 		Files.write(dir.resolve("notes.json"), "{}".getBytes(StandardCharsets.UTF_8));
 		Files.write(dir.resolve("CUSTOM_00000005.png"), new byte[]{1, 2, 3});
-		List<CustomDesignStore.Stored> all = store.loadAll();
+		List<CustomDesignStore.Stored> all = loadAll(store);
 		assertEquals(1, all.size());
 		assertEquals("CUSTOM_00000004", all.get(0).design.id);
 	}
@@ -135,7 +142,7 @@ public class CustomDesignStoreTest
 		save("CUSTOM_00000001", 1);
 		Files.write(dir.resolve("CUSTOM_00000001.high.rgb"), new byte[]{'R', 'S', 'K', 'C', 1});
 		Files.delete(dir.resolve("CUSTOM_00000001.low.rgb"));
-		CustomDesignStore.Stored s = store.loadAll().get(0);
+		CustomDesignStore.Stored s = loadAll(store).get(0);
 		assertNull(s.high);
 		assertNull(s.low);
 	}
@@ -153,9 +160,9 @@ public class CustomDesignStoreTest
 			good.replace("\"version\": 1", "\"version\": 99")})
 		{
 			save("CUSTOM_00000001", 1);
-			assertEquals(1, store.loadAll().size());
+			assertEquals(1, loadAll(store).size());
 			Files.write(dir.resolve("CUSTOM_00000001.json"), bad.getBytes(StandardCharsets.UTF_8));
-			assertTrue(bad, store.loadAll().isEmpty());
+			assertTrue(bad, loadAll(store).isEmpty());
 		}
 	}
 
@@ -207,7 +214,7 @@ public class CustomDesignStoreTest
 		{
 			save(String.format("CUSTOM_%08X", i), i);
 		}
-		List<CustomDesignStore.Stored> all = store.loadAll();
+		List<CustomDesignStore.Stored> all = loadAll(store);
 		assertEquals(CustomDesignRules.MAX_DESIGNS, all.size());
 		assertEquals("CUSTOM_00000000", all.get(0).design.id);
 	}
@@ -270,7 +277,7 @@ public class CustomDesignStoreTest
 		save("CUSTOM_0000000A", 5);
 		Files.write(dir.resolve("CUSTOM_0000000B.png.tmp"), new byte[]{1, 2});
 		Files.write(dir.resolve("CUSTOM_0000000A.json.tmp"), new byte[]{3});
-		assertEquals(1, store.loadAll().size());
+		assertEquals(1, loadAll(store).size());
 		assertFalse(Files.exists(dir.resolve("CUSTOM_0000000B.png.tmp")));
 		assertFalse(Files.exists(dir.resolve("CUSTOM_0000000A.json.tmp")));
 	}
@@ -279,6 +286,6 @@ public class CustomDesignStoreTest
 	public void aMissingFolderHasNoDesigns()
 	{
 		CustomDesignStore none = new CustomDesignStore(Filepath.Unchecked.getRooted(dir.resolve("nothing")));
-		assertTrue(none.loadAll().isEmpty());
+		assertTrue(loadAll(none).isEmpty());
 	}
 }

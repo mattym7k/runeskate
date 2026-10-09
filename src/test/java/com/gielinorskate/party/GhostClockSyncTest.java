@@ -102,7 +102,7 @@ public class GhostClockSyncTest
 		double sent = sync.unwrap(GhostTrajectory.timeMs(0.3f));
 		assertFalse(sync.observe((float) (OFFSET + 20.4), sent));
 		assertEquals(floor, sync.floor(), 1e-9);
-		sync.clear();
+		sync = new GhostClockSync();
 		assertFalse(sync.has());
 		assertTrue(sync.observe((float) (OFFSET + 20.4), sync.unwrap(GhostTrajectory.timeMs(0.3f))));
 	}

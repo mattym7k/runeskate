@@ -80,20 +80,7 @@ public class PartyShareSimulationTest
 				}
 			}, 1000);
 			this.designs = new PartyDesigns(executor::add, clientThread::add, members::contains,
-				PartyShareSimulationTest::bake, new PartyDesigns.Colours()
-			{
-				@Override
-				public void register(String designId, int[] low)
-				{
-					colours.put(designId, low);
-				}
-
-				@Override
-				public void unregister(String designId)
-				{
-					colours.remove(designId);
-				}
-			}, () -> this.hub.relook());
+				PartyShareSimulationTest::bake, colours::put, colours::remove, () -> this.hub.relook());
 			hub.setMemberDesigns(designs);
 			hub.setDesignSharing(true);
 			// the receiver has opted in to seeing party members' designs (off by default)
@@ -171,7 +158,7 @@ public class PartyShareSimulationTest
 		}
 		else if (m instanceof SkateGhostStop)
 		{
-			to.hub.onRemoteStop(sender);
+			to.hub.onMemberLeft(sender);
 		}
 		else if (m instanceof SkateDesignOffer)
 		{
@@ -207,9 +194,9 @@ public class PartyShareSimulationTest
 			p));
 	}
 
-	private static GhostFrame still()
+	private static GhostState still()
 	{
-		return new GhostFrame(420, 0, 6400f, 6400f, 0f, 0f, 0f, 0f, 0f, SkaterState.ROLLING, null, null, 0f);
+		return GhostFeed.frame(420, 0, 6400f, 6400f, 0f, 0f, 0f, 0f, 0f, SkaterState.ROLLING, null, null, 0f);
 	}
 
 	/** One frame on both clients: skate frames (both skating, standing still), the duel tick's flush, callbacks. */

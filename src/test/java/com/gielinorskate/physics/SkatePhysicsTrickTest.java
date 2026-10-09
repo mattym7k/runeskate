@@ -26,7 +26,7 @@ public class SkatePhysicsTrickTest
 	private SkatePhysics rolling(float speed)
 	{
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.flat(), 0, 0, 0);
-		p.setSpeed(speed);
+		p.setRollingSpeed(speed);
 		return p;
 	}
 

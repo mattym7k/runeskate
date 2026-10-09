@@ -8,6 +8,7 @@ import com.gielinorskate.scoring.ComboScorer;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import net.runelite.api.gameval.SpotanimID;
 import org.junit.Test;
 
 public class EffectPickerTest
@@ -21,14 +22,14 @@ public class EffectPickerTest
 		EffectPicker picker = new EffectPicker();
 		List<SkateEvent> land = Arrays.asList(SkateEvent.LAND);
 		assertTrue(picker.pick(land, false, 0.3f, null, DT).isEmpty());
-		assertEquals(Arrays.asList(EffectPicker.LANDING_PUFF), picker.pick(land, false, 0.5f, null, DT));
+		assertEquals(Arrays.asList(SpotanimID.EMOTE_DUSTSTAMP_SPOT), picker.pick(land, false, 0.5f, null, DT));
 	}
 
 	@Test
 	public void sparksOnContactThenEvery150ms()
 	{
 		EffectPicker picker = new EffectPicker();
-		assertEquals(Arrays.asList(EffectPicker.GRIND_SPARKS), picker.pick(NONE, true, 0f, null, DT));
+		assertEquals(Arrays.asList(SpotanimID.WARGUILD_SPARKS_SPOTANIM), picker.pick(NONE, true, 0f, null, DT));
 		int bursts = 0;
 		// 0.3 s more (float steps): two more bursts
 		for (int i = 0; i < 16; i++)
@@ -43,10 +44,10 @@ public class EffectPickerTest
 	public void bailSmokeAndBigComboConfetti()
 	{
 		EffectPicker picker = new EffectPicker();
-		assertEquals(Arrays.asList(EffectPicker.BAIL_SMOKE), picker.pick(Arrays.asList(SkateEvent.BAIL), false, 0f,
+		assertEquals(Arrays.asList(SpotanimID.SMOKEPUFF_LARGE), picker.pick(Arrays.asList(SkateEvent.BAIL), false, 0f,
 			null, DT));
 		assertTrue(picker.pick(NONE, false, 0f, ComboScorer.Result.landed(249_999), DT).isEmpty());
-		assertEquals(Arrays.asList(EffectPicker.BIG_COMBO_CONFETTI),
+		assertEquals(Arrays.asList(SpotanimID.FX_EMOTE_PARTY01_ACTIVE),
 			picker.pick(NONE, false, 0f, ComboScorer.Result.landed(250_000), DT));
 		assertTrue("a lost combo drops no pet", picker.pick(NONE, false, 0f, ComboScorer.Result.bailed(300_000), DT)
 			.isEmpty());

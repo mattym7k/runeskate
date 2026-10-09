@@ -50,10 +50,10 @@ public class GrabPoseTest
 			{
 				continue;
 			}
-			assertEquals(GrabPose.TWEAK * GrabPose.torsoLean(t), GrabPose.torsoLean(tw), 1e-6f);
-			assertEquals(GrabPose.TWEAK * GrabPose.bodyRoll(t), GrabPose.bodyRoll(tw), 1e-6f);
-			assertEquals(GrabPose.TWEAK * GrabPose.boardPitch(t), GrabPose.boardPitch(tw), 1e-6f);
-			assertEquals(GrabPose.TWEAK * GrabPose.boardRoll(t), GrabPose.boardRoll(tw), 1e-6f);
+			assertEquals(Tuning.TWEAK * GrabPose.torsoLean(t), GrabPose.torsoLean(tw), 1e-6f);
+			assertEquals(Tuning.TWEAK * GrabPose.bodyRoll(t), GrabPose.bodyRoll(tw), 1e-6f);
+			assertEquals(Tuning.TWEAK * GrabPose.boardPitch(t), GrabPose.boardPitch(tw), 1e-6f);
+			assertEquals(Tuning.TWEAK * GrabPose.boardRoll(t), GrabPose.boardRoll(tw), 1e-6f);
 		}
 	}
 
@@ -84,13 +84,14 @@ public class GrabPoseTest
 		assertTrue(GrabPose.grabAlong(Trick.NOSEGRAB) > 35f);
 		assertTrue(GrabPose.grabAlong(Trick.TAILGRAB) < -35f);
 		assertTrue(GrabPose.grabAlong(Trick.CRAIL) > 35f);
+		// toe- and heel-edge grabs hold the deck's edge, 13 units (half its width) either side of the centre line
 		for (Trick toe : new Trick[]{Trick.INDY, Trick.MUTE, Trick.JAPAN, Trick.TWEAKED_INDY})
 		{
-			assertEquals(toe.toString(), -GrabPose.EDGE, GrabPose.grabAcross(toe), 0f);
+			assertEquals(toe.toString(), -13f, GrabPose.grabAcross(toe), 0f);
 		}
 		for (Trick heel : new Trick[]{Trick.MELON, Trick.METHOD, Trick.STALEFISH})
 		{
-			assertEquals(heel.toString(), GrabPose.EDGE, GrabPose.grabAcross(heel), 0f);
+			assertEquals(heel.toString(), 13f, GrabPose.grabAcross(heel), 0f);
 		}
 		// a tweak holds the same spot as its grab
 		assertEquals(GrabPose.grabAlong(Trick.TAILGRAB), GrabPose.grabAlong(Trick.TAILBONE), 0f);
@@ -168,9 +169,9 @@ public class GrabPoseTest
 			}
 			float[] flat = new float[3];
 			float[] tweaked = new float[3];
-			GrabReach.target(GrabPose.grabAlong(t), GrabPose.grabAcross(t), GrabPose.grabBoardY(t), 1f, 0f, 0f, 0f,
+			BoardPlacement.grabTarget(GrabPose.grabAlong(t), GrabPose.grabAcross(t), GrabPose.grabBoardY(t), 0f, 0f, 0f,
 				flat);
-			GrabReach.target(GrabPose.grabAlong(t), GrabPose.grabAcross(t), GrabPose.grabBoardY(t), 1f, 0f, pitch,
+			BoardPlacement.grabTarget(GrabPose.grabAlong(t), GrabPose.grabAcross(t), GrabPose.grabBoardY(t), 0f, pitch,
 				BoardPlacement.deckLift(pitch), tweaked);
 			// y down: the grabbed spot comes up toward the body
 			assertTrue(t + ": spot y " + tweaked[1] + " vs flat " + flat[1], tweaked[1] < flat[1] - 1f);

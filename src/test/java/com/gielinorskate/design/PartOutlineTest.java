@@ -24,18 +24,18 @@ public class PartOutlineTest
 		return BakedBoardGeometry.Mesh.of(1, v, f, rgb, uv);
 	}
 
-	private static final DesignLayout.Part LAYOUT = new DesignLayout.Part(DesignPart.DECK, 100, 200, 0, 0);
+	private static final DesignLayout.Part LAYOUT = new DesignLayout.Part(100, 200, 0, 0);
 
 	@Test
 	public void outlineIsTheEdgesNoOtherFaceShares()
 	{
 		PartOutline o = PartOutline.of(square(), LAYOUT, false);
 		// the shared copy is one set of faces; the diagonal is inside
-		assertEquals(2 * 6, o.faces().length);
-		assertEquals(4 * 4, o.edges().length);
-		for (int i = 0; i < o.edges().length; i += 4)
+		assertEquals(2 * 6, o.faces.length);
+		assertEquals(4 * 4, o.edges.length);
+		for (int i = 0; i < o.edges.length; i += 4)
 		{
-			float[] e = o.edges();
+			float[] e = o.edges;
 			boolean vertical = e[i] == e[i + 2];
 			boolean horizontal = e[i + 1] == e[i + 3];
 			assertTrue("an outline edge is a side of the square", vertical ^ horizontal);
@@ -71,11 +71,11 @@ public class PartOutlineTest
 	public void boltsTakeTheUvOfTheFaceOverThem()
 	{
 		PartOutline o = PartOutline.of(square(), LAYOUT, true);
-		assertEquals(8, o.bolts().size());
+		assertEquals(8, o.bolts.size());
 		// x -3.16 of -10..10 maps to u 0.25 + 0.5 * 6.84 / 20; z 33.24 of -40..40 to v 0.25 + 0.5 * 73.24 / 80
 		double u = 0.25 + 0.5 * (10 - 3.16) / 20;
 		double v = 0.25 + 0.5 * (40 + 33.24) / 80;
-		double[] b = o.bolts().get(6);
+		double[] b = o.bolts.get(6);
 		assertEquals(u * 100, b[0], 1e-3);
 		assertEquals((1 - v) * 200, b[1], 1e-3);
 	}
@@ -90,12 +90,12 @@ public class PartOutlineTest
 			PartOutline o = PartOutline.of(high[part.index], layout, part != DesignPart.WHEELS);
 			double[] b = o.bounds();
 			assertTrue(part + " bounds", b[0] >= 0 && b[1] >= 0 && b[2] <= layout.width && b[3] <= layout.height);
-			assertTrue(part + " outline", o.edges().length > 40);
+			assertTrue(part + " outline", o.edges.length > 40);
 			if (part != DesignPart.WHEELS)
 			{
-				assertEquals(part + " bolts", 8, o.bolts().size());
+				assertEquals(part + " bolts", 8, o.bolts.size());
 				boolean[] m = o.mask();
-				for (double[] bolt : o.bolts())
+				for (double[] bolt : o.bolts)
 				{
 					assertTrue(part + " bolt on the part", m[(int) bolt[1] * layout.width + (int) bolt[0]]);
 				}

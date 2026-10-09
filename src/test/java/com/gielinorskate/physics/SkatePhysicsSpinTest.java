@@ -21,7 +21,7 @@ public class SkatePhysicsSpinTest
 	private SkatePhysics rolling(float speed)
 	{
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.flat(), 0, 0, 0);
-		p.setSpeed(speed);
+		p.setRollingSpeed(speed);
 		return p;
 	}
 
@@ -107,14 +107,14 @@ public class SkatePhysicsSpinTest
 		SkatePhysics p = rolling(600);
 		SkateInput in = new SkateInput();
 		chargedPop(p, in, new Gesture(Direction.UP, false, 0f));
-		assertEquals(0f, p.getAirSpin(), 1e-6f);
+		assertEquals(0f, p.airSpin, 1e-6f);
 		in.steer = -1f;
 		for (int i = 0; i < 10; i++)
 		{
 			p.step(DT, in);
 		}
 		// 10 steps of 7 * 0.02 = 0.14 rad, counter-clockwise
-		assertEquals(-1.4f, p.getAirSpin(), 1e-3f);
+		assertEquals(-1.4f, p.airSpin, 1e-3f);
 	}
 
 	@Test
@@ -128,7 +128,7 @@ public class SkatePhysicsSpinTest
 		{
 			p.step(DT, in);
 		}
-		assertEquals(0f, p.getAirSpin(), 1e-6f);
+		assertEquals(0f, p.airSpin, 1e-6f);
 	}
 
 	@Test
@@ -136,7 +136,7 @@ public class SkatePhysicsSpinTest
 	{
 		// rolling south off a 300-high platform: sqrt(2 * 300 / 2000) = 0.55 s of fall, enough for a 180
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.platformAtY(10f, 300f), 0, 20, (float) Math.PI);
-		p.setSpeed(600);
+		p.setRollingSpeed(600);
 		SkateInput in = new SkateInput();
 		for (int i = 0; i < 20 && p.getState() != SkaterState.AIRBORNE; i++)
 		{

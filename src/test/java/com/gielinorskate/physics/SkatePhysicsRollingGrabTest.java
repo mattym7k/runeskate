@@ -25,7 +25,7 @@ public class SkatePhysicsRollingGrabTest
 	private SkatePhysics rolling()
 	{
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.flat(), 0, 0, 0);
-		p.setSpeed(400);
+		p.setRollingSpeed(400);
 		return p;
 	}
 

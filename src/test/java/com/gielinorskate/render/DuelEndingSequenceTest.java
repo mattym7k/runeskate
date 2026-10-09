@@ -137,7 +137,7 @@ public class DuelEndingSequenceTest
 			assertTrue(d >= last);
 			last = d;
 		}
-		assertEquals(SnappedBoard.SINK_DEPTH, SnappedBoard.sinkDepth(100f), 1e-6f);
+		assertEquals(Tuning.SINK_DEPTH, SnappedBoard.sinkDepth(100f), 1e-6f);
 		assertEquals(0f, SnappedBoard.sinkDepth(Float.NaN), 0f);
 	}
 }

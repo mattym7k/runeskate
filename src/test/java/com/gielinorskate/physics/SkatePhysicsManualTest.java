@@ -23,7 +23,7 @@ public class SkatePhysicsManualTest
 	private SkatePhysics rolling(float speed)
 	{
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.flat(), 0, 0, 0);
-		p.setSpeed(speed);
+		p.setRollingSpeed(speed);
 		return p;
 	}
 
@@ -242,7 +242,7 @@ public class SkatePhysicsManualTest
 		// at 150; 3-unit bumps every 126 units swing it by about +-16 (slope 0.15 * 800 = 120 u/s^2 over a
 		// 0.84 s bump), back and forth across 150
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.bumpyDownhillNorth(0.057f, 3f, 20f), 0, 0, 0);
-		p.setSpeed(155);
+		p.setRollingSpeed(155);
 		SkateInput in = new SkateInput();
 		in.manualHeld = true;
 		int starts = 0;

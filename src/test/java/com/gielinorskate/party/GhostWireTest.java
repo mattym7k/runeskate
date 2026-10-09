@@ -41,7 +41,9 @@ public class GhostWireTest
 		assertEquals(32, r.unsigned());
 		assertEquals(262_143, r.fixed(3));
 		assertTrue(r.ok());
-		assertFalse(r.more());
+		// nothing is left: reading on fails
+		r.fixed(1);
+		assertFalse(r.ok());
 
 		StringBuilder one = new StringBuilder();
 		GhostWire.putSigned(one, -16);

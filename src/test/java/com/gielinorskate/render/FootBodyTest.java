@@ -87,14 +87,14 @@ public class FootBodyTest
 		s.state = SkaterState.AIRBORNE;
 		s.onFoot = true;
 		s.verticalSpeed = 100f;
-		assertEquals(SkaterPoseRig.FOOT_JUMP_TUCK, SkaterPoseRig.crouchTarget(s, 0.3f, true), 0f);
-		assertEquals(SkaterPoseRig.FOOT_FALL_TUCK, SkaterPoseRig.crouchTarget(s, 0.3f, false), 0f);
+		assertEquals(Tuning.FOOT_JUMP_TUCK, SkaterPoseRig.crouchTarget(s, 0.3f, true), 0f);
+		assertEquals(Tuning.FOOT_FALL_TUCK, SkaterPoseRig.crouchTarget(s, 0.3f, false), 0f);
 		// straight legs just after take-off, reaching for the ground when falling fast
-		assertEquals(SkaterPoseRig.POP_EXTEND, SkaterPoseRig.crouchTarget(s, 0.05f, true), 0f);
-		s.verticalSpeed = -SkaterPoseRig.LAND_REACH_SPEED - 1f;
-		assertEquals(SkaterPoseRig.LAND_REACH, SkaterPoseRig.crouchTarget(s, 0.3f, true), 0f);
-		assertTrue(SkaterPoseRig.FOOT_JUMP_TUCK < SkaterPoseRig.TRICK_TUCK);
-		assertTrue(SkaterPoseRig.FOOT_FALL_TUCK < SkaterPoseRig.FOOT_JUMP_TUCK);
+		assertEquals(Tuning.POP_EXTEND, SkaterPoseRig.crouchTarget(s, 0.05f, true), 0f);
+		s.verticalSpeed = -Tuning.LAND_REACH_SPEED - 1f;
+		assertEquals(Tuning.LAND_REACH, SkaterPoseRig.crouchTarget(s, 0.3f, true), 0f);
+		assertTrue(Tuning.FOOT_JUMP_TUCK < Tuning.TRICK_TUCK);
+		assertTrue(Tuning.FOOT_FALL_TUCK < Tuning.FOOT_JUMP_TUCK);
 	}
 
 	@Test

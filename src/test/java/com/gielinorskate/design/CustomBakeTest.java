@@ -102,7 +102,7 @@ public class CustomBakeTest
 		// a 2x2 image: red, green / blue, white, spread over a 100x100 layout
 		int[] px = {0xFFFF0000, 0xFF00FF00, 0xFF0000FF, 0xFFFFFFFF};
 		CustomBake.Source src = new CustomBake.Source(px, 2, 2, 0);
-		DesignLayout.Part layout = new DesignLayout.Part(DesignPart.DECK, 100, 100, 0, 0);
+		DesignLayout.Part layout = new DesignLayout.Part(100, 100, 0, 0);
 		ImagePlacement p = new ImagePlacement(2, 2, 50, 50, 50, 0, false);
 		int[] out = CustomBake.bake(mesh, layout, p, src, true);
 		// v up: v 0.75 is the top row

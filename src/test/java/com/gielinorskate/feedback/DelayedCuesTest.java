@@ -30,11 +30,11 @@ public class DelayedCuesTest
 	{
 		DelayedCues cues = new DelayedCues();
 		cues.goalComplete(5f);
+		// at least the throttle gap after the landing's own chime
+		assertTrue(cues.due(5f + SkateSounds.MIN_GAP_SECONDS).isEmpty());
 		assertTrue(cues.due(5.2f).isEmpty());
 		List<SoundPicker.Cue> due = cues.due(5.5f);
 		assertEquals(SoundPicker.COMBO_LANDED, due.get(0).id);
-		// at least the throttle gap after the landing's own chime
-		assertTrue(DelayedCues.GOAL_CHIME_DELAY >= SoundThrottle.MIN_GAP_SECONDS);
 	}
 
 	@Test

@@ -37,7 +37,7 @@ public class SkatePhysicsComfortTest
 		// 1500 head-on would bail on any wall (1500 > wallBailSpeed 1100); the edge of the loaded area is no
 		// real wall, so it stops the skater instead
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.edgeAtY(200), 0, 0, 0f);
-		p.setSpeed(1500f);
+		p.setRollingSpeed(1500f);
 		List<SkateEvent> events = run(p, new SkateInput(), 0.4f);
 		assertFalse(events.contains(SkateEvent.BAIL));
 		assertEquals(SkaterState.ROLLING, p.getState());
@@ -48,7 +48,7 @@ public class SkatePhysicsComfortTest
 	public void theSameHitOnAnOrdinaryWallStillBails()
 	{
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.wallAtY(200, Float.POSITIVE_INFINITY), 0, 0, 0f);
-		p.setSpeed(1500f);
+		p.setRollingSpeed(1500f);
 		assertTrue(run(p, new SkateInput(), 0.4f).contains(SkateEvent.BAIL));
 	}
 
@@ -56,7 +56,7 @@ public class SkatePhysicsComfortTest
 	public void flyingIntoTheLoadedAreaEdgeDoesNotBail()
 	{
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.edgeAtY(300), 0, 0, 0f);
-		p.setSpeed(1500f);
+		p.setRollingSpeed(1500f);
 		SkateInput in = new SkateInput();
 		in.gestures.add(new Gesture(Gesture.Direction.UP, false, 0f));
 		List<SkateEvent> events = run(p, in, 1.2f);
@@ -69,7 +69,7 @@ public class SkatePhysicsComfortTest
 	{
 		// 45 deg at 1000: impact 1000 * cos 45 = 707 > wallStumbleSpeed 600
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.wallAtY(100, 300), 0, 95, (float) Math.toRadians(45));
-		p.setSpeed(1000f);
+		p.setRollingSpeed(1000f);
 		List<SkateEvent> events = run(p, new SkateInput(), 0.1f);
 		assertEquals(1, events.stream().filter(e -> e == SkateEvent.STUMBLE).count());
 		assertFalse(events.contains(SkateEvent.BAIL));
@@ -80,7 +80,7 @@ public class SkatePhysicsComfortTest
 	{
 		// 70 deg at 1000: impact 1000 * cos 70 = 342 < 600
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.wallAtY(100, 300), 0, 95, (float) Math.toRadians(70));
-		p.setSpeed(1000f);
+		p.setRollingSpeed(1000f);
 		assertFalse(run(p, new SkateInput(), 0.1f).contains(SkateEvent.STUMBLE));
 	}
 
@@ -90,7 +90,7 @@ public class SkatePhysicsComfortTest
 		// 20 deg at 1500: 1500 * cos 20 = 1410 > 1100 within 30 deg of head-on: a bail. Facing straight away
 		// (180) swung the camera 160 degrees; along the wall to the east (90) it turns only 70.
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.wallAtY(100, 300), 0, 50, (float) Math.toRadians(20));
-		p.setSpeed(1500f);
+		p.setRollingSpeed(1500f);
 		run(p, new SkateInput(), 0.2f);
 		assertEquals(SkaterState.BAILED, p.getState());
 		List<SkateEvent> events = run(p, new SkateInput(), t.bailDuration + t.bailAutoReset + 0.1f);
@@ -110,7 +110,7 @@ public class SkatePhysicsComfortTest
 	public void aWallBailFromTheLeftRecoversToTheWest()
 	{
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.wallAtY(100, 300), 0, 50, (float) Math.toRadians(-20));
-		p.setSpeed(1500f);
+		p.setRollingSpeed(1500f);
 		run(p, new SkateInput(), 0.2f);
 		run(p, new SkateInput(), t.bailDuration + t.bailAutoReset + 0.1f);
 		assertEquals(-90f, deg(p.getHeading()), 0.01f);
@@ -120,7 +120,7 @@ public class SkatePhysicsComfortTest
 	public void rWhileRollingSlowlyStandsTheSkaterStill()
 	{
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.flat(), 0, 0, 0f);
-		p.setSpeed(100f);
+		p.setRollingSpeed(100f);
 		SkateInput in = new SkateInput();
 		in.resetRequested = true;
 		p.step(DT, in);
@@ -133,7 +133,7 @@ public class SkatePhysicsComfortTest
 	public void rWhileRollingFastDoesNothing()
 	{
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.flat(), 0, 0, 0f);
-		p.setSpeed(600f);
+		p.setRollingSpeed(600f);
 		SkateInput in = new SkateInput();
 		in.resetRequested = true;
 		p.step(DT, in);

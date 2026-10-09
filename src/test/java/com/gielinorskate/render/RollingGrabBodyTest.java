@@ -58,7 +58,7 @@ public class RollingGrabBodyTest
 	private static float[] target(BodyPose p)
 	{
 		float[] t = new float[3];
-		GrabReach.target(p.grabAlong, p.grabAcross, p.grabBoardY, p.forwardX, p.boardRoll, p.boardPitch,
+		BoardPlacement.grabTarget(p.grabAlong, p.grabAcross, p.grabBoardY, p.boardRoll, p.boardPitch,
 			p.deckLift - p.boardLift, t);
 		return t;
 	}
@@ -202,7 +202,7 @@ public class RollingGrabBodyTest
 			rig.update(s, DT);
 		}
 		BodyPose last = drawn(rig);
-		assertEquals(SkaterPoseRig.GRAB_LIFT, last.feetLift, 0.5f);
+		assertEquals(Tuning.GRAB_LIFT, last.feetLift, 0.5f);
 		// touchdown: the physics' air grab is released and the same grab carries on as the rolling grab
 		s.state = SkaterState.ROLLING;
 		s.landed = true;

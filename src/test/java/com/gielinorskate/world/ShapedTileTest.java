@@ -18,7 +18,7 @@ public class ShapedTileTest
 		GridCollisionWorld w = new GridCollisionWorld(10);
 		// a bush 150 tall flags its tile as blocked whole; its box is ridden through by name
 		w.setTile(5, 5, GridCollisionWorld.FULL, 150f);
-		w.addObjectBlocker(5.5f * T, 5.5f * T, new float[]{-40, 40, -40, 40}, 0, 150f, true);
+		w.addObjectBlocker(5.5f * T, 5.5f * T, new float[]{-40, 40, -40, 40}, 0, 150f, true, true);
 		return w;
 	}
 
@@ -34,11 +34,10 @@ public class ShapedTileTest
 	public void markingTheTileModelledShapesItSoThePlantIsRiddenThrough()
 	{
 		GridCollisionWorld w = plantTile();
-		boolean[][] shapeable = new boolean[10][10];
-		boolean[][] modelled = new boolean[10][10];
-		shapeable[5][5] = true;
-		assertTrue(SceneCollisionBuilder.markModelled(w, shapeable, modelled, 5, 5, 5, 5));
-		assertTrue(modelled[5][5]);
+		SceneCollisionBuilder b = new SceneCollisionBuilder(null, w, true);
+		b.shapeable[5][5] = true;
+		assertTrue(b.shapeTiles(5, 5, 5, 5, true));
+		assertTrue(b.modelled[5][5]);
 		assertEquals(Float.NEGATIVE_INFINITY, w.blockerTop(4.9f * T, 5.5f * T, 5.5f * T, 5.5f * T), 0f);
 		assertEquals("no platform rise either", 0f, w.groundHeight(5.5f * T, 5.5f * T), 1e-3f);
 	}
@@ -48,10 +47,10 @@ public class ShapedTileTest
 	{
 		GridCollisionWorld w = new GridCollisionWorld(10);
 		w.setTile(5, 5, GridCollisionWorld.FULL, 300f);
-		w.addObjectBlocker(5.5f * T, 5.5f * T, new float[]{-20, 20, -20, 20}, 0, 300f, false);
-		boolean[][] shapeable = new boolean[10][10];
-		shapeable[5][5] = true;
-		SceneCollisionBuilder.markModelled(w, shapeable, new boolean[10][10], 5, 5, 5, 5);
+		w.addObjectBlocker(5.5f * T, 5.5f * T, new float[]{-20, 20, -20, 20}, 0, 300f, false, true);
+		SceneCollisionBuilder b = new SceneCollisionBuilder(null, w, true);
+		b.shapeable[5][5] = true;
+		b.shapeTiles(5, 5, 5, 5, true);
 		// the tile's edge is free, the rock in the middle is not
 		assertEquals(Float.NEGATIVE_INFINITY, w.blockerTop(4.9f * T, 5.1f * T, 5.1f * T, 5.1f * T), 0f);
 		assertEquals(300f, w.blockerTop(5.5f * T - 40, 5.5f * T, 5.5f * T - 25, 5.5f * T), 1e-3f);

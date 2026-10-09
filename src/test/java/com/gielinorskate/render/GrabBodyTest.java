@@ -55,7 +55,7 @@ public class GrabBodyTest
 	private static float[] target(BodyPose p)
 	{
 		float[] t = new float[3];
-		GrabReach.target(p.grabAlong, p.grabAcross, p.grabBoardY, p.forwardX, p.boardRoll, p.boardPitch,
+		BoardPlacement.grabTarget(p.grabAlong, p.grabAcross, p.grabBoardY, p.boardRoll, p.boardPitch,
 			p.deckLift - p.boardLift, t);
 		return t;
 	}
@@ -145,7 +145,7 @@ public class GrabBodyTest
 		for (Trick grab : GRABS)
 		{
 			BodyPose p = held(grab, 0);
-			assertEquals(grab + " lift", SkaterPoseRig.GRAB_LIFT, p.boardLift, 1f);
+			assertEquals(grab + " lift", Tuning.GRAB_LIFT, p.boardLift, 1f);
 			Humanoid rest = new Humanoid();
 			Humanoid b = deformed(p);
 			// the middle of the deck top as the board is drawn (its tweak, the lift), in the puppet's space: board
@@ -282,7 +282,7 @@ public class GrabBodyTest
 				}
 			}
 			int lift = BoardPlacement.grabLift(v, false);
-			assertTrue(v + ": lift " + lift, lift >= 0 && lift <= BoardPlacement.MAX_GRAB_LIFT);
+			assertTrue(v + ": lift " + lift, lift >= 0 && lift <= Tuning.MAX_GRAB_LIFT);
 		}
 	}
 }

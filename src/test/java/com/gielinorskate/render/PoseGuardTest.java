@@ -20,7 +20,7 @@ public class PoseGuardTest
 	{
 		PoseGuard g = new PoseGuard();
 		boolean revert = false;
-		for (int i = 0; i < PoseGuard.MISSING_FRAMES_BEFORE_REVERT; i++)
+		for (int i = 0; i < Tuning.MISSING_FRAMES_BEFORE_REVERT; i++)
 		{
 			revert = g.frame(false);
 		}

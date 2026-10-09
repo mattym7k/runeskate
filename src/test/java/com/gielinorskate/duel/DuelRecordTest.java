@@ -41,32 +41,32 @@ public class DuelRecordTest
 	public void winsAndLossesAreSavedPerAccount()
 	{
 		record.load();
-		record.record(DuelStateMachine.Outcome.WIN);
-		record.record(DuelStateMachine.Outcome.WIN);
-		record.record(DuelStateMachine.Outcome.LOSS);
-		assertEquals(2, record.wins());
-		assertEquals(1, record.losses());
+		record.add(DuelStateMachine.Outcome.WIN, 1);
+		record.add(DuelStateMachine.Outcome.WIN, 1);
+		record.add(DuelStateMachine.Outcome.LOSS, 1);
+		assertEquals(2, record.getWins());
+		assertEquals(1, record.getLosses());
 		assertEquals("2", store.values.get("acc1/" + DuelRecord.WINS_KEY));
 		assertEquals("1", store.values.get("acc1/" + DuelRecord.LOSSES_KEY));
 
 		store.profile = "acc2";
 		record.load();
-		assertEquals(0, record.wins());
-		record.record(DuelStateMachine.Outcome.LOSS);
+		assertEquals(0, record.getWins());
+		record.add(DuelStateMachine.Outcome.LOSS, 1);
 		store.profile = "acc1";
 		record.load();
-		assertEquals(2, record.wins());
-		assertEquals(1, record.losses());
+		assertEquals(2, record.getWins());
+		assertEquals(1, record.getLosses());
 	}
 
 	@Test
 	public void drawsAndCancelsAreNotCounted()
 	{
 		record.load();
-		record.record(DuelStateMachine.Outcome.DRAW);
-		record.record(DuelStateMachine.Outcome.CANCELLED);
-		assertEquals(0, record.wins());
-		assertEquals(0, record.losses());
+		record.add(DuelStateMachine.Outcome.DRAW, 1);
+		record.add(DuelStateMachine.Outcome.CANCELLED, 1);
+		assertEquals(0, record.getWins());
+		assertEquals(0, record.getLosses());
 		assertTrue(store.values.isEmpty());
 	}
 
@@ -75,7 +75,7 @@ public class DuelRecordTest
 	{
 		record.load();
 		store.profile = "acc2";
-		record.record(DuelStateMachine.Outcome.WIN);
+		record.add(DuelStateMachine.Outcome.WIN, 1);
 		assertEquals("1", store.values.get("acc2/" + DuelRecord.WINS_KEY));
 		assertEquals(null, store.values.get("acc1/" + DuelRecord.WINS_KEY));
 	}
@@ -85,10 +85,10 @@ public class DuelRecordTest
 	{
 		store.values.put("acc1/" + DuelRecord.WINS_KEY, "lots");
 		record.load();
-		assertEquals(0, record.wins());
+		assertEquals(0, record.getWins());
 		store.profile = null;
 		record.load();
-		record.record(DuelStateMachine.Outcome.WIN);
+		record.add(DuelStateMachine.Outcome.WIN, 1);
 		assertFalse(store.values.containsKey("null/" + DuelRecord.WINS_KEY));
 	}
 
@@ -104,13 +104,13 @@ public class DuelRecordTest
 	public void aVoidedLossIsTakenBack()
 	{
 		record.load();
-		record.record(DuelStateMachine.Outcome.LOSS);
-		record.record(DuelStateMachine.Outcome.LOSS);
-		record.unrecord(DuelStateMachine.Outcome.LOSS);
-		assertEquals(1, record.losses());
+		record.add(DuelStateMachine.Outcome.LOSS, 1);
+		record.add(DuelStateMachine.Outcome.LOSS, 1);
+		record.add(DuelStateMachine.Outcome.LOSS, -1);
+		assertEquals(1, record.getLosses());
 		assertEquals("1", store.values.get("acc1/" + DuelRecord.LOSSES_KEY));
-		record.unrecord(DuelStateMachine.Outcome.LOSS);
-		record.unrecord(DuelStateMachine.Outcome.LOSS);
-		assertEquals("never below 0", 0, record.losses());
+		record.add(DuelStateMachine.Outcome.LOSS, -1);
+		record.add(DuelStateMachine.Outcome.LOSS, -1);
+		assertEquals("never below 0", 0, record.getLosses());
 	}
 }

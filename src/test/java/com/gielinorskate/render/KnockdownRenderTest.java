@@ -17,25 +17,25 @@ public class KnockdownRenderTest
 	public void theGetUpAnimationIsScrubbedThroughItsFramesByProgress()
 	{
 		int[] lengths = {10, 10, 20, 10};
-		assertEquals(0, AnimationScrub.frameAt(0f, lengths));
-		assertEquals(1, AnimationScrub.frameAt(0.25f, lengths));
-		assertEquals(2, AnimationScrub.frameAt(0.5f, lengths));
-		assertEquals(2, AnimationScrub.frameAt(0.7f, lengths));
-		assertEquals(3, AnimationScrub.frameAt(0.8f, lengths));
+		assertEquals(0, AnimClock.frameAt(0f, lengths));
+		assertEquals(1, AnimClock.frameAt(0.25f, lengths));
+		assertEquals(2, AnimClock.frameAt(0.5f, lengths));
+		assertEquals(2, AnimClock.frameAt(0.7f, lengths));
+		assertEquals(3, AnimClock.frameAt(0.8f, lengths));
 		// the end holds the last frame
-		assertEquals(3, AnimationScrub.frameAt(1f, lengths));
-		assertEquals(3, AnimationScrub.frameAt(5f, lengths));
-		assertEquals(0, AnimationScrub.frameAt(-1f, lengths));
+		assertEquals(3, AnimClock.frameAt(1f, lengths));
+		assertEquals(3, AnimClock.frameAt(5f, lengths));
+		assertEquals(0, AnimClock.frameAt(-1f, lengths));
 	}
 
 	@Test
 	public void anUnusableAnimationIsLeftAlone()
 	{
-		assertEquals(-1, AnimationScrub.frameAt(0.5f, null));
-		assertEquals(-1, AnimationScrub.frameAt(0.5f, new int[0]));
-		assertEquals(-1, AnimationScrub.frameAt(Float.NaN, new int[]{1, 2}));
+		assertEquals(-1, AnimClock.frameAt(0.5f, null));
+		assertEquals(-1, AnimClock.frameAt(0.5f, new int[0]));
+		assertEquals(-1, AnimClock.frameAt(Float.NaN, new int[]{1, 2}));
 		// zero-length frames count as one tick
-		assertEquals(1, AnimationScrub.frameAt(0.6f, new int[]{0, 0}));
+		assertEquals(1, AnimClock.frameAt(0.6f, new int[]{0, 0}));
 	}
 
 	@Test

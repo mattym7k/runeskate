@@ -32,7 +32,7 @@ public class WallStuckTest
 			for (float off : new float[]{0.5f, 1.2f, 3f})
 			{
 				SkatePhysics p = new SkatePhysics(t, w, 11 * T - off, startY, (float) Math.toRadians(164));
-				p.setSpeed(450);
+				p.setRollingSpeed(450);
 				SkateInput in = new SkateInput();
 				in.pushHeld = true;
 				for (int i = 0; i < 50; i++)
@@ -56,7 +56,7 @@ public class WallStuckTest
 		float c = 10 * T;
 		w.addBlocker(c, c, 30, 30, 1f, 0f, 200, BlockerSet.SOLID, 0);
 		SkatePhysics p = new SkatePhysics(t, w, c - 100, c - 30 - 12.5f, (float) Math.toRadians(75));
-		p.setSpeed(200);
+		p.setRollingSpeed(200);
 		SkateInput in = new SkateInput();
 		in.pushHeld = true;
 		for (int i = 0; i < 60; i++)
@@ -95,7 +95,7 @@ public class WallStuckTest
 		// dropping back down after bouncing off a wall in the air: a few u/s backwards at touchdown. That set
 		// the fakie flag, so every W push went backwards, straight back into the wall
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.flat(), 0, 0, 0f);
-		p.setSpeed(-20f);
+		p.setRollingSpeed(-20f);
 		SkateInput in = new SkateInput();
 		in.gestures.add(new Gesture(Gesture.Direction.UP, false, 0f));
 		p.step(DT, in);

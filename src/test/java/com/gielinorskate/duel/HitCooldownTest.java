@@ -43,10 +43,10 @@ public class HitCooldownTest
 		assertEquals(1, cd.poll(0f).damage);
 		assertNull(cd.poll(1f));
 		assertEquals(2, cd.poll(1.5f).damage);
-		assertEquals(1, cd.pending());
+		assertEquals(1, cd.queue.size());
 		assertNull(cd.poll(2.9f));
 		assertEquals(3, cd.poll(3.0f).damage);
-		assertEquals(0, cd.pending());
+		assertEquals(0, cd.queue.size());
 	}
 
 	@Test
@@ -65,7 +65,7 @@ public class HitCooldownTest
 		cd.poll(0f);
 		cd.offer(2, 600, 1);
 		cd.clear();
-		assertEquals(0, cd.pending());
+		assertEquals(0, cd.queue.size());
 		cd.offer(4, 1_500, 1);
 		assertNotNull(cd.poll(0.1f));
 	}

@@ -82,6 +82,8 @@ public class BoardKeyTest
 		key.poll(1500, e);
 		assertFalse(e.pressed);
 		assertFalse(e.held);
-		assertFalse(key.isDown());
+		key.press(1600);
+		key.poll(1600, e);
+		assertTrue("not still down: a new press counts", e.pressed);
 	}
 }

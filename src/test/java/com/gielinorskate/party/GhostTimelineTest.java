@@ -3,6 +3,7 @@ package com.gielinorskate.party;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import com.gielinorskate.physics.Angles;
 import com.gielinorskate.physics.SkatePhysics;
@@ -73,7 +74,7 @@ public class GhostTimelineTest
 		float[] f = p.at(sent);
 		SkaterState st = SkaterState.values()[(int) f[7]];
 		Trick flipTrick = flip != null && flipTime < flip.duration ? flip : null;
-		GhostFrame frame = new GhostFrame(330, 0, f[0], f[1], f[2], f[3], f[4], f[5], f[6], st, null, flipTrick,
+		GhostState frame = GhostFeed.frame(330, 0, f[0], f[1], f[2], f[3], f[4], f[5], f[6], st, null, flipTrick,
 			flipTrick == null ? 0f : flipTime / flip.duration, f[8]);
 		SkateGhostUpdate m = GhostCodec.encode(frame, ev, flip);
 		m.seq = seq;
@@ -94,7 +95,7 @@ public class GhostTimelineTest
 			hds[i] = s[3];
 			sts[i] = SkaterState.values()[(int) s[7]];
 		}
-		m.tj = GhostTrajectory.encode(GhostTrajectory.timeMs((float) sent), ev, evAgo, n, a, xs, ys, hs, hds, sts,
+		m.tj = GhostFeed.wire(GhostTrajectory.timeMs((float) sent), ev, evAgo, n, a, xs, ys, hs, hds, sts,
 			m.x, m.y, m.h, m.hd);
 		return m;
 	}
@@ -137,8 +138,8 @@ public class GhostTimelineTest
 					continue;
 				}
 				RenderPose pose = g.pose((float) s + OFFSET, FLAT);
-				drawn.add(new float[]{(float) s, pose.x, pose.y, pose.h, pose.heading, (float) g.playbackTime(),
-					g.playbackRate(), g.speed()});
+				drawn.add(new float[]{(float) s, pose.x, pose.y, pose.h, pose.heading, (float) g.tp,
+					g.rate, g.speed()});
 			}
 			return this;
 		}
@@ -288,7 +289,7 @@ public class GhostTimelineTest
 					(float) (3.6 + LATENCY) + OFFSET, FLAT);
 			}
 			RenderPose pose = g.pose(now, FLAT);
-			double tp = g.playbackTime();
+			double tp = g.tp;
 			if (popsBefore == 0 && g.popCount() == 1)
 			{
 				// the pop plays on the frame the playback passes it
@@ -384,7 +385,7 @@ public class GhostTimelineTest
 			if (g.latest() != null)
 			{
 				RenderPose pose = g.pose((float) s + OFFSET, FLAT);
-				drawn.add(new float[]{(float) s, pose.x, pose.y, (float) g.playbackTime()});
+				drawn.add(new float[]{(float) s, pose.x, pose.y, (float) g.tp});
 			}
 		}
 		for (int i = 2; i < drawn.size(); i++)
@@ -404,72 +405,35 @@ public class GhostTimelineTest
 	}
 
 	@Test
-	public void olderVersionsAreDeadReckonedExactlyAsBefore()
-	{
-		Path p = carve(800f, 1.2f, 0f);
-		GhostPredictor withHub = new GhostPredictor();
-		GhostPredictor plain = new GhostPredictor();
-		for (int i = 0; i < 8; i++)
-		{
-			SkateGhostUpdate m = update(p, i * 0.6, i + 1);
-			m.tj = null;
-			float now = (float) (i * 0.6 + LATENCY) + OFFSET;
-			assertTrue(withHub.accept(GhostCodec.decode(m), GhostTrajectory.decode(m.tj, m.ev, m.x, m.y, m.h, m.hd),
-				now, FLAT));
-			assertTrue(plain.accept(GhostCodec.decode(m), now, FLAT));
-			for (int k = 0; k < 36; k++)
-			{
-				float t = now + k / 60f;
-				RenderPose a = withHub.pose(t, FLAT);
-				RenderPose b = plain.pose(t, FLAT);
-				assertEquals(b.x, a.x, 0f);
-				assertEquals(b.y, a.y, 0f);
-				assertEquals(b.h, a.h, 0f);
-				assertEquals(b.heading, a.heading, 0f);
-				assertEquals(plain.turnRate(t), withHub.turnRate(t), 0f);
-				assertEquals(plain.speed(), withHub.speed(), 0f);
-			}
-		}
-		assertFalse(withHub.isTimed());
-		assertTrue(Double.isNaN(withHub.playbackTime()));
-	}
-
-	@Test
-	public void updatesWithoutRoomForTheTimelineArePlacedByArrivalThenOldVersionsTakeOver()
+	public void updatesWithoutRoomForTheTimelineArePlacedByArrival()
 	{
 		Path p = carve(600f, 0.5f, 0f);
 		GhostPredictor g = new GhostPredictor();
-		RenderPose before = null;
-		boolean wasTimed = false;
+		// with no timeline before it, an update has nothing to be placed on
+		SkateGhostUpdate first = update(p, 0, 1);
+		first.tj = null;
+		assertFalse(accept(g, first, LATENCY + OFFSET, FLAT));
+		assertNull(g.latest());
 		double dt = 1 / 60.0;
-		int next = 0;
-		for (double s = 0; s < 12; s += dt)
+		int next = 1;
+		for (double s = 0.6; s < 12; s += dt)
 		{
 			while (next * 0.6 + LATENCY <= s)
 			{
 				SkateGhostUpdate m = update(p, next * 0.6, next + 1);
 				if (next > 9)
 				{
-					// from 6 s on, no timeline (it did not fit, or an older version took over)
+					// from 6 s on, no timeline (it did not fit)
 					m.tj = null;
 				}
 				float arrive = (float) (next * 0.6 + LATENCY) + OFFSET;
-				wasTimed = g.isTimed();
-				before = wasTimed ? g.pose(arrive, FLAT) : before;
 				assertTrue(accept(g, m, arrive, FLAT));
-				if (next > 9 && arrive - OFFSET < 5.4 + LATENCY + GhostPredictor.TIMELINE_LINGER - 0.01)
+				if (next > 9)
 				{
-					// still on the timeline, placed by its arrival
-					assertTrue(g.isTimed());
+					// placed on the timeline by its arrival
 					RenderPose pose = g.pose((float) s + OFFSET, FLAT);
-					float[] t = p.at(g.playbackTime());
+					float[] t = p.at(g.tp);
 					assertEquals(0, Math.hypot(pose.x - t[0], pose.y - t[1]), 3);
-				}
-				else if (wasTimed && !g.isTimed())
-				{
-					// dead reckoning takes over from what was drawn
-					RenderPose after = g.pose(arrive, FLAT);
-					assertEquals(0, Math.hypot(after.x - before.x, after.y - before.y), 0.5);
 				}
 				next++;
 			}
@@ -478,7 +442,6 @@ public class GhostTimelineTest
 				g.pose((float) s + OFFSET, FLAT);
 			}
 		}
-		assertFalse(g.isTimed());
 	}
 
 	@Test
@@ -499,7 +462,7 @@ public class GhostTimelineTest
 			accept(g, m, (float) (104 + i * 0.6 + LATENCY) + OFFSET, FLAT);
 		}
 		RenderPose pose = g.pose(107.4f + OFFSET, FLAT);
-		double tp = g.playbackTime();
+		double tp = g.tp;
 		assertTrue("playing the new clock: " + tp, tp > 2 && tp < 3.4);
 		float[] t = p.at(tp);
 		assertEquals(0, Math.hypot(pose.x - t[0], pose.y - t[1]), 3);

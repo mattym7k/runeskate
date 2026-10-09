@@ -17,7 +17,7 @@ public class GrindableNamesTest
 		};
 		for (String n : yes)
 		{
-			assertTrue(n, GrindableNames.looksGrindable(n));
+			assertTrue(n, ObjectNames.looksGrindable(n));
 		}
 	}
 
@@ -31,7 +31,7 @@ public class GrindableNamesTest
 		};
 		for (String n : no)
 		{
-			assertFalse(String.valueOf(n), GrindableNames.looksGrindable(n));
+			assertFalse(String.valueOf(n), ObjectNames.looksGrindable(n));
 		}
 	}
 }

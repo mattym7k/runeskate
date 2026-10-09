@@ -124,7 +124,7 @@ public class ThawTrickBookTest
 	{
 		List<TrickBook.Section> pad = TrickBook.build(thaw(false));
 		List<TrickBook.Section> keys = TrickBook.build(new TrickBook.Settings("Ctrl+K", "F", "Space", "right", false,
-			true, false, false, "B", "Up", "Down"));
+			true, false, false, "B", "Up", "Down", PadPreset.skate3(), "Skate 3"));
 		assertEquals(text(section(keys, "Flip tricks")), text(section(pad, "Flip tricks")));
 		assertEquals(text(section(keys, "Grabs")), text(section(pad, "Grabs")));
 	}
@@ -156,7 +156,7 @@ public class ThawTrickBookTest
 		javax.swing.JComboBox<?> from = (javax.swing.JComboBox<?>) find(v, "layout:startFrom");
 		from.setSelectedIndex(3);
 		((javax.swing.JButton) find(v, "layout:load")).doClick();
-		assertEquals(PadPreset.thaw(), v.edited());
+		assertEquals(PadPreset.thaw(), v.editing);
 	}
 
 	private static java.awt.Component find(java.awt.Container c, String name)

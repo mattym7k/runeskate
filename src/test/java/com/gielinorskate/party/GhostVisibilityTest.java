@@ -10,7 +10,7 @@ public class GhostVisibilityTest
 {
 	private static GhostState at(int world, int plane)
 	{
-		return new GhostState(world, plane, 0f, 0f, 0f, 0f, 0f, 0f, 0f, SkaterState.ROLLING, null, 0, null, 0f, 1);
+		return GhostFeed.state(world, plane, 0f, 0f, 0f, 0f, 0f, 0f, 0f, SkaterState.ROLLING, null, 0, null, 0f, 1);
 	}
 
 	@Test

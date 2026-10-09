@@ -114,10 +114,10 @@ public class SessionGoalsTest
 	@Test
 	public void shiftTricksAreTheGuidesShiftGroup()
 	{
-		assertTrue(SessionGoals.isShiftTrick(Trick.HARDFLIP));
-		assertTrue(SessionGoals.isShiftTrick(Trick.IMPOSSIBLE));
-		assertFalse(SessionGoals.isShiftTrick(Trick.KICKFLIP));
-		assertFalse(SessionGoals.isShiftTrick(Trick.BACKFLIP));
+		assertTrue(SessionGoals.SHIFT.contains(Trick.HARDFLIP));
+		assertTrue(SessionGoals.SHIFT.contains(Trick.IMPOSSIBLE));
+		assertFalse(SessionGoals.SHIFT.contains(Trick.KICKFLIP));
+		assertFalse(SessionGoals.SHIFT.contains(Trick.BACKFLIP));
 	}
 
 	@Test

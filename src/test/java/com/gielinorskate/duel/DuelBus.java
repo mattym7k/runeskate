@@ -40,17 +40,19 @@ final class DuelBus
 		}
 
 		@Override
-		public void send(PartyMessage message)
+		public void send(PartyMessage message, boolean lastWord)
 		{
 			outbound.add(message);
 			sentLog.add(message);
+			if (lastWord)
+			{
+				lastWords.add(message);
+			}
 		}
 
 		@Override
-		public void sendLastWord(PartyMessage message)
+		public void challengeSent(long toId)
 		{
-			send(message);
-			lastWords.add(message);
 		}
 
 		@Override

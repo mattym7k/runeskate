@@ -54,27 +54,11 @@ public class DesignEditorPanelTest
 		ImagePlacement start = ImagePlacement.initial(60, 120, outline.bounds());
 		// previews baked right here (the plugin bakes them on its executor)
 		editor = new DesignEditorPanel(DesignPart.GRIP, layout, grip, outline, image, start, "My grip", Runnable::run,
-			new DesignEditorPanel.Listener()
+			(name, placement) ->
 			{
-				@Override
-				public void save(String name, ImagePlacement placement)
-				{
-					savedName = name;
-					saved = placement;
-				}
-
-				@Override
-				public void cancel()
-				{
-					calls.add("cancel");
-				}
-
-				@Override
-				public void downloadTemplate()
-				{
-					calls.add("template");
-				}
-			});
+				savedName = name;
+				saved = placement;
+			}, () -> calls.add("cancel"), () -> calls.add("template"));
 		flush();
 	}
 
@@ -385,22 +369,12 @@ public class DesignEditorPanelTest
 		BakedBoardGeometry.Mesh grip = BakedBoardGeometry.sharedBoard(true)[DesignPart.GRIP.index];
 		DesignLayout.Part layout = DesignLayout.bundled().of(DesignPart.GRIP);
 		DesignEditorPanel slow = new DesignEditorPanel(DesignPart.GRIP, layout, grip, outline, image,
-			ImagePlacement.initial(60, 120, outline.bounds()), "My grip", jobs::add, new DesignEditorPanel.Listener()
+			ImagePlacement.initial(60, 120, outline.bounds()), "My grip", jobs::add, (name, placement) ->
 			{
-				@Override
-				public void save(String name, ImagePlacement placement)
-				{
-				}
-
-				@Override
-				public void cancel()
-				{
-				}
-
-				@Override
-				public void downloadTemplate()
-				{
-				}
+			}, () ->
+			{
+			}, () ->
+			{
 			});
 		DesignCanvas canvas = slow.canvas();
 		assertEquals(1, jobs.size());
@@ -431,7 +405,7 @@ public class DesignEditorPanelTest
 		flush();
 		assertEquals(2, slow.previewsDone());
 		assertEquals(end, canvas.placement());
-		slow.dispose();
+		slow.removeNotify();
 	}
 
 	private static void press(DesignCanvas canvas, KeyStroke k)
@@ -493,11 +467,11 @@ public class DesignEditorPanelTest
 			for (boolean flip : new boolean[]{false, true})
 			{
 				ImagePlacement p = new ImagePlacement(40, 25, 100, 300, 2.5, 0.8, turns, flip);
-				java.awt.geom.Point2D q = DesignCanvas.transform(p).transform(new java.awt.geom.Point2D.Double(7, 19),
-					null);
-				double[] want = p.toLayout(7, 19);
-				assertEquals(want[0], q.getX(), 1e-9);
-				assertEquals(want[1], q.getY(), 1e-9);
+				// the canvas draws through toLayout(); the bake samples through toImage(): one is the other's inverse
+				java.awt.geom.Point2D q = p.toLayout().transform(new java.awt.geom.Point2D.Double(7, 19), null);
+				double[] back = p.toImage(q.getX(), q.getY());
+				assertEquals(7, back[0], 1e-9);
+				assertEquals(19, back[1], 1e-9);
 			}
 		}
 	}

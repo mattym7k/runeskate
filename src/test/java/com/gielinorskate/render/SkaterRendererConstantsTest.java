@@ -9,7 +9,7 @@ public class SkaterRendererConstantsTest
 	@Test
 	public void aDroppedOrPickedUpBoardMovesAsLongAsAMount()
 	{
-		assertEquals(BoardSwap.TRANSITION_SECONDS, SkaterRenderer.BOARD_MOVE_SECONDS, 0f);
+		assertEquals(BoardSwap.TRANSITION_SECONDS, Tuning.BOARD_MOVE_SECONDS, 0f);
 	}
 
 	@Test

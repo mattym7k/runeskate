@@ -99,7 +99,7 @@ public class BufferProbeTest
 	{
 		SharedBuffer src = new SharedBuffer();
 		FakeModel untouched = base();
-		FakeModel first = BufferProbe.drawable(src, MESH, leaning());
+		FakeModel first = BufferProbe.drawable(src, MESH, leaning(), new BufferProbe.Probe<>());
 		assertSame(src.shared, first);
 		assertEquals(1, first.deformedCalls);
 		assertNotEquals(-200f, first.ys[2], 1f);
@@ -107,7 +107,7 @@ public class BufferProbeTest
 		// frame after frame the result is the same: nothing piles up
 		for (int i = 0; i < 5; i++)
 		{
-			BufferProbe.drawable(src, MESH, leaning());
+			BufferProbe.drawable(src, MESH, leaning(), new BufferProbe.Probe<>());
 		}
 		assertArrayEquals(firstYs, src.shared.ys, 1e-4f);
 		assertArrayEquals(untouched.xs, src.base.xs, 0f);
@@ -123,7 +123,7 @@ public class BufferProbeTest
 		BufferProbe.Source<FakeModel> src = () -> cached;
 		for (int i = 0; i < 5; i++)
 		{
-			assertSame(cached, BufferProbe.drawable(src, MESH, leaning()));
+			assertSame(cached, BufferProbe.drawable(src, MESH, leaning(), new BufferProbe.Probe<>()));
 		}
 		assertEquals(0, cached.deformedCalls);
 		assertArrayEquals(copy.xs, cached.xs, 0f);
@@ -137,7 +137,7 @@ public class BufferProbeTest
 		FakeModel[] made = new FakeModel[2];
 		int[] n = {0};
 		BufferProbe.Source<FakeModel> src = () -> made[n[0]++ % 2] = base();
-		FakeModel out = BufferProbe.drawable(src, MESH, leaning());
+		FakeModel out = BufferProbe.drawable(src, MESH, leaning(), new BufferProbe.Probe<>());
 		assertSame(made[1], out);
 		assertEquals(0, out.deformedCalls);
 		assertArrayEquals(base().ys, out.ys, 0f);
@@ -149,7 +149,7 @@ public class BufferProbeTest
 	public void neutralPoseAsksOnceAndDrawsPlain()
 	{
 		SharedBuffer src = new SharedBuffer();
-		FakeModel out = BufferProbe.drawable(src, MESH, new BodyPose());
+		FakeModel out = BufferProbe.drawable(src, MESH, new BodyPose(), new BufferProbe.Probe<>());
 		assertEquals(1, src.calls);
 		assertEquals(0, out.deformedCalls);
 		assertArrayEquals(base().ys, out.ys, 0f);
@@ -158,9 +158,9 @@ public class BufferProbeTest
 	@Test
 	public void nullAndEmptyModelsPassThrough()
 	{
-		assertEquals(null, BufferProbe.drawable(() -> null, MESH, leaning()));
+		assertEquals(null, BufferProbe.drawable(() -> null, MESH, leaning(), new BufferProbe.Probe<>()));
 		FakeModel empty = new FakeModel();
-		assertSame(empty, BufferProbe.drawable(() -> empty, MESH, leaning()));
+		assertSame(empty, BufferProbe.drawable(() -> empty, MESH, leaning(), new BufferProbe.Probe<>()));
 	}
 
 	@Test
@@ -178,7 +178,7 @@ public class BufferProbeTest
 		};
 		try
 		{
-			BufferProbe.drawable(src, MESH, leaning());
+			BufferProbe.drawable(src, MESH, leaning(), new BufferProbe.Probe<>());
 			fail();
 		}
 		catch (IllegalStateException expected)
@@ -186,41 +186,5 @@ public class BufferProbeTest
 			assertTrue(true);
 		}
 		assertArrayEquals(base().xs, cached.xs, 0f);
-	}
-
-	@Test
-	public void theProbeSaysWhyAModelIsNotProven()
-	{
-		BufferProbe.Probe<FakeModel> probe = new BufferProbe.Probe<>();
-		assertTrue(BufferProbe.prove(new SharedBuffer(), MESH, probe));
-		assertEquals(BufferProbe.Fail.NONE, probe.fail());
-
-		BufferProbe.prove(() -> null, MESH, probe);
-		assertEquals(BufferProbe.Fail.NO_MODEL, probe.fail());
-
-		FakeModel empty = new FakeModel();
-		BufferProbe.prove(() -> empty, MESH, probe);
-		assertEquals(BufferProbe.Fail.BAD_MESH, probe.fail());
-
-		FakeModel cached = base();
-		BufferProbe.prove(() -> cached, MESH, probe);
-		assertEquals(BufferProbe.Fail.NOT_REBUILT, probe.fail());
-
-		BufferProbe.prove(BufferProbeTest::base, MESH, probe);
-		assertEquals(BufferProbe.Fail.NOT_REBUILT, probe.fail());
-
-		// rebuilt (the sentinel overwritten) but another object handed back
-		SharedBuffer shared = new SharedBuffer();
-		FakeModel other = base();
-		int[] n = {0};
-		BufferProbe.prove(() -> n[0]++ == 0 ? shared.get() : copyInto(shared, other), MESH, probe);
-		assertEquals(BufferProbe.Fail.OTHER_OBJECT, probe.fail());
-	}
-
-	/** Rebuilds the shared buffer (overwriting any sentinel) and hands back {@code other}. */
-	private static FakeModel copyInto(SharedBuffer shared, FakeModel other)
-	{
-		shared.get();
-		return other;
 	}
 }

@@ -9,7 +9,7 @@ public class BoardGeometryTest
 	@Test
 	public void faceCountWithinBudget()
 	{
-		BoardGeometry.Mesh m = BoardGeometry.standardBoard();
+		ClassicBoard.Mesh m = ClassicBoard.standardBoard();
 		assertTrue(m.faceCount() > 0);
 		assertTrue(m.faceCount() <= 400);
 		assertEquals(m.faceCount() * 9, m.tris.length);
@@ -18,7 +18,7 @@ public class BoardGeometryTest
 	@Test
 	public void boundsMatchSpec()
 	{
-		BoardGeometry.Mesh mesh = BoardGeometry.standardBoard();
+		ClassicBoard.Mesh mesh = ClassicBoard.standardBoard();
 		float[] t = mesh.tris;
 		float minY = Float.MAX_VALUE, maxY = -Float.MAX_VALUE;
 		float minZ = Float.MAX_VALUE, maxZ = -Float.MAX_VALUE;
@@ -41,12 +41,12 @@ public class BoardGeometryTest
 	@Test
 	public void deckMiddleTopIsBoardTop()
 	{
-		BoardGeometry.Mesh mesh = BoardGeometry.standardBoard();
+		ClassicBoard.Mesh mesh = ClassicBoard.standardBoard();
 		float[] t = mesh.tris;
 		int[] c = mesh.colorIndex;
 		for (int f = 0; f < c.length; f++)
 		{
-			if (c[f] != BoardGeometry.GRIP)
+			if (c[f] != ClassicBoard.GRIP)
 			{
 				continue;
 			}
@@ -76,14 +76,14 @@ public class BoardGeometryTest
 	@Test
 	public void kicktailsRise()
 	{
-		BoardGeometry.Mesh mesh = BoardGeometry.standardBoard();
+		ClassicBoard.Mesh mesh = ClassicBoard.standardBoard();
 		float[] t = mesh.tris;
 		int[] c = mesh.colorIndex;
 		boolean foundPositive = false;
 		boolean foundNegative = false;
 		for (int f = 0; f < c.length; f++)
 		{
-			if (c[f] != BoardGeometry.GRIP)
+			if (c[f] != ClassicBoard.GRIP)
 			{
 				continue;
 			}
@@ -109,7 +109,7 @@ public class BoardGeometryTest
 	@Test
 	public void gripFacesPointUp_graphicFacesPointDown()
 	{
-		BoardGeometry.Mesh mesh = BoardGeometry.standardBoard();
+		ClassicBoard.Mesh mesh = ClassicBoard.standardBoard();
 		float[] t = mesh.tris;
 		int[] c = mesh.colorIndex;
 		for (int f = 0; f < c.length; f++)
@@ -121,11 +121,11 @@ public class BoardGeometryTest
 			float ux = bx - ax, uy = by - ay, uz = bz - az;
 			float vx = cx - ax, vy = cy - ay, vz = cz - az;
 			float normalY = uz * vx - ux * vz;
-			if (c[f] == BoardGeometry.GRIP)
+			if (c[f] == ClassicBoard.GRIP)
 			{
 				assertTrue("GRIP face normal.y should be < 0", normalY < 0f);
 			}
-			else if (c[f] == BoardGeometry.GRAPHIC)
+			else if (c[f] == ClassicBoard.GRAPHIC)
 			{
 				assertTrue("GRAPHIC face normal.y should be > 0", normalY > 0f);
 			}
@@ -135,14 +135,14 @@ public class BoardGeometryTest
 	@Test
 	public void wheelsAreSymmetric()
 	{
-		BoardGeometry.Mesh mesh = BoardGeometry.standardBoard();
+		ClassicBoard.Mesh mesh = ClassicBoard.standardBoard();
 		float[] t = mesh.tris;
 		int[] c = mesh.colorIndex;
 		float minX = Float.MAX_VALUE, maxX = -Float.MAX_VALUE;
 		float minZ = Float.MAX_VALUE, maxZ = -Float.MAX_VALUE;
 		for (int f = 0; f < c.length; f++)
 		{
-			if (c[f] != BoardGeometry.WHEELS)
+			if (c[f] != ClassicBoard.WHEELS)
 			{
 				continue;
 			}
@@ -164,7 +164,7 @@ public class BoardGeometryTest
 	@Test
 	public void rollByPiFlipsBoardOverItsLongAxis()
 	{
-		float[] t = BoardGeometry.standardBoard().tris;
+		float[] t = ClassicBoard.standardBoard().tris;
 		float[] r = BoardGeometry.rotate(t, (float) Math.PI, 0f);
 		// x and y are negated, z unchanged
 		assertEquals(-t[0], r[0], 1e-3f);
@@ -175,7 +175,7 @@ public class BoardGeometryTest
 	@Test
 	public void rotateDoesNotModifyInput()
 	{
-		float[] t = BoardGeometry.standardBoard().tris;
+		float[] t = ClassicBoard.standardBoard().tris;
 		float before = t[0];
 		BoardGeometry.rotate(t, 1f, 1f);
 		assertEquals(before, t[0], 0f);

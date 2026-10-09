@@ -31,7 +31,7 @@ public class StartGlyphTest
 	@Test
 	public void thePanelListsTheOnFootPadControls()
 	{
-		SkatePanel panel = new SkatePanel(() -> { }, (k, v) -> { });
+		SkatePanel panel = new SkatePanel(() -> { }, (k, v) -> { }, d -> { });
 		panel.setSettings("Ctrl+K", "Space", true, false, false, false, true, true, "F");
 		java.util.List<javax.swing.JLabel> all = new java.util.ArrayList<>();
 		collect(panel, all);

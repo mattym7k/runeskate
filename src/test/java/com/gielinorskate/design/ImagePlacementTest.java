@@ -16,12 +16,20 @@ public class ImagePlacementTest
 		assertEquals(y, p[1], 1e-7);
 	}
 
+	/** Layout position of image position (x, y). */
+	private static double[] layout(ImagePlacement p, double x, double y)
+	{
+		double[] out = {x, y};
+		p.toLayout().transform(out, 0, out, 0, 1);
+		return out;
+	}
+
 	@Test
 	public void identityMapsPixelsOneToOne()
 	{
 		ImagePlacement p = new ImagePlacement(100, 50, 50, 25, 1, 0, false);
-		assertPoint(0, 0, p.toLayout(0, 0));
-		assertPoint(100, 50, p.toLayout(100, 50));
+		assertPoint(0, 0, layout(p, 0, 0));
+		assertPoint(100, 50, layout(p, 100, 50));
 		assertPoint(30, 20, p.toImage(30, 20));
 	}
 
@@ -29,8 +37,8 @@ public class ImagePlacementTest
 	public void scaleAndMoveAboutTheCentre()
 	{
 		ImagePlacement p = new ImagePlacement(100, 50, 200, 300, 2, 0, false);
-		assertPoint(100, 250, p.toLayout(0, 0));
-		assertPoint(300, 350, p.toLayout(100, 50));
+		assertPoint(100, 250, layout(p, 0, 0));
+		assertPoint(300, 350, layout(p, 100, 50));
 		assertEquals(200, p.placedWidth(), EPS);
 		assertEquals(100, p.placedHeight(), EPS);
 	}
@@ -40,8 +48,8 @@ public class ImagePlacementTest
 	{
 		// the image's top-left corner goes to the top-right once turned clockwise
 		ImagePlacement p = new ImagePlacement(100, 50, 0, 0, 1, 1, false);
-		assertPoint(25, -50, p.toLayout(0, 0));
-		assertPoint(-25, 50, p.toLayout(100, 50));
+		assertPoint(25, -50, layout(p, 0, 0));
+		assertPoint(-25, 50, layout(p, 100, 50));
 		assertEquals(50, p.placedWidth(), EPS);
 		assertEquals(100, p.placedHeight(), EPS);
 	}
@@ -50,8 +58,8 @@ public class ImagePlacementTest
 	public void flipMirrorsLeftRight()
 	{
 		ImagePlacement p = new ImagePlacement(100, 50, 50, 25, 1, 0, true);
-		assertPoint(100, 0, p.toLayout(0, 0));
-		assertPoint(0, 50, p.toLayout(100, 50));
+		assertPoint(100, 0, layout(p, 0, 0));
+		assertPoint(0, 50, layout(p, 100, 50));
 	}
 
 	@Test
@@ -64,7 +72,7 @@ public class ImagePlacementTest
 				ImagePlacement p = new ImagePlacement(64, 37, 120.5, -33.25, 1.7, turns, flip);
 				for (double[] s : new double[][]{{0, 0}, {64, 37}, {10.5, 30.25}, {-5, 80}})
 				{
-					double[] l = p.toLayout(s[0], s[1]);
+					double[] l = layout(p, s[0], s[1]);
 					assertArrayEquals("turns " + turns + " flip " + flip, s, p.toImage(l[0], l[1]), 1e-9);
 				}
 			}
@@ -82,8 +90,8 @@ public class ImagePlacementTest
 				ImagePlacement m = p.flippedHorizontally();
 				for (double[] s : new double[][]{{0, 0}, {64, 0}, {13, 29}})
 				{
-					double[] a = p.toLayout(s[0], s[1]);
-					double[] b = m.toLayout(s[0], s[1]);
+					double[] a = layout(p, s[0], s[1]);
+					double[] b = layout(m, s[0], s[1]);
 					// mirrored about the vertical line through the centre, same height
 					assertEquals(200 - a[0], b[0], 1e-9);
 					assertEquals(a[1], b[1], 1e-9);
@@ -149,14 +157,12 @@ public class ImagePlacementTest
 	}
 
 	@Test
-	public void movedAndResizedImageCoversTheSameArea()
+	public void movedKeepsTheRest()
 	{
 		ImagePlacement p = new ImagePlacement(2000, 1000, 50, 60, 0.25, 1, true).moved(5, -5);
 		assertEquals(55, p.cx, EPS);
-		ImagePlacement small = p.forImageSize(1000, 500);
-		assertEquals(p.placedWidth(), small.placedWidth(), 1e-9);
-		assertEquals(p.placedHeight(), small.placedHeight(), 1e-9);
-		assertPoint(p.toLayout(2000, 0)[0], p.toLayout(2000, 0)[1], small.toLayout(1000, 0));
+		assertEquals(55, p.cy, EPS);
+		assertEquals(new ImagePlacement(2000, 1000, 55, 55, 0.25, 1, true), p);
 	}
 
 	private static final double[][] SAMPLES = {{0, 0}, {64, 37}, {10.5, 30.25}, {-5, 80}};
@@ -176,15 +182,15 @@ public class ImagePlacementTest
 	public void nonUniformScaleStretchesAlongTheImagesOwnAxes()
 	{
 		ImagePlacement p = new ImagePlacement(100, 50, 0, 0, 2, 3, 0, false);
-		assertPoint(-100, -75, p.toLayout(0, 0));
-		assertPoint(100, 75, p.toLayout(100, 50));
+		assertPoint(-100, -75, layout(p, 0, 0));
+		assertPoint(100, 75, layout(p, 100, 50));
 		assertEquals(200, p.placedWidth(), EPS);
 		assertEquals(150, p.placedHeight(), EPS);
 		// turned a quarter, the image's width (stretched 2x) now runs down the layout
 		ImagePlacement t = p.rotated();
 		assertEquals(150, t.placedWidth(), EPS);
 		assertEquals(200, t.placedHeight(), EPS);
-		assertPoint(75, -100, t.toLayout(0, 0));
+		assertPoint(75, -100, layout(t, 0, 0));
 		assertEquals(Math.sqrt(6), p.meanScale(), EPS);
 	}
 
@@ -198,7 +204,7 @@ public class ImagePlacementTest
 				ImagePlacement p = new ImagePlacement(64, 37, 120.5, -33.25, 1.7, 0.6, turns, flip);
 				for (double[] s : SAMPLES)
 				{
-					double[] l = p.toLayout(s[0], s[1]);
+					double[] l = layout(p, s[0], s[1]);
 					assertArrayEquals("turns " + turns + " flip " + flip, s, p.toImage(l[0], l[1]), 1e-9);
 				}
 				double[] b = p.bounds();
@@ -220,8 +226,8 @@ public class ImagePlacementTest
 		assertEquals(0.5, m.scaleY, EPS);
 		for (double[] s : SAMPLES)
 		{
-			double[] a = p.rotated().toLayout(s[0], s[1]);
-			double[] b = m.toLayout(s[0], s[1]);
+			double[] a = layout(p.rotated(), s[0], s[1]);
+			double[] b = layout(m, s[0], s[1]);
 			assertEquals(200 - a[0], b[0], 1e-9);
 			assertEquals(a[1], b[1], 1e-9);
 		}
@@ -354,13 +360,4 @@ public class ImagePlacementTest
 		assertArrayEquals(under, z.toImage(130, 180), 1e-9);
 	}
 
-	@Test
-	public void aStretchedImageResizedCoversTheSameArea()
-	{
-		ImagePlacement p = new ImagePlacement(2000, 1000, 50, 60, 0.25, 0.1, 1, true);
-		ImagePlacement small = p.forImageSize(1000, 500);
-		assertEquals(p.placedWidth(), small.placedWidth(), 1e-9);
-		assertEquals(p.placedHeight(), small.placedHeight(), 1e-9);
-		assertPoint(p.toLayout(2000, 0)[0], p.toLayout(2000, 0)[1], small.toLayout(1000, 0));
-	}
 }

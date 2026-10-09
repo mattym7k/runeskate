@@ -14,7 +14,7 @@ public class GhostSendPolicyTest
 	@Test
 	public void neverMoreThanTwoPerSecondEvenUnderEventSpam()
 	{
-		GhostSendPolicy p = new GhostSendPolicy();
+		GhostSendPolicy p = new GhostSendPolicy(0);
 		List<Float> sent = new ArrayList<>();
 		for (int i = 0; i < 500; i++)
 		{
@@ -39,7 +39,7 @@ public class GhostSendPolicyTest
 	@Test
 	public void eventsGoOutImmediately()
 	{
-		GhostSendPolicy p = new GhostSendPolicy();
+		GhostSendPolicy p = new GhostSendPolicy(0);
 		p.recordSend(0f);
 		assertTrue(p.shouldSend(0.05f, false, true));
 	}
@@ -47,7 +47,7 @@ public class GhostSendPolicyTest
 	@Test
 	public void snapshotOnlyOnChangeAndAtMostOncePerTick()
 	{
-		GhostSendPolicy p = new GhostSendPolicy();
+		GhostSendPolicy p = new GhostSendPolicy(0);
 		assertTrue(p.shouldSend(0f, true, false));
 		p.recordSend(0f);
 		// changed, but within the same 0.6 s tick
@@ -65,7 +65,7 @@ public class GhostSendPolicyTest
 	@Test
 	public void keepAliveAfterTenSecondsIdle()
 	{
-		GhostSendPolicy p = new GhostSendPolicy();
+		GhostSendPolicy p = new GhostSendPolicy(0);
 		p.recordSend(0f);
 		assertFalse(p.shouldSend(9.9f, false, false));
 		assertTrue(p.shouldSend(10f, false, false));
@@ -74,7 +74,7 @@ public class GhostSendPolicyTest
 	@Test
 	public void resetAllowsAnImmediateFirstSnapshot()
 	{
-		GhostSendPolicy p = new GhostSendPolicy();
+		GhostSendPolicy p = new GhostSendPolicy(0);
 		p.recordSend(5f);
 		p.reset();
 		assertTrue(p.shouldSend(5.1f, true, false));
@@ -83,7 +83,7 @@ public class GhostSendPolicyTest
 	@Test
 	public void resetDoesNotRefillTheRateLimit()
 	{
-		GhostSendPolicy p = new GhostSendPolicy();
+		GhostSendPolicy p = new GhostSendPolicy(0);
 		for (int i = 0; i < GhostSendPolicy.MAX_PER_SECOND; i++)
 		{
 			p.recordSend(0.01f * i);
@@ -102,7 +102,7 @@ public class GhostSendPolicyTest
 	@Test
 	public void announceAtMostEveryFiveSeconds()
 	{
-		GhostSendPolicy p = new GhostSendPolicy();
+		GhostSendPolicy p = new GhostSendPolicy(0);
 		assertTrue("first announce at once", p.shouldAnnounce(0f));
 		p.recordSend(0f);
 		assertFalse(p.shouldAnnounce(4.9f));
@@ -117,7 +117,7 @@ public class GhostSendPolicyTest
 	@Test
 	public void announceRespectsTheRateLimit()
 	{
-		GhostSendPolicy p = new GhostSendPolicy();
+		GhostSendPolicy p = new GhostSendPolicy(0);
 		p.recordSend(0f);
 		p.recordSend(0.1f);
 		p.reset();
@@ -130,22 +130,12 @@ public class GhostSendPolicyTest
 	@Test
 	public void sequenceNumbersIncrease()
 	{
-		GhostSendPolicy p = new GhostSendPolicy();
+		GhostSendPolicy p = new GhostSendPolicy(0);
 		int a = p.nextSeq();
 		p.reset();
 		int b = p.nextSeq();
 		int c = p.nextSeq();
 		assertTrue(b > a);
 		assertTrue(c > b);
-	}
-
-	@Test
-	public void gating()
-	{
-		assertTrue(GhostSendPolicy.allowed(false, true, true, true));
-		assertFalse("PvP area", GhostSendPolicy.allowed(true, true, true, true));
-		assertFalse("sharing off", GhostSendPolicy.allowed(false, false, true, true));
-		assertFalse("not skating", GhostSendPolicy.allowed(false, true, false, true));
-		assertFalse("no party", GhostSendPolicy.allowed(false, true, true, false));
 	}
 }

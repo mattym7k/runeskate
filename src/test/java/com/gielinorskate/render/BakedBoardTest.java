@@ -134,7 +134,7 @@ public class BakedBoardTest
 		for (boolean high : new boolean[]{true, false})
 		{
 			BakedBoardGeometry.Mesh[] v3 = BakedBoardGeometry.sharedBoard(high);
-			BoardGeometry.Mesh classic = BoardGeometry.sharedDefaultBoard();
+			ClassicBoard.Mesh classic = ClassicBoard.sharedDefaultBoard();
 
 			// length (z): the whole board, every part together
 			float[] cz = extent(classic.tris, 2, null, -1);
@@ -143,7 +143,7 @@ public class BakedBoardTest
 			assertEquals(0f, (vz[0] + vz[1]) / 2, 0.1f);
 
 			// width (x) of the grip
-			float[] cx = extent(classic.tris, 0, classic.colorIndex, BoardGeometry.GRIP);
+			float[] cx = extent(classic.tris, 0, classic.colorIndex, ClassicBoard.GRIP);
 			float[] vx = extentOfParts(v3, 0, BakedBoardGeometry.GRIP);
 			assertEquals(cx[1] - cx[0], vx[1] - vx[0], 0.02f * (cx[1] - cx[0]));
 			assertEquals(0f, (vx[0] + vx[1]) / 2, 0.2f);
@@ -289,8 +289,8 @@ public class BakedBoardTest
 	{
 		BakedBoardGeometry.Mesh[] ok = parse(TWO_PARTS);
 		assertTrue(BakedBoardModel.fitsRenderers(ok));
-		BakedBoardGeometry.Mesh big = new BakedBoardGeometry.Mesh(BakedBoardGeometry.DECK,
-			new float[3 * (BakedBoardModel.MAX_VERTICES + 1)], new int[3], new int[3]);
+		BakedBoardGeometry.Mesh big = BakedBoardGeometry.Mesh.of(BakedBoardGeometry.DECK,
+			new float[3 * (BakedBoardModel.MAX_VERTICES + 1)], new int[3], new int[3], null);
 		assertFalse(BakedBoardModel.fitsRenderers(new BakedBoardGeometry.Mesh[]{ok[0], big}));
 		assertFalse(BakedBoardModel.fitsRenderers(new BakedBoardGeometry.Mesh[0]));
 	}
@@ -410,7 +410,7 @@ public class BakedBoardTest
 		int[] c1 = {OsrsColor.light(BakedBoardModel.PROBE, 128), OsrsColor.light(BakedBoardModel.PROBE, 90), 5};
 		int[] c2 = {OsrsColor.light(BakedBoardModel.PROBE, 64), 0, 6};
 		int[] c3 = {OsrsColor.light(BakedBoardModel.PROBE, 160), -1, -2};
-		BakedBoardModel.shade(c1, c2, c3, corners);
+		BakedBoardModel.shade(c1, c2, c3, corners, null);
 
 		// smooth face: each corner its own intensity (within the probe's one-step precision)
 		assertLit(a, 128, c1[0]);
@@ -450,7 +450,7 @@ public class BakedBoardTest
 	public void cornerColoursConvertOncePerDistinctColour() throws IOException
 	{
 		BakedBoardGeometry.Mesh m = parse(TWO_PARTS)[0];
-		short[] hsl = BakedBoardGeometry.cornerHsl(m, 0.8);
+		short[] hsl = BakedBoardGeometry.cornerHsl(m.cornerRgb, 0.8);
 		assertEquals(6, hsl.length);
 		assertEquals(hsl[0], hsl[3]);
 		assertEquals(OsrsColor.rgbToHsl(0x808080, 0.8), hsl[5] & 0xffff);

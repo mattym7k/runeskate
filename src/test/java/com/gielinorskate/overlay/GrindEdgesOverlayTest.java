@@ -12,7 +12,7 @@ import java.util.Collections;
 import java.util.List;
 import org.junit.Test;
 
-public class GrindDebugOverlayTest
+public class GrindEdgesOverlayTest
 {
 	/** Top-down test projection: canvas = (x / 10, y / 10); the height must be passed through as given. */
 	private float lastH;
@@ -23,7 +23,7 @@ public class GrindDebugOverlayTest
 		return new Point(Math.round(x / 10f), Math.round(y / 10f));
 	}
 
-	private static BufferedImage render(GrindDebugOverlay o)
+	private static BufferedImage render(GrindEdgesOverlay o)
 	{
 		BufferedImage img = new BufferedImage(100, 100, BufferedImage.TYPE_INT_ARGB);
 		Graphics2D g = img.createGraphics();
@@ -43,7 +43,7 @@ public class GrindDebugOverlayTest
 		List<GrindSegment> segs = Arrays.asList(
 			new GrindSegment(100, 200, 800, 200, 160),
 			new GrindSegment(500, 300, 500, 900, 40));
-		GrindDebugOverlay o = new GrindDebugOverlay(() -> true, () -> segs, this::project);
+		GrindEdgesOverlay o = new GrindEdgesOverlay(() -> true, () -> segs, this::project, () -> null);
 		BufferedImage img = render(o);
 		assertEquals("yellow at the first segment's middle", true, yellow(img, 45, 20));
 		assertEquals("yellow at the second segment's middle", true, yellow(img, 50, 60));
@@ -54,10 +54,10 @@ public class GrindDebugOverlayTest
 	@Test
 	public void drawsNothingAndReadsNothingWhenHidden()
 	{
-		GrindDebugOverlay o = new GrindDebugOverlay(() -> false, () ->
+		GrindEdgesOverlay o = new GrindEdgesOverlay(() -> false, () ->
 		{
 			throw new AssertionError("segments read while hidden");
-		}, this::project);
+		}, this::project, () -> null);
 		BufferedImage img = render(o);
 		assertFalse(yellow(img, 45, 20));
 	}
@@ -66,7 +66,7 @@ public class GrindDebugOverlayTest
 	public void skipsSegmentsWithAnOffScreenEnd()
 	{
 		List<GrindSegment> segs = Collections.singletonList(new GrindSegment(100, 200, 800, 200, 60));
-		GrindDebugOverlay o = new GrindDebugOverlay(() -> true, () -> segs, (x, y, h) -> x > 500 ? null : project(x, y, h));
+		GrindEdgesOverlay o = new GrindEdgesOverlay(() -> true, () -> segs, (x, y, h) -> x > 500 ? null : project(x, y, h), () -> null);
 		BufferedImage img = render(o);
 		assertFalse(yellow(img, 20, 20));
 	}

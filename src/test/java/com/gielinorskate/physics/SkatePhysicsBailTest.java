@@ -19,7 +19,7 @@ public class SkatePhysicsBailTest
 		// an ollie at 1200 head-on into a 300-high wall bails in the air, well above the ground. It used to be put
 		// straight on the ground in the next step (an 80-unit drop in 0.02 s): now it falls under gravity
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.wallAtY(200, 300), 0, 0, 0f);
-		p.setSpeed(1200f);
+		p.setRollingSpeed(1200f);
 		SkateInput in = new SkateInput();
 		in.gestures.add(new Gesture(Gesture.Direction.UP, false, 0f));
 		for (int i = 0; i < 30 && p.getState() != SkaterState.BAILED; i++)
@@ -52,7 +52,7 @@ public class SkatePhysicsBailTest
 		// the animator restarts an animation only when the picked action changes: a bail into a wall, W held
 		// throughout, picks BAIL exactly once and keeps it until the reset
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.wallAtY(100, 300), 0, 50, 0f);
-		p.setSpeed(1500f);
+		p.setRollingSpeed(1500f);
 		SkateInput in = new SkateInput();
 		in.pushHeld = true;
 		AnimationPicker.Action current = AnimationPicker.Action.NONE;
@@ -79,7 +79,7 @@ public class SkatePhysicsBailTest
 	public void aBailOnTheGroundStaysOnTheGround()
 	{
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.wallAtY(100, 300), 0, 50, 0f);
-		p.setSpeed(1500f);
+		p.setRollingSpeed(1500f);
 		SkateInput in = new SkateInput();
 		for (int i = 0; i < 10 && p.getState() != SkaterState.BAILED; i++)
 		{

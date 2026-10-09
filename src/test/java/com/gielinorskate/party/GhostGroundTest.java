@@ -71,11 +71,11 @@ public class GhostGroundTest
 					hs[i] = ground.heightAt(xs[i], y);
 				}
 				float x = x0 + 200f + speed * (float) sent;
-				GhostFrame f = new GhostFrame(330, 0, x, y, ground.heightAt(x, y), Angles.PI / 2, speed, 0f, 0f,
+				GhostState f = GhostFeed.frame(330, 0, x, y, ground.heightAt(x, y), Angles.PI / 2, speed, 0f, 0f,
 					SkaterState.ROLLING, null, null, 0f);
 				SkateGhostUpdate m = GhostCodec.encode(f, 0, null);
 				m.seq = next + 1;
-				m.tj = GhostTrajectory.encode(GhostTrajectory.timeMs((float) sent), 0, null, 3, ago, xs, ys, hs, hds,
+				m.tj = GhostFeed.wire(GhostTrajectory.timeMs((float) sent), 0, null, 3, ago, xs, ys, hs, hds,
 					sts, m.x, m.y, m.h, m.hd);
 				g.accept(GhostCodec.decode(m), GhostTrajectory.decode(m.tj, 0, m.x, m.y, m.h, m.hd),
 					(float) (sent + 0.1), ground);

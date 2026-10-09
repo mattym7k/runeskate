@@ -38,7 +38,7 @@ public class SkatePhysicsAirTest
 	public void fullyChargedOllieReachesExpectedHeightAndLands()
 	{
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.flat(), 0, 0, 0);
-		p.setSpeed(500);
+		p.setRollingSpeed(500);
 		float peak = ollie(p, 0.4f, 0f, 0f);
 		// v^2 / 2g = 820^2 / 4000 = 168.1 (ollieImpulse 700 -> 820; was 122.5)
 		assertTrue("peak " + peak, peak > 155f && peak < 170f);
@@ -53,7 +53,7 @@ public class SkatePhysicsAirTest
 	public void uncrouchedOllieIsSmaller()
 	{
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.flat(), 0, 0, 0);
-		p.setSpeed(500);
+		p.setRollingSpeed(500);
 		float peak = ollie(p, 0f, 0f, 0f);
 		// (0.92 * 820)^2 / 4000 = 754.4^2 / 4000 = 142.3 analytic; 20 ms steps reach 0.02 * (18 * 754.4 - 40 * 171)
 		// = 134.8 (minPopFraction 0.85 -> 0.92; was 121.5)
@@ -64,7 +64,7 @@ public class SkatePhysicsAirTest
 	public void ollieClearsLowWall()
 	{
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.wallAtY(640, 80), 0, 0, 0);
-		p.setSpeed(600);
+		p.setRollingSpeed(600);
 		SkateInput idle = new SkateInput();
 		// pop lands around y=490 after the 0.4 s crouch, leaving ~150 units of climb before the wall
 		while (p.getY() < 250)
@@ -80,7 +80,7 @@ public class SkatePhysicsAirTest
 	public void quarterSpinLandingBails()
 	{
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.flat(), 0, 0, 0);
-		p.setSpeed(500);
+		p.setRollingSpeed(500);
 		ollie(p, 0.4f, 1f, 0.2f);
 		assertEquals(SkaterState.BAILED, p.getState());
 		assertEquals(BailReason.SIDEWAYS, p.getLastBailReason());
@@ -90,7 +90,7 @@ public class SkatePhysicsAirTest
 	public void halfSpinLandsFakie()
 	{
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.flat(), 0, 0, 0);
-		p.setSpeed(500);
+		p.setRollingSpeed(500);
 		// 7 rad/s for 0.44 s = 3.08 rad (176.5 deg), within landingToleranceDeg (55, was 35) of 180
 		ollie(p, 0.4f, 1f, 0.44f);
 		assertEquals(SkaterState.ROLLING, p.getState());
@@ -102,7 +102,7 @@ public class SkatePhysicsAirTest
 	public void fiftyDegreeOffAxisLandingNowLands()
 	{
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.flat(), 0, 0, 0);
-		p.setSpeed(500);
+		p.setRollingSpeed(500);
 		// Full charge -> vh = ollieImpulse = 820, continuous hang time T = 2*vh/gravity = 0.82 s.
 		// Steer at 0.1520 (|steer| > 0.1, so spin assist never engages) for the whole flight:
 		// rotation = steer * airSpinRate * T = 0.1520 * 7 * 0.82 = 0.8725 rad = 50 deg
@@ -118,7 +118,7 @@ public class SkatePhysicsAirTest
 	public void spinAssistClosesTheGapAndLandsFakie()
 	{
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.flat(), 0, 0, 0);
-		p.setSpeed(500);
+		p.setRollingSpeed(500);
 		// Uncharged pop -> charge = minPopFraction = 0.92, vh = 0.92 * 820 = 754.4, continuous hang time
 		// T = 2*754.4/2000 = 0.754 s. Steer at full (1) for 0.3 s: rotation = 7*0.3 = 2.1 rad = 120.3 deg,
 		// leaving 0.454 s of hang time (T - 0.3).
@@ -138,7 +138,7 @@ public class SkatePhysicsAirTest
 	public void rollingOffALedgeGoesAirborneThenLands()
 	{
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.stepAtY(300, 100, 0), 0, 0, 0);
-		p.setSpeed(500);
+		p.setRollingSpeed(500);
 		SkateInput idle = new SkateInput();
 		boolean wasAirborne = false;
 		for (int i = 0; i < 100; i++)

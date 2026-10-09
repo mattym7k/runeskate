@@ -25,7 +25,7 @@ public class GrindableBoxPhysicsTest
 	public void rollingIntoABenchIsBlocked()
 	{
 		SkatePhysics p = new SkatePhysics(t, bench(), 5 * T, 2 * T, 0);
-		p.setSpeed(600);
+		p.setRollingSpeed(600);
 		SkateInput idle = new SkateInput();
 		for (int i = 0; i < 150; i++)
 		{
@@ -50,7 +50,7 @@ public class GrindableBoxPhysicsTest
 		GridCollisionWorld w = new GridCollisionWorld(12);
 		w.addGrindableBlocker(5 * T, 650, new float[]{-150, 150, -250, 250}, 0, 100);
 		SkatePhysics p = new SkatePhysics(t, w, 5 * T, 0, 0);
-		p.setSpeed(600);
+		p.setRollingSpeed(600);
 		SkateInput in = new SkateInput();
 		in.crouch = true;
 		for (int i = 0; i < 20; i++)

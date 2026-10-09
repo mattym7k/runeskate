@@ -1,38 +1,23 @@
 package com.gielinorskate.progression;
 
+import lombok.AllArgsConstructor;
+
 /** One or more Skating levels gained at once: reported with the final level. Pure. */
+@AllArgsConstructor
 public final class LevelUp
 {
-	/** A banner shows for every this many levels (and at 99). */
-	public static final int BANNER_EVERY = 10;
+public final int from;
+public final int to;
 
-	public final int from;
-	public final int to;
+/** The level-up chat line (sent tagged as a RuneSkate message). */
+public String message()
+{
+return "You reached Skating level " + to + "!";
+}
 
-	public LevelUp(int from, int to)
-	{
-		this.from = from;
-		this.to = to;
-	}
-
-	/** The level-up chat line (sent tagged as a RuneSkate message). */
-	public String message()
-	{
-		return "You reached Skating level " + to + "!";
-	}
-
-	/** The HUD banner for reaching a multiple of ten (or 99), or null. */
-	public String banner()
-	{
-		if (to >= SkateLevels.MAX_LEVEL)
-		{
-			return "99 Skating!";
-		}
-		return to / BANNER_EVERY > from / BANNER_EVERY ? "Skating level " + to + "!" : null;
-	}
-
-	public boolean isMax()
-	{
-		return to >= SkateLevels.MAX_LEVEL;
-	}
+/** The HUD banner for reaching a multiple of ten (or 99), or null. */
+public String banner()
+{
+return to >= SkateLevels.MAX_LEVEL ? "99 Skating!" : to / 10 > from / 10 ? "Skating level " + to + "!" : null;
+}
 }

@@ -15,7 +15,7 @@ public class ClutterNamesTest
 			"Mushrooms", "Crops", "Hay bales", "Reeds", "Daisies", "Cabbage", "Flax", "Potatoes", "Sapling",
 			"Tree roots", "Thistle", "Nettles", "Red flower"})
 		{
-			assertTrue(n, ClutterNames.passByName(n));
+			assertTrue(n, ObjectNames.passByName(n));
 		}
 	}
 
@@ -25,7 +25,7 @@ public class ClutterNamesTest
 		for (String n : new String[]{"Rocks", "Boulder", "Tree", "Crate", "Fence", "Planter", "Flowerpot stand",
 			"Grassland sign", "Haystack", "Weedkiller", "", null})
 		{
-			assertFalse(String.valueOf(n), ClutterNames.passByName(n));
+			assertFalse(String.valueOf(n), ObjectNames.passByName(n));
 		}
 	}
 
@@ -40,7 +40,7 @@ public class ClutterNamesTest
 			"Wildflowers", "Hay bales", "Jungle bush", "Dead plant", "Small fern", "Snape grass", "Cabbages",
 			"Lavender", "Thornbush", "Creeper", "Flowerbed", "Vegetable patch", "Herb patch"})
 		{
-			assertTrue(n, ClutterNames.passByName(n));
+			assertTrue(n, ObjectNames.passByName(n));
 		}
 	}
 
@@ -54,40 +54,40 @@ public class ClutterNamesTest
 			"Fungus-covered cavern wall", "Rose trellis", "Sign", "Vase of flowers", "Mossy rocks", "Shayzien banner",
 			"Wooden table", "Willow", "Yew"})
 		{
-			assertFalse(n, ClutterNames.passByName(n));
+			assertFalse(n, ObjectNames.passByName(n));
 		}
 	}
 
 	@Test
 	public void theVegetationToggleOffMakesPlantsCollideButOpenDoorsStillPass()
 	{
-		assertTrue(ClutterNames.passThrough("Rosebush", null, true));
-		assertTrue(ClutterNames.passThrough("Thick vines", new String[]{"Cut"}, true));
-		assertFalse(ClutterNames.passThrough("Rosebush", null, false));
-		assertFalse(ClutterNames.passThrough("Thick vines", new String[]{"Cut"}, false));
-		assertTrue(ClutterNames.passThrough("Door", new String[]{"Close"}, false));
-		assertFalse(ClutterNames.passThrough("Oak tree", null, true));
+		assertTrue(ObjectNames.passThrough("Rosebush", null, true));
+		assertTrue(ObjectNames.passThrough("Thick vines", new String[]{"Cut"}, true));
+		assertFalse(ObjectNames.passThrough("Rosebush", null, false));
+		assertFalse(ObjectNames.passThrough("Thick vines", new String[]{"Cut"}, false));
+		assertTrue(ObjectNames.passThrough("Door", new String[]{"Close"}, false));
+		assertFalse(ObjectNames.passThrough("Oak tree", null, true));
 	}
 
 	@Test
 	public void openDoorsAndGatesPassClosedOnesDoNot()
 	{
-		assertTrue(ClutterNames.isOpenDoor("Door", new String[]{"Close", null, null}));
-		assertTrue(ClutterNames.isOpenDoor("Large door", new String[]{null, "close"}));
-		assertTrue(ClutterNames.isOpenDoor("Gate", new String[]{"Close"}));
-		assertFalse(ClutterNames.isOpenDoor("Door", new String[]{"Open"}));
-		assertFalse(ClutterNames.isOpenDoor("Gate", null));
-		assertFalse(ClutterNames.isOpenDoor("Chest", new String[]{"Close"}));
-		assertFalse(ClutterNames.isOpenDoor(null, new String[]{"Close"}));
+		assertTrue(ObjectNames.isOpenDoor("Door", new String[]{"Close", null, null}));
+		assertTrue(ObjectNames.isOpenDoor("Large door", new String[]{null, "close"}));
+		assertTrue(ObjectNames.isOpenDoor("Gate", new String[]{"Close"}));
+		assertFalse(ObjectNames.isOpenDoor("Door", new String[]{"Open"}));
+		assertFalse(ObjectNames.isOpenDoor("Gate", null));
+		assertFalse(ObjectNames.isOpenDoor("Chest", new String[]{"Close"}));
+		assertFalse(ObjectNames.isOpenDoor(null, new String[]{"Close"}));
 	}
 
 	@Test
 	public void passThroughCombinesPlantsAndOpenDoors()
 	{
-		assertTrue(ClutterNames.passThrough("Bush", null));
-		assertTrue(ClutterNames.passThrough("Door", new String[]{"Close"}));
-		assertFalse(ClutterNames.passThrough("Door", new String[]{"Open"}));
-		assertFalse(ClutterNames.passThrough("Rocks", new String[]{"Mine"}));
+		assertTrue(ObjectNames.passThrough("Bush", null, true));
+		assertTrue(ObjectNames.passThrough("Door", new String[]{"Close"}, true));
+		assertFalse(ObjectNames.passThrough("Door", new String[]{"Open"}, true));
+		assertFalse(ObjectNames.passThrough("Rocks", new String[]{"Mine"}, true));
 	}
 
 	/** Stand-in for an object definition with an optional impostor. */
@@ -110,14 +110,14 @@ public class ClutterNamesTest
 	{
 		Def flowers = new Def("Flowers", false, null);
 		Def wrapper = new Def("null", true, flowers);
-		Def resolved = ClutterNames.resolve(wrapper, d -> d.hasImpostors, d -> d.impostor);
+		Def resolved = ObjectNames.resolve(wrapper, d -> d.hasImpostors, d -> d.impostor);
 		assertEquals("Flowers", resolved.name);
-		assertTrue(ClutterNames.passByName(resolved.name));
-		assertFalse("the wrapper's own name says nothing", ClutterNames.passByName(wrapper.name));
+		assertTrue(ObjectNames.passByName(resolved.name));
+		assertFalse("the wrapper's own name says nothing", ObjectNames.passByName(wrapper.name));
 		Def plain = new Def("Rocks", false, null);
-		assertEquals("Rocks", ClutterNames.resolve(plain, d -> d.hasImpostors, d -> d.impostor).name);
+		assertEquals("Rocks", ObjectNames.resolve(plain, d -> d.hasImpostors, d -> d.impostor).name);
 		// a varbit-driven object currently showing nothing resolves to nothing
-		assertNull(ClutterNames.resolve(new Def("null", true, null), d -> d.hasImpostors, d -> d.impostor));
-		assertNull(ClutterNames.resolve((Def) null, d -> d.hasImpostors, d -> d.impostor));
+		assertNull(ObjectNames.resolve(new Def("null", true, null), d -> d.hasImpostors, d -> d.impostor));
+		assertNull(ObjectNames.resolve((Def) null, d -> d.hasImpostors, d -> d.impostor));
 	}
 }

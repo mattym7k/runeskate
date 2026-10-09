@@ -5,6 +5,7 @@ import com.gielinorskate.tricks.Gesture;
 import com.gielinorskate.world.GridCollisionWorld;
 import com.gielinorskate.world.GrindMap;
 import com.gielinorskate.world.GrindSegment;
+import com.gielinorskate.world.WorldTests;
 import org.junit.Test;
 
 /**
@@ -73,7 +74,7 @@ public class GrindLockRateSweepTest
 	private static GridCollisionWorld rail(float h, boolean realBox)
 	{
 		GridCollisionWorld w = new GridCollisionWorld(N);
-		w.addGrindSegment(new GrindSegment(RAIL_X0, RAIL_Y, RAIL_X1, RAIL_Y, h));
+		WorldTests.addGrindSegment(w, new GrindSegment(RAIL_X0, RAIL_Y, RAIL_X1, RAIL_Y, h));
 		if (realBox)
 		{
 			w.addGrindableBlocker(MID_X, RAIL_Y, new float[]{RAIL_X0 - MID_X, RAIL_X1 - MID_X, -4, 4}, 0, h);
@@ -90,7 +91,7 @@ public class GrindLockRateSweepTest
 		float perp = popDist + v * (float) Math.sin(th) * chargeSteps * DT;
 		SkatePhysics p = new SkatePhysics(new SkateTuning(), w, grinds, MID_X - perp / (float) Math.tan(th),
 			RAIL_Y - perp, heading);
-		p.setSpeed(v);
+		p.setRollingSpeed(v);
 		SkateInput in = new SkateInput();
 		for (int i = 0; i < 400; i++)
 		{

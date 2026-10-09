@@ -174,7 +174,7 @@ land across the rail for slides.
 - **Advanced** (collapsed): speed and jump height, riding through plants, skating in PvP areas (off by
   default), every key rebind (wheelie, lean, brake, board on/off), flick button, mirrored flicks
   and sensitivity, the controls card, trick hints and flick visualizer, sound volume, bail jokes, level-up
-  notifications, daily goals, **Board model** (RuneSkate or Classic), **Board detail** (party members' boards are
+  notifications, daily goals, **Board detail** (party members' boards are
   always Normal), smooth motion and showing grindable edges.
 
 ## Safety
@@ -197,11 +197,6 @@ it is never mistaken for a game message.
 
 ## Development
 
-`./gradlew run` launches a developer RuneLite client with the plugin loaded. In developer mode the
-`::skatepose`, `::skategrinds`, `::skateboxes` and `::skategesture` commands turn on debug views, and
-`::skatelevel [1-99]` shows or sets your Skating level to try the designs (the account is marked as set by hand);
-`::skateboard runeskate|classic` switches your board model until the setting changes.
-`::skateghosts` prints one line per party ghost: distance, detail level, what its body is drawn as, the reason for
-any fallback, and how it moves.
+`./gradlew run` launches a developer RuneLite client with the plugin loaded.
 
 The board model and the bundled board designs ship pre-baked in the plugin's resources.

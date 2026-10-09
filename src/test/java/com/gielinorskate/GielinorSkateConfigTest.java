@@ -168,9 +168,9 @@ public class GielinorSkateConfigTest
 		}
 	}
 
-	/** Controller presets retired the pad A / X keys: their keyNames stay (hidden), and the new state is hidden. */
+	/** The custom controller layout is hidden state, and the preset defaults to Skate 3. */
 	@Test
-	public void theRetiredPadKeysAreKeptHiddenAndThePresetDefaultsToSkate3() throws IOException
+	public void theCustomLayoutIsHiddenAndThePresetDefaultsToSkate3() throws IOException
 	{
 		Set<String> hidden = new HashSet<>();
 		for (String body : items())
@@ -180,16 +180,12 @@ public class GielinorSkateConfigTest
 				hidden.add(key(body));
 			}
 		}
-		for (String k : Arrays.asList("customControllerLayout", "controllerProfileNotice"))
-		{
-			assertTrue(k + " is hidden", hidden.contains(k));
-		}
+		assertTrue(hidden.contains("customControllerLayout"));
 		GielinorSkateConfig defaults = new GielinorSkateConfig()
 		{
 		};
 		assertEquals(GielinorSkateConfig.ControllerPreset.SKATE_3, defaults.controllerPreset());
 		assertEquals("", defaults.customControllerLayout());
-		assertEquals(0, defaults.controllerProfileNotice());
 	}
 
 	@Test

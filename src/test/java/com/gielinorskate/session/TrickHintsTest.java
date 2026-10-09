@@ -14,12 +14,12 @@ public class TrickHintsTest
 	public void aHintShowsThenFades()
 	{
 		TrickHints h = new TrickHints();
-		assertNull(h.text(0f));
+		assertNull(h.text(0f, false));
 		assertTrue(h.offer(NearMiss.TOO_SLOW, 10f));
-		assertEquals(NearMiss.TOO_SLOW.hint, h.text(10f));
+		assertEquals(NearMiss.TOO_SLOW.hint, h.text(10f, false));
 		assertEquals(1f, h.alpha(11.9f), 1e-4f);
 		assertEquals(0.5f, h.alpha(12.25f), 1e-4f);
-		assertNull(h.text(12.5f));
+		assertNull(h.text(12.5f, false));
 	}
 
 	@Test
@@ -42,9 +42,9 @@ public class TrickHintsTest
 		TrickHints h = new TrickHints();
 		assertTrue(h.offer(NearMiss.TOO_SLOW, 0f));
 		assertFalse(h.offer(NearMiss.NO_WIND_UP, 3.9f));
-		assertEquals(NearMiss.TOO_SLOW.hint, h.text(1f));
+		assertEquals(NearMiss.TOO_SLOW.hint, h.text(1f, false));
 		assertTrue(h.offer(NearMiss.NO_WIND_UP, 4f));
-		assertEquals(NearMiss.NO_WIND_UP.hint, h.text(4f));
+		assertEquals(NearMiss.NO_WIND_UP.hint, h.text(4f, false));
 	}
 
 	@Test
@@ -53,7 +53,7 @@ public class TrickHintsTest
 		TrickHints h = new TrickHints();
 		h.offer(NearMiss.TOO_SHORT, 0f);
 		h.onTrick();
-		assertNull(h.text(0.5f));
+		assertNull(h.text(0.5f, false));
 		assertFalse(h.offer(NearMiss.TOO_SHORT, 1f));
 	}
 
@@ -64,7 +64,7 @@ public class TrickHintsTest
 		assertFalse(h.offer(null, 0f));
 		h.offer(NearMiss.TOO_SHORT, 0f);
 		h.reset();
-		assertNull(h.text(0f));
+		assertNull(h.text(0f, false));
 		assertTrue(h.offer(NearMiss.TOO_SHORT, 0.1f));
 	}
 }

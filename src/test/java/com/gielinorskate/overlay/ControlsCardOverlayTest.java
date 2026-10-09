@@ -15,7 +15,7 @@ public class ControlsCardOverlayTest
 {
 	private static ControlsCardOverlay.Spec spec()
 	{
-		return new ControlsCardOverlay.Spec("Space", false, true, "right", false, false);
+		return new ControlsCardOverlay.Spec("Space", false, true, "right", false, false, false, false, "F", com.gielinorskate.controller.PadPreset.skate3());
 	}
 
 	private static String text(ControlsCardOverlay.Spec spec)
@@ -47,7 +47,7 @@ public class ControlsCardOverlayTest
 			for (boolean onFoot : new boolean[]{false, true})
 			{
 				String card = text(new ControlsCardOverlay.Spec("Space", true, true, "right", false, false, controller,
-					onFoot, "F"));
+					onFoot, "F", com.gielinorskate.controller.PadPreset.skate3()));
 				assertFalse(card, card.contains("next page"));
 				assertFalse(card, card.contains("/3)"));
 			}
@@ -62,7 +62,7 @@ public class ControlsCardOverlayTest
 			for (boolean onFoot : new boolean[]{false, true})
 			{
 				String card = text(new ControlsCardOverlay.Spec("Space", false, true, "right", false, true, controller,
-					onFoot, "F"));
+					onFoot, "F", com.gielinorskate.controller.PadPreset.skate3()));
 				assertTrue(card, card.contains("Full trick list: Trick Book in the side panel"));
 			}
 		}
@@ -87,7 +87,7 @@ public class ControlsCardOverlayTest
 	@Test
 	public void onceLearnedTheCardDropsTheReminder()
 	{
-		ControlsCardOverlay.Spec learned = new ControlsCardOverlay.Spec("Space", false, true, "right", false, true);
+		ControlsCardOverlay.Spec learned = new ControlsCardOverlay.Spec("Space", false, true, "right", false, true, false, false, "F", com.gielinorskate.controller.PadPreset.skate3());
 		assertFalse(text(learned).contains("Push and jump once"));
 	}
 
@@ -113,7 +113,7 @@ public class ControlsCardOverlayTest
 	@Test
 	public void mirroredFlicksSwapThePictureButNotTheTrick()
 	{
-		ControlsCardOverlay.Spec mirrored = new ControlsCardOverlay.Spec("Space", false, true, "right", true, false);
+		ControlsCardOverlay.Spec mirrored = new ControlsCardOverlay.Spec("Space", false, true, "right", true, false, false, false, "F", com.gielinorskate.controller.PadPreset.skate3());
 		assertEquals(Direction.UP_RIGHT, flickFor(mirrored, "kickflip"));
 		assertEquals(Direction.RIGHT, flickFor(mirrored, "shove-it"));
 	}
@@ -121,14 +121,14 @@ public class ControlsCardOverlayTest
 	@Test
 	public void keyboardOnlyHasNoFlickPictures()
 	{
-		ControlsCardOverlay.Spec kb = new ControlsCardOverlay.Spec("C", true, false, "right", false, true);
+		ControlsCardOverlay.Spec kb = new ControlsCardOverlay.Spec("C", true, false, "right", false, true, false, false, "F", com.gielinorskate.controller.PadPreset.skate3());
 		assertTrue(ControlsCardOverlay.rows(kb).stream().allMatch(r -> r.cells == null && r.glyph == null));
 	}
 
 	@Test
 	public void keyboardModeExplainsTheKeysAndTheManualKey()
 	{
-		ControlsCardOverlay.Spec kb = new ControlsCardOverlay.Spec("C", true, false, "right", false, true);
+		ControlsCardOverlay.Spec kb = new ControlsCardOverlay.Spec("C", true, false, "right", false, true, false, false, "F", com.gielinorskate.controller.PadPreset.skate3());
 		String card = text(kb);
 		assertTrue(card, card.contains("Space: ollie   1: kickflip   2: heelflip"));
 		assertTrue(card.contains("Alt: nollie"));
@@ -139,7 +139,7 @@ public class ControlsCardOverlayTest
 
 	private static ControlsCardOverlay.Spec pad(boolean mirror)
 	{
-		return new ControlsCardOverlay.Spec("Space", false, true, "right", mirror, false, true);
+		return new ControlsCardOverlay.Spec("Space", false, true, "right", mirror, false, true, false, "F", com.gielinorskate.controller.PadPreset.skate3());
 	}
 
 	@Test
@@ -167,7 +167,7 @@ public class ControlsCardOverlayTest
 		assertTrue(walk, walk.contains("Hold {L3} and move {RS}: turn the camera"));
 		assertTrue(walk, ControlsCardOverlay.rows(foot).size() <= 9);
 		assertFalse(board.equals(new ControlsCardOverlay.Spec("Space", false, true, "right", false, true, true, false,
-			"F")));
+			"F", com.gielinorskate.controller.PadPreset.skate3())));
 	}
 
 	@Test
@@ -194,15 +194,15 @@ public class ControlsCardOverlayTest
 	public void controllerModeIsPartOfTheSpecsEquality()
 	{
 		assertFalse(pad(false).equals(spec()));
-		assertEquals(spec(), new ControlsCardOverlay.Spec("Space", false, true, "right", false, false, false));
+		assertEquals(spec(), new ControlsCardOverlay.Spec("Space", false, true, "right", false, false, false, false, "F", com.gielinorskate.controller.PadPreset.skate3()));
 		assertEquals(spec().hashCode(),
-			new ControlsCardOverlay.Spec("Space", false, true, "right", false, false, false).hashCode());
+			new ControlsCardOverlay.Spec("Space", false, true, "right", false, false, false, false, "F", com.gielinorskate.controller.PadPreset.skate3()).hashCode());
 	}
 
 	@Test
 	public void flickButtonIsNamed()
 	{
-		ControlsCardOverlay.Spec left = new ControlsCardOverlay.Spec("Space", false, true, "left", false, false);
+		ControlsCardOverlay.Spec left = new ControlsCardOverlay.Spec("Space", false, true, "left", false, false, false, false, "F", com.gielinorskate.controller.PadPreset.skate3());
 		assertTrue(text(left).contains("hold the left mouse button"));
 	}
 
@@ -210,8 +210,8 @@ public class ControlsCardOverlayTest
 	public void fixedModeRegionStaysInTheViewportAboveTheTrickStack()
 	{
 		// fixed mode: a 512 x 334 viewport at (4, 4) on a 765 x 503 canvas, the side panel to its right
-		int[] r = ControlsCardOverlay.region(4, 4, 512, 334, 765, 503);
-		HudLayout hud = HudLayout.of(4, 4, 512, 334, 765, 503);
+		int[] r = ControlsCardOverlay.region(new HudLayout(4, 4, 512, 334, 765, 503, HudLayout.NO_OBSTACLE));
+		HudLayout hud = new HudLayout(4, 4, 512, 334, 765, 503, HudLayout.NO_OBSTACLE);
 		assertTrue("left " + r[0], r[0] >= 4);
 		assertTrue("top " + r[1], r[1] >= 4);
 		assertTrue("right " + (r[0] + r[2]), r[0] + r[2] <= 4 + 512);
@@ -221,7 +221,7 @@ public class ControlsCardOverlayTest
 	@Test
 	public void everyModeIsScaledToFitTheFixedModeRegion()
 	{
-		int[] r = ControlsCardOverlay.region(4, 4, 512, 334, 765, 503);
+		int[] r = ControlsCardOverlay.region(new HudLayout(4, 4, 512, 334, 765, 503, HudLayout.NO_OBSTACLE));
 		Graphics2D g = new BufferedImage(8, 8, BufferedImage.TYPE_INT_ARGB).createGraphics();
 		try
 		{
@@ -236,7 +236,7 @@ public class ControlsCardOverlayTest
 					for (boolean controller : new boolean[]{false, true})
 					{
 						ControlsCardOverlay.Spec s = new ControlsCardOverlay.Spec("Space", keyboard, mouse, "right",
-							false, false, controller);
+							false, false, controller, false, "F", com.gielinorskate.controller.PadPreset.skate3());
 						ControlsCardOverlay.Card card = ControlsCardOverlay.fit(g, ControlsCardOverlay.rows(s), r[2],
 							r[3]);
 						String what = "keyboard " + keyboard + " mouse " + mouse + (controller ? " (controller)" : "");
@@ -255,7 +255,7 @@ public class ControlsCardOverlayTest
 	@Test
 	public void largeViewportUsesTheFullSizeFont()
 	{
-		int[] r = ControlsCardOverlay.region(0, 0, 1600, 900, 1600, 900);
+		int[] r = ControlsCardOverlay.region(new HudLayout(0, 0, 1600, 900, 1600, 900, HudLayout.NO_OBSTACLE));
 		Graphics2D g = new BufferedImage(8, 8, BufferedImage.TYPE_INT_ARGB).createGraphics();
 		try
 		{

@@ -26,7 +26,7 @@ public class SkatePhysicsWallTest
 		// 30 deg incidence at 800; the old slide turned the board 30 -> 87 deg in two steps. A barely-held
 		// steer (0.01 * <= 2.6 rad/s = 1.5 deg/s at most) must be all that turns it.
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.wallAtY(100, 300), 0, 90, (float) Math.toRadians(30));
-		p.setSpeed(800f);
+		p.setRollingSpeed(800f);
 		SkateInput in = new SkateInput();
 		in.steer = 0.01f;
 		SkatePhysicsRollingTest.run(p, in, 0.5f);
@@ -39,7 +39,7 @@ public class SkatePhysicsWallTest
 	public void withoutSteerTheBoardEasesAlongTheWallSlowly()
 	{
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.wallAtY(100, 300), 0, 90, (float) Math.toRadians(30));
-		p.setSpeed(800f);
+		p.setRollingSpeed(800f);
 		SkateInput in = new SkateInput();
 		float maxTurn = 0f;
 		for (int i = 0; i < 60; i++)
@@ -63,7 +63,7 @@ public class SkatePhysicsWallTest
 		// 248 u/s^2, ~124) and a scrape of 400 * into while the board eases the last 10 deg (~0.12 s, < 5):
 		// about 1210 left. The old slide re-projected the speed every step.
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.wallAtY(100, 300), 0, 95, (float) Math.toRadians(80));
-		p.setSpeed(1400f);
+		p.setRollingSpeed(1400f);
 		SkatePhysicsRollingTest.run(p, new SkateInput(), 0.5f);
 		assertEquals(SkaterState.ROLLING, p.getState());
 		assertTrue("speed " + p.getSpeed(), p.getSpeed() > 1150f);
@@ -93,7 +93,7 @@ public class SkatePhysicsWallTest
 	{
 		// 1400 at 30 deg: 1400 * cos 30 = 1212 > 1100 and within the 30 deg cone -> bail
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.wallAtY(100, 300), 0, 90, (float) Math.toRadians(30));
-		p.setSpeed(1400f);
+		p.setRollingSpeed(1400f);
 		SkatePhysicsRollingTest.run(p, new SkateInput(), 0.2f);
 		assertEquals(SkaterState.BAILED, p.getState());
 	}
@@ -103,7 +103,7 @@ public class SkatePhysicsWallTest
 	{
 		// 1400 * cos 31 = 1200 > 1100, but outside the 30 deg cone: a hard scrape, not a bail
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.wallAtY(100, 300), 0, 90, (float) Math.toRadians(31));
-		p.setSpeed(1400f);
+		p.setRollingSpeed(1400f);
 		SkatePhysicsRollingTest.run(p, new SkateInput(), 0.2f);
 		assertEquals(SkaterState.ROLLING, p.getState());
 		assertFalse(p.drainEvents().contains(SkateEvent.BAIL));
@@ -114,7 +114,7 @@ public class SkatePhysicsWallTest
 	{
 		// 1000 head-on: 1000 * 1 < wallBailSpeed 1100
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.wallAtY(100, 300), 0, 50, 0f);
-		p.setSpeed(1000f);
+		p.setRollingSpeed(1000f);
 		SkatePhysicsRollingTest.run(p, new SkateInput(), 0.3f);
 		assertEquals(SkaterState.ROLLING, p.getState());
 		assertEquals(0f, p.getSpeed(), 0f);
@@ -126,7 +126,7 @@ public class SkatePhysicsWallTest
 	{
 		// 45 deg at 1000: impact 1000 * cos 45 = 707 > wallStumbleSpeed 600 -> 0.3 s with steering locked
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.wallAtY(100, 300), 0, 95, (float) Math.toRadians(45));
-		p.setSpeed(1000f);
+		p.setRollingSpeed(1000f);
 		SkateInput in = new SkateInput();
 		in.steer = -1f; // into the wall: would turn the board left (toward north) if it worked
 		p.step(DT, in);
@@ -155,7 +155,7 @@ public class SkatePhysicsWallTest
 	{
 		// 60 deg at 1000 (58 after the first step's steer): impact 1000 * cos 58 = 530 < 600, no stumble
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.wallAtY(100, 300), 0, 95, (float) Math.toRadians(60));
-		p.setSpeed(1000f);
+		p.setRollingSpeed(1000f);
 		SkateInput in = new SkateInput();
 		in.steer = -1f;
 		p.step(DT, in);
@@ -169,7 +169,7 @@ public class SkatePhysicsWallTest
 	{
 		// a dropped-in ollie at 1200 head-on into a 300-high wall: 1200 * 1 > 1100 (was only > 1300)
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.wallAtY(200, 300), 0, 0, 0f);
-		p.setSpeed(1200f);
+		p.setRollingSpeed(1200f);
 		SkateInput in = new SkateInput();
 		in.gestures.add(new com.gielinorskate.tricks.Gesture(com.gielinorskate.tricks.Gesture.Direction.UP, false, 0f));
 		SkatePhysicsRollingTest.run(p, in, 0.3f);
@@ -180,7 +180,7 @@ public class SkatePhysicsWallTest
 	public void afterAWallBailTheSkaterRecoversAlongTheWallAndCanRideOff()
 	{
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.wallAtY(100, 300), 0, 50, 0f);
-		p.setSpeed(1500f);
+		p.setRollingSpeed(1500f);
 		SkatePhysicsRollingTest.run(p, new SkateInput(), 0.2f);
 		assertEquals(SkaterState.BAILED, p.getState());
 		// bailAutoReset 1.0 -> 0.5
@@ -201,7 +201,7 @@ public class SkatePhysicsWallTest
 	{
 		// stumble (as above), pop straight away and land ~0.75 s later: the 0.3 s steering lock is long over
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.wallAtY(100, 300), 0, 95, (float) Math.toRadians(45));
-		p.setSpeed(1000f);
+		p.setRollingSpeed(1000f);
 		SkateInput in = new SkateInput();
 		p.step(DT, in);
 		in.gestures.add(new com.gielinorskate.tricks.Gesture(com.gielinorskate.tricks.Gesture.Direction.UP, false, 0f));

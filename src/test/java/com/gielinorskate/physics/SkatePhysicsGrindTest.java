@@ -45,7 +45,7 @@ public class SkatePhysicsGrindTest
 	private SkatePhysics rolling(GrindMap grinds, float speed, float heading)
 	{
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.flat(), grinds, 0, 0, heading);
-		p.setSpeed(speed);
+		p.setRollingSpeed(speed);
 		return p;
 	}
 
@@ -380,7 +380,7 @@ public class SkatePhysicsGrindTest
 	public void oldConstructorHasNoGrinds()
 	{
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.flat(), 0, 0, 0);
-		p.setSpeed(500);
+		p.setRollingSpeed(500);
 		SkateInput in = new SkateInput();
 		pop(p, in);
 		stepWhile(p, in, SkaterState.AIRBORNE);
@@ -410,7 +410,7 @@ public class SkatePhysicsGrindTest
 		// falling 168 - 144 = 24 takes sqrt(2 * 24 / 2000) = 0.15 s, i.e. ~90 units at 600 u/s along the rail.
 		GridCollisionWorld w = tallFenceWorld();
 		SkatePhysics p = new SkatePhysics(t, w, w.getGrinds(), 374, 150, 0);
-		p.setSpeed(600);
+		p.setRollingSpeed(600);
 		SkateInput in = new SkateInput();
 		in.crouch = true;
 		for (int i = 0; i < 20; i++) // 0.4 s > crouchChargeTime 0.20 s
@@ -433,7 +433,7 @@ public class SkatePhysicsGrindTest
 		// quick flick now catches it (snapping up at most 32)
 		GridCollisionWorld w = tallFenceWorld();
 		SkatePhysics p = new SkatePhysics(t, w, w.getGrinds(), 374, 150, 0);
-		p.setSpeed(600);
+		p.setRollingSpeed(600);
 		SkateInput in = new SkateInput();
 		pop(p, in);
 		stepWhile(p, in, SkaterState.AIRBORNE);
@@ -447,7 +447,7 @@ public class SkatePhysicsGrindTest
 		// rolling east into the fence at x = 384: blocker top 160 > h 0 + maxStepUp 24
 		GridCollisionWorld w = tallFenceWorld();
 		SkatePhysics rollIn = new SkatePhysics(t, w, w.getGrinds(), 200, 600, (float) Math.PI / 2);
-		rollIn.setSpeed(600);
+		rollIn.setRollingSpeed(600);
 		SkateInput in = new SkateInput();
 		for (int i = 0; i < 50; i++)
 		{
@@ -457,7 +457,7 @@ public class SkatePhysicsGrindTest
 
 		// a quick flick peaks at 134.8 in 20 ms steps, and 160 > 134.8 + 24, so it is stopped in the air too
 		SkatePhysics hop = new SkatePhysics(t, w, w.getGrinds(), 200, 600, (float) Math.PI / 2);
-		hop.setSpeed(600);
+		hop.setRollingSpeed(600);
 		pop(hop, in);
 		for (int i = 0; i < 100 && hop.getState() != SkaterState.ROLLING; i++)
 		{

@@ -3,6 +3,7 @@ package com.gielinorskate.physics;
 import static org.junit.Assert.assertTrue;
 import com.gielinorskate.world.BlockerSet;
 import com.gielinorskate.world.GridCollisionWorld;
+import com.gielinorskate.world.WorldTests;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.Test;
@@ -113,10 +114,10 @@ public class WallEscapeSweepTest
 			{
 				GridCollisionWorld w = new GridCollisionWorld(20);
 				w.addGrindableBlocker(C, C, new float[]{-200f, 200f, -4f, 4f}, (int) (a / 360f * 2048f), hgt);
-				for (com.gielinorskate.world.GrindSegment g : com.gielinorskate.world.ObjectRailShape.segments(C, C,
-					new float[]{-200f, 200f, -4f, 4f}, (int) (a / 360f * 2048f), 0f))
+				for (com.gielinorskate.world.GrindSegment g : com.gielinorskate.world.ObjectShapes.segments(C, C,
+					new float[]{-200f, 200f, -4f, 4f}, (int) (a / 360f * 2048f)))
 				{
-					w.addGrindSegment(new com.gielinorskate.world.GrindSegment(g.x0, g.y0, g.x1, g.y1, hgt));
+					WorldTests.addGrindSegment(w, new com.gielinorskate.world.GrindSegment(g.x0, g.y0, g.x1, g.y1, hgt));
 				}
 				Scene probe = new Scene("x", w, C, C, 0);
 				float[] n = faceOf(probe.world, C, C);
@@ -234,7 +235,7 @@ public class WallEscapeSweepTest
 		float start = 260f;
 		SkatePhysics p = new SkatePhysics(t, sc.world, sc.world.getGrinds(), sc.px - dx * start + sc.nx * 1f,
 			sc.py - dy * start + sc.ny * 1f, travel);
-		p.setSpeed(speed);
+		p.setRollingSpeed(speed);
 		SkateInput in = new SkateInput();
 		in.pushHeld = pushIn;
 		boolean hit = false;

@@ -38,8 +38,8 @@ public class GridCollisionWorldTest
 	public void groundIsBilinearBetweenCorners()
 	{
 		GridCollisionWorld w = new GridCollisionWorld(4);
-		w.setCornerHeight(1, 0, 100f);
-		w.setCornerHeight(1, 1, 100f);
+		WorldTests.setCornerHeight(w, 1, 0, 100f);
+		WorldTests.setCornerHeight(w, 1, 1, 100f);
 		// tile (0,0): west corners 0, east corners 100 -> centre 50
 		assertEquals(50f, w.groundHeight(0.5f * T, 0.5f * T), 1e-3f);
 		assertEquals(100f, w.groundHeight(1.0f * T, 0.5f * T), 1e-3f);

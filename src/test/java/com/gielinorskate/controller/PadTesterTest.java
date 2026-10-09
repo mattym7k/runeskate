@@ -55,7 +55,6 @@ public class PadTesterTest
 		t.mouse(160, 100, 1050);
 		assertEquals(1.2f / PadTester.FULL_TILT, t.rightX(), 1e-4);
 		assertEquals(0f, t.rightY(), 1e-4);
-		assertTrue(t.rightStickSeen());
 		t.mouse(160, 100, 1100);
 		assertEquals("still, but not for long yet", 1f, t.rightX(), 1e-4);
 		t.mouse(160, 100, 1300);
@@ -72,7 +71,6 @@ public class PadTesterTest
 		t.mouse(100, 100, 1000);
 		t.mouse(500, 100, 5000);
 		assertEquals(0f, t.rightX(), 1e-4);
-		assertFalse(t.rightStickSeen());
 	}
 
 	@Test

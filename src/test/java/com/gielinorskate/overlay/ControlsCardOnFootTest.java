@@ -13,7 +13,7 @@ public class ControlsCardOnFootTest
 	private static ControlsCardOverlay.Spec spec(boolean controller, boolean onFoot, String boardKey)
 	{
 		return new ControlsCardOverlay.Spec("Space", false, true, "right", false, false, controller, onFoot,
-			boardKey);
+			boardKey, com.gielinorskate.controller.PadPreset.skate3());
 	}
 
 	private static String text(ControlsCardOverlay.Spec spec)
@@ -69,7 +69,7 @@ public class ControlsCardOnFootTest
 	@Test
 	public void theOnFootPageFitsTheFixedModeRegion()
 	{
-		int[] r = ControlsCardOverlay.region(4, 4, 512, 334, 765, 503);
+		int[] r = ControlsCardOverlay.region(new HudLayout(4, 4, 512, 334, 765, 503, HudLayout.NO_OBSTACLE));
 		Graphics2D g = new BufferedImage(8, 8, BufferedImage.TYPE_INT_ARGB).createGraphics();
 		try
 		{

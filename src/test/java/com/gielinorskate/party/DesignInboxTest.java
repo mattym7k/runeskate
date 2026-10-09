@@ -60,7 +60,7 @@ public class DesignInboxTest
 		assertEquals(d.height, a.height);
 		assertEquals("Mine", a.name);
 		assertEquals(d.hash, DesignShare.hash(a.png));
-		assertEquals(0, inbox.pendingCount());
+		assertEquals(0, inbox.pending.size());
 	}
 
 	@Test
@@ -101,7 +101,7 @@ public class DesignInboxTest
 		{
 			assertNull(inbox.chunk(2L, (SkateDesignChunk) msgs.get(i), 0f));
 		}
-		assertEquals(1, inbox.pendingCount());
+		assertEquals(1, inbox.pending.size());
 	}
 
 	private static SkateDesignOffer offer(String part, String hash, int chunks, int w, int h)
@@ -158,7 +158,7 @@ public class DesignInboxTest
 		assertNull(inbox.chunk(1L, chunk("0123abcd", 0, repeat('A', 1001)), 0f));
 		assertNull(inbox.chunk(1L, chunk("bad", 0, "AAAA"), 0f));
 		assertNull(inbox.chunk(1L, null, 0f));
-		assertEquals(1, inbox.pendingCount());
+		assertEquals(1, inbox.pending.size());
 	}
 
 	@Test
@@ -166,7 +166,7 @@ public class DesignInboxTest
 	{
 		inbox.offer(1L, offer("deck", "0123abcd", 1, 35, 96), 0f);
 		assertNull(inbox.chunk(1L, chunk("0123abcd", 0, "AAAA"), 0f));
-		assertEquals(0, inbox.pendingCount());
+		assertEquals(0, inbox.pending.size());
 	}
 
 	@Test
@@ -178,9 +178,9 @@ public class DesignInboxTest
 		{
 			assertNull(inbox.chunk(1L, chunk("0123abcd", i, repeat('A', 1000)), 0f));
 		}
-		assertEquals(1, inbox.pendingCount());
+		assertEquals(1, inbox.pending.size());
 		assertNull(inbox.chunk(1L, chunk("0123abcd", 8, repeat('A', 1000)), 0f));
-		assertEquals(0, inbox.pendingCount());
+		assertEquals(0, inbox.pending.size());
 	}
 
 	@Test
@@ -190,9 +190,9 @@ public class DesignInboxTest
 		List<PartyMessage> msgs = d.messages();
 		inbox.offer(1L, (SkateDesignOffer) msgs.get(0), 0f);
 		inbox.expire(29.9f);
-		assertEquals(1, inbox.pendingCount());
+		assertEquals(1, inbox.pending.size());
 		inbox.expire(30.1f);
-		assertEquals(0, inbox.pendingCount());
+		assertEquals(0, inbox.pending.size());
 		// the rest arriving late completes nothing
 		for (int i = 1; i < msgs.size(); i++)
 		{
@@ -210,15 +210,15 @@ public class DesignInboxTest
 		// a chunk at 25 s keeps it past 30 s
 		inbox.chunk(1L, (SkateDesignChunk) msgs.get(1), 25f);
 		inbox.expire(50f);
-		assertEquals(1, inbox.pendingCount());
+		assertEquals(1, inbox.pending.size());
 		// the same offer again at 54 s: the chunk already here still counts, and the clock starts again
 		assertTrue(inbox.offer(1L, (SkateDesignOffer) msgs.get(0), 54f));
 		inbox.expire(80f);
-		assertEquals(1, inbox.pendingCount());
+		assertEquals(1, inbox.pending.size());
 		// a repeat of a chunk already here is not progress
 		assertNull(inbox.chunk(1L, (SkateDesignChunk) msgs.get(1), 83f));
 		inbox.expire(84.1f);
-		assertEquals(0, inbox.pendingCount());
+		assertEquals(0, inbox.pending.size());
 		// offered again: every chunk but the first arriving a minute apart (each within 30 s) completes it
 		inbox.offer(1L, (SkateDesignOffer) msgs.get(0), 100f);
 		DesignInbox.Assembled a = null;
@@ -242,7 +242,7 @@ public class DesignInboxTest
 		DesignShare.Outgoing newer = design(DesignPart.DECK, 3000, 6);
 		inbox.offer(1L, (SkateDesignOffer) older.messages().get(0), 0f);
 		inbox.offer(1L, (SkateDesignOffer) newer.messages().get(0), 0f);
-		assertEquals(1, inbox.pendingCount());
+		assertEquals(1, inbox.pending.size());
 		assertNotNull(feed(1L, newer, 1f));
 	}
 
@@ -254,16 +254,16 @@ public class DesignInboxTest
 			inbox.offer(1L, offer(i % 2 == 0 ? "deck" : "grip", String.format("%08x", i), 2, 30, 90), 0f);
 		}
 		// one per part: deck and grip
-		assertEquals(2, inbox.pendingCount());
+		assertEquals(2, inbox.pending.size());
 		for (long m = 0; m < 40; m++)
 		{
 			inbox.offer(m + 100, offer("deck", "0123abcd", 2, 30, 90), 0f);
 		}
-		assertEquals(DesignInbox.MAX_PENDING, inbox.pendingCount());
+		assertEquals(DesignInbox.MAX_PENDING, inbox.pending.size());
 		inbox.forget(139L);
-		assertEquals(DesignInbox.MAX_PENDING - 1, inbox.pendingCount());
+		assertEquals(DesignInbox.MAX_PENDING - 1, inbox.pending.size());
 		inbox.clear();
-		assertEquals(0, inbox.pendingCount());
+		assertEquals(0, inbox.pending.size());
 	}
 
 	@Test

@@ -52,7 +52,6 @@ public class CustomDesignRulesTest
 		assertNotNull(CustomDesignRules.nameProblem(null));
 		assertNotNull(CustomDesignRules.nameProblem("<b>bold</b>"));
 		assertNotNull(CustomDesignRules.nameProblem("dot."));
-		assertEquals("My wheels", CustomDesignRules.defaultName(DesignPart.WHEELS));
 	}
 
 	@Test
@@ -64,10 +63,26 @@ public class CustomDesignRulesTest
 		assertNull(CustomDesignRules.imageProblem(4096, 4096));
 		assertNotNull(CustomDesignRules.imageProblem(4097, 10));
 		assertNotNull(CustomDesignRules.imageProblem(10, 4097));
-		assertTrue(CustomDesignRules.isImageFile("a.PNG"));
-		assertTrue(CustomDesignRules.isImageFile("b.jpeg"));
-		assertFalse(CustomDesignRules.isImageFile("c.exe"));
-		assertFalse(CustomDesignRules.isImageFile("png"));
+	}
+
+	@Test
+	public void theLayoutMatchesTheToolsFile() throws Exception
+	{
+		com.google.gson.JsonObject parts;
+		try (java.io.Reader r = new java.io.InputStreamReader(
+			getClass().getResourceAsStream("/com/gielinorskate/design_layout.json"), "UTF-8"))
+		{
+			parts = new com.google.gson.JsonParser().parse(r).getAsJsonObject().getAsJsonObject("parts");
+		}
+		for (DesignPart part : DesignPart.values())
+		{
+			com.google.gson.JsonObject o = parts.getAsJsonObject(part.key);
+			DesignLayout.Part l = DesignLayout.bundled().of(part);
+			assertEquals(o.getAsJsonArray("size").get(0).getAsInt(), l.width);
+			assertEquals(o.getAsJsonArray("size").get(1).getAsInt(), l.height);
+			assertEquals(o.getAsJsonObject("blur").get("high").getAsInt(), l.blur(true));
+			assertEquals(o.getAsJsonObject("blur").get("low").getAsInt(), l.blur(false));
+		}
 	}
 
 	@Test
@@ -147,7 +162,7 @@ public class CustomDesignRulesTest
 		assertEquals(layout.width, t.getWidth());
 		assertEquals(layout.height, t.getHeight());
 		assertEquals(DesignTemplate.OUTSIDE.getRGB(), t.getRGB(2, 2));
-		double[] bolt = o.bolts().get(0);
+		double[] bolt = o.bolts.get(0);
 		assertEquals(DesignTemplate.LINES.getRGB(), t.getRGB((int) bolt[0], (int) bolt[1]));
 		// somewhere off the centre line, between the trucks, is plain part
 		double[] b = o.bounds();

@@ -14,18 +14,18 @@ public class GhostDetailTest
 		float focalX = 6656f;
 		float focalHeight = -350f;
 		float focalZ = 6400f;
-		assertEquals(0f, GhostDetail.focusDistance(6656f, 6400f, focalX, focalZ), 1e-3f);
-		assertEquals(128f, GhostDetail.focusDistance(6656f, 6528f, focalX, focalZ), 1e-3f);
+		assertEquals(0f, GhostVisibility.focusDistance(6656f, 6400f, focalX, focalZ), 1e-3f);
+		assertEquals(128f, GhostVisibility.focusDistance(6656f, 6528f, focalX, focalZ), 1e-3f);
 		// measured against the height instead, a ghost right at the focus would be ~53 tiles off: never full
-		assertFalse(GhostDetail.full(0, GhostDetail.focusDistance(6656f, 6400f, focalX, focalHeight)));
+		assertFalse(GhostVisibility.full(0, GhostVisibility.focusDistance(6656f, 6400f, focalX, focalHeight)));
 	}
 
 	@Test
 	public void theNearestFourWithin32TilesAreFull()
 	{
-		assertTrue(GhostDetail.full(0, GhostDetail.focusDistance(100f, 100f, 100f, 100f)));
-		assertTrue(GhostDetail.full(3, 32 * 128f));
-		assertFalse(GhostDetail.full(4, 0f));
-		assertFalse(GhostDetail.full(0, 32 * 128f + 1f));
+		assertTrue(GhostVisibility.full(0, GhostVisibility.focusDistance(100f, 100f, 100f, 100f)));
+		assertTrue(GhostVisibility.full(3, 32 * 128f));
+		assertFalse(GhostVisibility.full(4, 0f));
+		assertFalse(GhostVisibility.full(0, 32 * 128f + 1f));
 	}
 }

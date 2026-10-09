@@ -27,10 +27,10 @@ public class GhostBodyWireTest
 			.registerSubtype(SkateGhostStop.class))
 		.create();
 
-	private static GhostFrame rolling(float charge)
+	private static GhostState rolling(float charge)
 	{
-		return new GhostFrame(330, 0, 1000f, 2000f, 0f, 0f, 0f, 800f, 0f, SkaterState.ROLLING, null, null, 0f)
-			.withCharge(charge);
+		return GhostFeed.withBody(GhostFeed.frame(330, 0, 1000f, 2000f, 0f, 0f, 0f, 800f, 0f, SkaterState.ROLLING, null,
+			null, 0f), charge, null, 0f);
 	}
 
 	private static SkateGhostUpdate roundTrip(SkateGhostUpdate m)
@@ -49,8 +49,8 @@ public class GhostBodyWireTest
 		assertEquals(5f / 9f, s.charge, 1e-6f);
 		assertNull(s.knockStage);
 		// no charge in the air: the frame says so whatever the physics held
-		GhostFrame air = new GhostFrame(330, 0, 0f, 0f, 100f, 0f, 0f, 0f, 300f, SkaterState.AIRBORNE, null, null, 0f)
-			.withCharge(1f);
+		GhostState air = GhostFeed.withBody(GhostFeed.frame(330, 0, 0f, 0f, 100f, 0f, 0f, 0f, 300f,
+			SkaterState.AIRBORNE, null, null, 0f), 1f, null, 0f);
 		assertNull(GhostCodec.encode(air, 0, null).cr);
 	}
 
@@ -75,9 +75,9 @@ public class GhostBodyWireTest
 
 	private static final float HALF_PI = (float) (Math.PI / 2);
 
-	private static GhostFrame knocked(KnockdownPose.Stage stage, float lie, boolean airborne)
+	private static GhostState knocked(KnockdownPose.Stage stage, float lie, boolean airborne)
 	{
-		return GhostFrame.knockdown(330, 2, 1_409_664f, 1_411_200f, -1237f, -3.14159f, -1400f, 1400f, airborne,
+		return GhostFeed.knockdown(330, 2, 1_409_664f, 1_411_200f, -1237f, -3.14159f, -1400f, 1400f, airborne,
 			stage, lie, 1_409_000f, 1_411_999f, -1237f, -3.14159f);
 	}
 
@@ -154,9 +154,9 @@ public class GhostBodyWireTest
 	public void theBiggestUpdatesWithTheBodyFieldsStayWithinTheBound()
 	{
 		// a grind with a full charge and every event bit: the designs wait while crouching (with them it was 286)
-		GhostFrame grind = new GhostFrame(330, 2, 1_409_664f, 1_411_200f, -1237f, -3.14159f, -2600f, -2600f,
-			-1820f, SkaterState.GRINDING, Trick.BOARDSLIDE, null, 0f, -TurnRateMeter.MAX_RATE, -4 * (float) Math.PI,
-			-11.424f).withCharge(1f);
+		GhostState grind = GhostFeed.withBody(GhostFeed.frame(330, 2, 1_409_664f, 1_411_200f, -1237f, -3.14159f,
+			-2600f, -2600f, -1820f, SkaterState.GRINDING, Trick.BOARDSLIDE, null, 0f, -TurnRateMeter.MAX_RATE,
+			-4 * (float) Math.PI, -11.424f), 1f, null, 0f);
 		SkateGhostUpdate g = GhostCodec.encode(grind, 0x7ff, null);
 		g.seq = 1_234_567_890;
 		g.dk = longest(DesignPart.DECK);
@@ -167,7 +167,7 @@ public class GhostBodyWireTest
 
 		// the busiest knockdown: every number at its longest, the longest deck, the duel version (with the vertical
 		// speed, tumble angle and rate and a progress it measured 298)
-		SkateGhostUpdate k = GhostCodec.encode(GhostFrame.knockdown(330, 2, 1_409_664f, 1_411_200f, -1237f,
+		SkateGhostUpdate k = GhostCodec.encode(GhostFeed.knockdown(330, 2, 1_409_664f, 1_411_200f, -1237f,
 			-3.14159f, -2600f, -2600f, true, KnockdownPose.Stage.GET_UP, -7 * HALF_PI, 1_409_000f, 1_411_999f,
 			-1237f, -3.14159f), 0x7ff, null);
 		k.seq = 1_234_567_890;

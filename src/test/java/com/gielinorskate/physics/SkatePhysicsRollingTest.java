@@ -119,7 +119,7 @@ public class SkatePhysicsRollingTest
 	public void steerRightCarvesClockwise()
 	{
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.flat(), 0, 0, 0);
-		p.setSpeed(500);
+		p.setRollingSpeed(500);
 		SkateInput in = new SkateInput();
 		in.steer = 1f;
 		run(p, in, 0.5f);
@@ -131,7 +131,7 @@ public class SkatePhysicsRollingTest
 	public void powerslideWithSteerCarvesTightlyAndScrubsSpeed()
 	{
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.flat(), 0, 0, 0);
-		p.setSpeed(800);
+		p.setRollingSpeed(800);
 		SkateInput in = new SkateInput();
 		in.powerslide = true;
 		in.steer = 1f;
@@ -168,7 +168,7 @@ public class SkatePhysicsRollingTest
 	public void slowIntoWallStops()
 	{
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.wallAtY(200, 300), 0, 0, 0);
-		p.setSpeed(500);
+		p.setRollingSpeed(500);
 		run(p, new SkateInput(), 1f);
 		assertTrue(p.getY() < 200f);
 		assertEquals(0f, p.getSpeed(), 0f);
@@ -185,7 +185,7 @@ public class SkatePhysicsRollingTest
 		// speed = 1500 - 0.9*7 = 1493.7 > 1300 -> bails with margin. Heading is due north (straight
 		// into the wall), so both the x-only and y-only slide probes are blocked (dx=0 trivially,
 		// dy crosses the wall) and it falls back to hitWall()/bail() as before.
-		p.setSpeed(1500);
+		p.setRollingSpeed(1500);
 		run(p, new SkateInput(), 0.5f);
 		assertEquals(SkaterState.BAILED, p.getState());
 		assertTrue(p.drainEvents().contains(SkateEvent.BAIL));
@@ -200,7 +200,7 @@ public class SkatePhysicsRollingTest
 		// y(7) = 0.02*(9800 - 0.45*56) = 195.5 < 200, so the wall is hit on step 8 at
 		// speed = 1400 - 0.9*8 = 1392.8 > 1300 -> bails. Head-on (heading 0 == wall normal), so
 		// neither the x-only nor y-only slide probe finds an escape and it bails as a direct hit.
-		p.setSpeed(1400);
+		p.setRollingSpeed(1400);
 		run(p, new SkateInput(), 0.5f);
 		assertEquals(SkaterState.BAILED, p.getState());
 		assertEquals(BailReason.WALL, p.getLastBailReason());
@@ -215,7 +215,7 @@ public class SkatePhysicsRollingTest
 		// SkatePhysicsWallTest). At 35 degrees: 1400 * cos 35 = 1147 > 1100, but 35 > 30, so the skater
 		// scrapes along the wall (x keeps advancing, y stays pinned below 200) instead of bailing.
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.wallAtY(200, 300), 0, 0, (float) Math.toRadians(35));
-		p.setSpeed(1400);
+		p.setRollingSpeed(1400);
 		run(p, new SkateInput(), 1f);
 		assertEquals(SkaterState.ROLLING, p.getState());
 		assertTrue(p.getY() < 200f);
@@ -235,7 +235,7 @@ public class SkatePhysicsRollingTest
 		// runs 1.2 s (was 0.6). Speed: 300 * (1 - 0.25 * 0.866) = 235 at contact, minus at most
 		// 0.7 * (400 * 0.866 + 45 + 7) = 278 of scrape (into falls to 0 as it aligns, so really ~150) -> fakie.
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.wallAtY(60, 300), 0, 0, (float) Math.toRadians(210));
-		p.setSpeed(-300);
+		p.setRollingSpeed(-300);
 		float x0 = p.getX();
 		run(p, new SkateInput(), 1.2f);
 		assertEquals(SkaterState.ROLLING, p.getState());
@@ -249,7 +249,7 @@ public class SkatePhysicsRollingTest
 	public void bigStepUpActsAsWall()
 	{
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.stepAtY(200, 0, 100), 0, 0, 0);
-		p.setSpeed(500);
+		p.setRollingSpeed(500);
 		run(p, new SkateInput(), 1f);
 		assertTrue(p.getY() < 200f);
 		assertEquals(0f, p.getH(), 0f);
@@ -262,7 +262,7 @@ public class SkatePhysicsRollingTest
 		// wallBailSpeed=1300; wall at y=100, v0=1500. y(k) = dt*(v0*k - 0.45*k*(k+1));
 		// y(4) = 0.02*(6000 - 0.45*20) = 119.8 >= 100, y(3) = 0.02*(4500 - 0.45*12) = 89.9 < 100,
 		// so the wall is hit on step 4 at speed = 1500 - 0.9*4 = 1496.4 > 1300 -> bails.
-		p.setSpeed(1500);
+		p.setRollingSpeed(1500);
 		run(p, new SkateInput(), 0.2f);
 		assertEquals(SkaterState.BAILED, p.getState());
 		SkateInput in = new SkateInput();
@@ -281,7 +281,7 @@ public class SkatePhysicsRollingTest
 	{
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.wallAtY(100, 300), 0, 0, 0);
 		// See resetAfterBailOnlyWhenTimerExpired for the step/speed math (v0=1500, wall at y=100).
-		p.setSpeed(1500);
+		p.setRollingSpeed(1500);
 		run(p, new SkateInput(), 0.2f);
 		assertEquals(SkaterState.BAILED, p.getState());
 		p.drainEvents();
@@ -295,7 +295,7 @@ public class SkatePhysicsRollingTest
 	{
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.wallAtY(100, 300), 0, 0, 0);
 		// See resetAfterBailOnlyWhenTimerExpired for the step/speed math (v0=1500, wall at y=100).
-		p.setSpeed(1500);
+		p.setRollingSpeed(1500);
 		run(p, new SkateInput(), 0.2f);
 		SkateInput in = new SkateInput();
 		in.resetRequested = true;

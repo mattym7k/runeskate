@@ -22,7 +22,7 @@ public class SkatePhysicsTurnTest
 	private Turn turnAround(float speed, boolean shift)
 	{
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.flat(), 0, 0, 0);
-		p.setSpeed(speed);
+		p.setRollingSpeed(speed);
 		SkateInput in = new SkateInput();
 		in.steer = -1f;
 		in.powerslide = shift;
@@ -49,7 +49,7 @@ public class SkatePhysicsTurnTest
 	public void shiftWithoutSteerStillBrakes()
 	{
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.flat(), 0, 0, 0);
-		p.setSpeed(800);
+		p.setRollingSpeed(800);
 		SkateInput in = new SkateInput();
 		in.powerslide = true;
 		SkatePhysicsRollingTest.run(p, in, 0.5f);
@@ -64,7 +64,7 @@ public class SkatePhysicsTurnTest
 		// the input layer blocks the brake while Shift is a trick modifier (W held, a flick wind-up, or not yet
 		// 0.25 s alone): only friction and drag, (45 + 0.00006 * 800^2) * 0.5 = 41.7, so still over 750
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.flat(), 0, 0, 0);
-		p.setSpeed(800);
+		p.setRollingSpeed(800);
 		SkateInput in = new SkateInput();
 		in.powerslide = true;
 		in.brakeBlocked = true;
@@ -108,7 +108,7 @@ public class SkatePhysicsTurnTest
 	{
 		// carveSpeedFalloff 1600 -> 2200: at 1100, 2.6 / (1 + 1100/2200) = 1.733 rad/s
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.flat(), 0, 0, 0);
-		p.setSpeed(1100f);
+		p.setRollingSpeed(1100f);
 		SkateInput in = new SkateInput();
 		in.steer = 1f;
 		p.step(DT, in);
@@ -120,7 +120,7 @@ public class SkatePhysicsTurnTest
 	{
 		// carving with A held into the pop used to spin 7 rad/s through an uncharged ollie (0.7 s, 280 deg)
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.flat(), 0, 0, 0);
-		p.setSpeed(900f);
+		p.setRollingSpeed(900f);
 		SkateInput in = new SkateInput();
 		in.steer = -1f;
 		SkatePhysicsRollingTest.run(p, in, 0.3f);
@@ -138,7 +138,7 @@ public class SkatePhysicsTurnTest
 	public void steerReleasedAndPressedAgainInTheAirSpins()
 	{
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.flat(), 0, 0, 0);
-		p.setSpeed(500f);
+		p.setRollingSpeed(500f);
 		SkateInput in = new SkateInput();
 		in.steer = 1f;
 		in.gestures.add(new Gesture(Gesture.Direction.UP, false, 0f));
@@ -160,7 +160,7 @@ public class SkatePhysicsTurnTest
 		// as SkatePhysicsAirTest.fiftyDegreeOffAxisLandingNowLands: a 0.152 steer held through a charged
 		// ollie lands ~50 deg off the travel (north). The travel then turns onto the board over ~0.15 s.
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.flat(), 0, 0, 0);
-		p.setSpeed(500f);
+		p.setRollingSpeed(500f);
 		SkateInput in = new SkateInput();
 		in.crouch = true;
 		SkatePhysicsRollingTest.run(p, in, 0.4f);

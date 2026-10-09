@@ -35,7 +35,7 @@ public class SkatePhysicsButtonTricksTest
 	private float spin(boolean fast, int steps)
 	{
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.flat(), 0, 0, 0);
-		p.setSpeed(400);
+		p.setRollingSpeed(400);
 		SkateInput in = new SkateInput();
 		in.gestures.add(new Gesture(Direction.UP, false, 0f));
 		p.step(DT, in);
@@ -47,7 +47,7 @@ public class SkatePhysicsButtonTricksTest
 			p.step(DT, in);
 		}
 		assertEquals(SkaterState.AIRBORNE, p.getState());
-		return p.getAirSpin();
+		return p.airSpin;
 	}
 
 	@Test
@@ -64,8 +64,8 @@ public class SkatePhysicsButtonTricksTest
 	{
 		SkatePhysics a = new SkatePhysics(t, TestWorlds.flat(), 0, 0, 0);
 		SkatePhysics b = new SkatePhysics(t, TestWorlds.flat(), 0, 0, 0);
-		a.setSpeed(400);
-		b.setSpeed(400);
+		a.setRollingSpeed(400);
+		b.setRollingSpeed(400);
 		SkateInput ia = new SkateInput();
 		SkateInput ib = new SkateInput();
 		ia.steer = ib.steer = 1f;
@@ -83,7 +83,7 @@ public class SkatePhysicsButtonTricksTest
 	{
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.flat(), map(new GrindSegment(side, -2000, side, 2000, 30)),
 			0, 0, 0);
-		p.setSpeed(500);
+		p.setRollingSpeed(500);
 		SkateInput in = new SkateInput();
 		in.grindHeld = grindHeld;
 		in.gestures.add(new Gesture(Direction.UP, false, 0f));

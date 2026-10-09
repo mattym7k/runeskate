@@ -54,9 +54,9 @@ public class GhostHubTest
 	private final FakeLink link = new FakeLink();
 	private final GhostHub hub = new GhostHub(link, 1000);
 
-	private static GhostFrame frame(float x)
+	private static GhostState frame(float x)
 	{
-		return new GhostFrame(420, 0, x, 0f, 0f, 0f, 0f, 0f, 0f, SkaterState.ROLLING, null, null, 0f);
+		return GhostFeed.frame(420, 0, x, 0f, 0f, 0f, 0f, 0f, 0f, SkaterState.ROLLING, null, null, 0f);
 	}
 
 	/** Another party member is skating (member 99 sent us an update), so full updates go out. */
@@ -99,7 +99,7 @@ public class GhostHubTest
 	{
 		audience();
 		frame(0f, frame(0f), 0, false, true);
-		hub.onRemoteStop(99L);
+		hub.onMemberLeft(99L);
 		for (int i = 1; i < 200; i++)
 		{
 			frame(i * FRAME, frame(i), GhostCodec.EV_POP, false, true);
@@ -110,7 +110,7 @@ public class GhostHubTest
 		assertEquals("the announce still made us live, so a stop goes out", 1, link.stops());
 	}
 
-	private void frame(float now, GhostFrame f, int events, boolean pvp, boolean sharing)
+	private void frame(float now, GhostState f, int events, boolean pvp, boolean sharing)
 	{
 		link.now = now;
 		hub.onLocalFrame(f, events, null, pvp, sharing, now);
@@ -272,10 +272,13 @@ public class GhostHubTest
 		assertEquals("INDY", last.tr);
 	}
 
+	/** A member's update with a timeline (sent at seq / 10 s of their clock, no positions). */
 	private static SkateGhostUpdate remote(float x, int seq)
 	{
 		SkateGhostUpdate m = GhostCodec.encode(frame(x), 0, null);
 		m.seq = seq;
+		m.tj = GhostFeed.wire(GhostTrajectory.timeMs(seq / 10f), 0, null, 0, new float[0], new float[0],
+			new float[0], new float[0], new float[0], new SkaterState[0], m.x, m.y, m.h, m.hd);
 		return m;
 	}
 
@@ -286,7 +289,7 @@ public class GhostHubTest
 		hub.onRemoteUpdate(8L, remote(200f, 1), 0f, null);
 		assertEquals(2, hub.ghosts().size());
 		assertNotNull(hub.ghosts().get(7L));
-		hub.onRemoteStop(7L);
+		hub.onMemberLeft(7L);
 		assertFalse(hub.ghosts().containsKey(7L));
 		hub.onMemberLeft(8L);
 		assertTrue(hub.ghosts().isEmpty());
@@ -378,7 +381,7 @@ public class GhostHubTest
 	{
 		audience();
 		hub.setLocalLook(look("GRIP_SARADOMIN", "SARADOMIN", "WHEELS_SARADOMIN"));
-		GhostFrame flipping = new GhostFrame(420, 0, 0f, 0f, 50f, 0f, 0f, 0f, 0f, SkaterState.AIRBORNE, null,
+		GhostState flipping = GhostFeed.frame(420, 0, 0f, 0f, 50f, 0f, 0f, 0f, 0f, SkaterState.AIRBORNE, null,
 			Trick.KICKFLIP, 0.5f);
 		frame(0f, flipping, 0, false, true);
 		// a flip's name already makes it the biggest kind of update: the designs wait
@@ -497,13 +500,13 @@ public class GhostHubTest
 	public void duelMessagesGoBeforeGhostUpdatesAndCountInTheBudget()
 	{
 		audience();
-		hub.sendDuel(new SkateDuelHit());
+		hub.sendDuel(new SkateDuelHit(), false);
 		frame(0f, frame(0f), GhostCodec.EV_POP, false, true);
 		assertEquals(1, duels());
 		// the duel message took a token; the event still fits (2 per second)
 		assertEquals(1, link.updates());
 		assertTrue(link.sent.get(0) instanceof SkateDuelHit);
-		hub.sendDuel(new SkateDuelHit());
+		hub.sendDuel(new SkateDuelHit(), false);
 		frame(0.1f, frame(1f), GhostCodec.EV_POP, false, true);
 		// no token left in this second: neither goes, and the duel message is kept, not dropped
 		assertEquals(1, duels());
@@ -519,7 +522,7 @@ public class GhostHubTest
 		audience();
 		for (int i = 0; i < 5; i++)
 		{
-			hub.sendDuel(new SkateDuelHit());
+			hub.sendDuel(new SkateDuelHit(), false);
 		}
 		for (int i = 0; i < 200; i++)
 		{
@@ -545,15 +548,15 @@ public class GhostHubTest
 	{
 		for (int i = 0; i < 4; i++)
 		{
-			hub.sendDuel(new SkateDuelHit());
+			hub.sendDuel(new SkateDuelHit(), false);
 		}
 		link.now = 0f;
-		hub.flushDuel(0f);
+		hub.flushDuel(0f, false);
 		link.now = 0.5f;
-		hub.flushDuel(0.5f);
+		hub.flushDuel(0.5f, false);
 		assertEquals(2, duels());
 		link.now = 1f;
-		hub.flushDuel(1f);
+		hub.flushDuel(1f, false);
 		assertEquals(4, duels());
 		assertLimit();
 	}
@@ -561,11 +564,11 @@ public class GhostHubTest
 	@Test
 	public void duelMessagesAreDroppedOutsideAParty()
 	{
-		hub.sendDuel(new SkateDuelHit());
+		hub.sendDuel(new SkateDuelHit(), false);
 		link.inParty = false;
-		hub.flushDuel(0f);
+		hub.flushDuel(0f, false);
 		link.inParty = true;
-		hub.flushDuel(1f);
+		hub.flushDuel(1f, false);
 		assertEquals(0, duels());
 	}
 
@@ -573,23 +576,23 @@ public class GhostHubTest
 	public void closingSendsOnlyTheLatestLastWord()
 	{
 		SkateDuelHit forfeit = new SkateDuelHit();
-		hub.sendDuel(new SkateDuelHit());
-		hub.sendDuel(new SkateDuelHit());
+		hub.sendDuel(new SkateDuelHit(), false);
+		hub.sendDuel(new SkateDuelHit(), false);
 		hub.sendDuel(forfeit, true);
-		hub.sendDuel(new SkateDuelHit());
+		hub.sendDuel(new SkateDuelHit(), false);
 		hub.close();
 		// queued hits would go over the budget in a burst: only the duel's last word goes
 		assertEquals(1, duels());
 		assertTrue(link.sent.get(0) == forfeit);
 		hub.sendDuel(new SkateDuelHit(), true);
-		hub.flushDuel(5f);
+		hub.flushDuel(5f, false);
 		assertEquals("closed: nothing more", 1, duels());
 	}
 
 	@Test
 	public void closingWithNoLastWordSendsNoDuelMessage()
 	{
-		hub.sendDuel(new SkateDuelHit());
+		hub.sendDuel(new SkateDuelHit(), false);
 		hub.close();
 		assertEquals(0, duels());
 	}
@@ -608,10 +611,10 @@ public class GhostHubTest
 	public void whileBlockedOnlyOneLastWordGoesOut()
 	{
 		SkateDuelHit last = new SkateDuelHit();
-		hub.sendDuel(new SkateDuelHit());
-		hub.sendDuel(new SkateDuelHit());
+		hub.sendDuel(new SkateDuelHit(), false);
+		hub.sendDuel(new SkateDuelHit(), false);
 		hub.sendDuel(last, true);
-		hub.sendDuel(new SkateDuelHit());
+		hub.sendDuel(new SkateDuelHit(), false);
 		link.now = 0f;
 		hub.flushDuel(0f, true);
 		assertEquals(1, duels());
@@ -622,7 +625,7 @@ public class GhostHubTest
 		assertEquals(1, duels());
 		// out again: sending resumes
 		hub.flushDuel(6f, false);
-		hub.sendDuel(new SkateDuelHit());
+		hub.sendDuel(new SkateDuelHit(), false);
 		hub.flushDuel(7f, false);
 		assertEquals(2, duels());
 	}
@@ -631,7 +634,7 @@ public class GhostHubTest
 	public void aSkateFrameInAPvpAreaDropsWaitingDuelMessages()
 	{
 		audience();
-		hub.sendDuel(new SkateDuelHit());
+		hub.sendDuel(new SkateDuelHit(), false);
 		frame(0f, frame(0f), 0, true, true);
 		hub.flushDuel(1f, false);
 		assertEquals(0, duels());

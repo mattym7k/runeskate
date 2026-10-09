@@ -24,14 +24,14 @@ public class CarryPoseTest
 	{
 		Placement p = new Placement();
 		// facing north: the right hand is east (+x)
-		CarryPose.place(1000f, 2000f, 50f, 0f, 0f, p);
+		CarryPose.placeAt(1000f, 2000f, 50f, 0f, 0f, -CarryPose.HAND_SIDE, -CarryPose.HAND_HEIGHT, 0f, p);
 		float[] w = heldPointWorld(p);
 		assertEquals(1000f + CarryPose.HAND_SIDE, w[0], 0.5f);
 		assertEquals(2000f, w[1], 0.5f);
 		assertEquals(50f + CarryPose.HAND_HEIGHT, w[2], 0.5f);
 
 		// facing east: the right hand is south (-y)
-		CarryPose.place(1000f, 2000f, 50f, Angles.PI / 2, 0f, p);
+		CarryPose.placeAt(1000f, 2000f, 50f, Angles.PI / 2, 0f, -CarryPose.HAND_SIDE, -CarryPose.HAND_HEIGHT, 0f, p);
 		w = heldPointWorld(p);
 		assertEquals(1000f, w[0], 0.5f);
 		assertEquals(2000f - CarryPose.HAND_SIDE, w[1], 0.5f);
@@ -42,7 +42,7 @@ public class CarryPoseTest
 	public void theBoardPointsAlongTheWalkAndStandsNearlyOnEdge()
 	{
 		Placement p = new Placement();
-		CarryPose.place(0f, 0f, 0f, 1.2f, FootPhysics.WALK_SPEED, p);
+		CarryPose.placeAt(0f, 0f, 0f, 1.2f, FootPhysics.WALK_SPEED, -CarryPose.HAND_SIDE, -CarryPose.HAND_HEIGHT, 0f, p);
 		assertEquals(Angles.toJau(1.2f), p.jau, 0f);
 		assertTrue(Math.abs(p.roll) > 1.3f && Math.abs(p.roll) <= Angles.PI / 2);
 		assertTrue(p.pitch != 0f);
@@ -65,12 +65,12 @@ public class CarryPoseTest
 	{
 		float walk = FootPhysics.WALK_SPEED;
 		assertEquals(CarryPose.pitch(walk), CarryPose.pitch(walk * 1.01f), 0f);
-		assertEquals(CarryPose.STILL_TILT, CarryPose.pitch(0.5f), 0f);
-		assertEquals(CarryPose.SPRINT_TILT, CarryPose.pitch(FootPhysics.SPRINT_SPEED), 1e-6f);
+		assertEquals(Tuning.STILL_TILT, CarryPose.pitch(0.5f), 0f);
+		assertEquals(Tuning.SPRINT_TILT, CarryPose.pitch(FootPhysics.SPRINT_SPEED), 1e-6f);
 		for (float v = 0f; v <= FootPhysics.SPRINT_SPEED; v += FootPhysics.SPRINT_SPEED / 97f)
 		{
-			float exact = CarryPose.STILL_TILT
-				+ (CarryPose.SPRINT_TILT - CarryPose.STILL_TILT) * (v / FootPhysics.SPRINT_SPEED);
+			float exact = Tuning.STILL_TILT
+				+ (Tuning.SPRINT_TILT - Tuning.STILL_TILT) * (v / FootPhysics.SPRINT_SPEED);
 			assertEquals(exact, CarryPose.pitch(v), 0.011f);
 		}
 	}
@@ -81,7 +81,7 @@ public class CarryPoseTest
 		assertEquals(0f, CarryPose.mountDrop(FootPhysics.MOUNT_JUMP_VH), 0f);
 		assertEquals(0f, CarryPose.mountDrop(0f), 0f);
 		assertEquals(1f, CarryPose.mountDrop(-FootPhysics.MOUNT_JUMP_VH), 0f);
-		float half = CarryPose.mountDrop(-0.5f * CarryPose.MOUNT_DROP_SPEED);
+		float half = CarryPose.mountDrop(-0.5f * Tuning.MOUNT_DROP_SPEED);
 		assertTrue(half > 0.3f && half < 0.7f);
 	}
 

@@ -44,7 +44,7 @@ public class SkatePhysicsContactTest
 		float sx = C - vx * 60 - ux * 400;
 		float sy = C - vy * 60 - uy * 400;
 		SkatePhysics p = new SkatePhysics(t, w, sx, sy, (float) Math.toRadians(50));
-		p.setSpeed(1000);
+		p.setRollingSpeed(1000);
 		SkateInput in = new SkateInput();
 		for (int i = 0; i < 50; i++)
 		{
@@ -68,7 +68,7 @@ public class SkatePhysicsContactTest
 		GridCollisionWorld w = new GridCollisionWorld(20);
 		w.addBlocker(C, C, 32, 32, 1f, 0f, 100, BlockerSet.SOLID, 0);
 		SkatePhysics p = new SkatePhysics(t, w, C, C - 400, 0);
-		p.setSpeed(1400);
+		p.setRollingSpeed(1400);
 		SkateInput in = new SkateInput();
 		for (int i = 0; i < 30 && p.getState() == SkaterState.ROLLING; i++)
 		{
@@ -90,8 +90,8 @@ public class SkatePhysicsContactTest
 		float sy = C - s * 60 - s * 400;
 		SkatePhysics p = new SkatePhysics(t, rock, sx, sy, (float) Math.toRadians(45));
 		SkatePhysics q = new SkatePhysics(t, open, sx, sy, (float) Math.toRadians(45));
-		p.setSpeed(1000);
-		q.setSpeed(1000);
+		p.setRollingSpeed(1000);
+		q.setRollingSpeed(1000);
 		SkateInput in = new SkateInput();
 		for (int i = 0; i < 40; i++)
 		{
@@ -117,7 +117,7 @@ public class SkatePhysicsContactTest
 		float vx = -uy;
 		float vy = ux;
 		SkatePhysics p = new SkatePhysics(t, w, C - vx * 300, C - vy * 300, (float) Math.toRadians(-10));
-		p.setSpeed(1400);
+		p.setRollingSpeed(1400);
 		SkateInput in = new SkateInput();
 		for (int i = 0; i < 30 && p.getState() == SkaterState.ROLLING; i++)
 		{
@@ -142,7 +142,7 @@ public class SkatePhysicsContactTest
 		GridCollisionWorld w = new GridCollisionWorld(20);
 		w.addBlocker(C, C, 32, 32, 1f, 0f, 200, BlockerSet.SOLID, 0);
 		SkatePhysics p = new SkatePhysics(t, w, C - 32 - 10, C - 300, 0);
-		p.setSpeed(800);
+		p.setRollingSpeed(800);
 		SkateInput in = new SkateInput();
 		float startSpeed = 800;
 		for (int i = 0; i < 40; i++)
@@ -170,7 +170,7 @@ public class SkatePhysicsContactTest
 		float sx = C - vx * 60 - ux * 400;
 		float sy = C - vy * 60 - uy * 400;
 		SkatePhysics p = new SkatePhysics(t, w, sx, sy, (float) Math.toRadians(50));
-		p.setSpeed(1000);
+		p.setRollingSpeed(1000);
 		SkateInput in = new SkateInput();
 		for (int i = 0; i < 50; i++)
 		{

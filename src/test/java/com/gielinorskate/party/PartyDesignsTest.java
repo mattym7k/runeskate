@@ -82,20 +82,7 @@ public class PartyDesignsTest
 				throw new OutOfMemoryError("test");
 			}
 			return new int[]{1, 2, 3};
-		}, new PartyDesigns.Colours()
-		{
-			@Override
-			public void register(String id, int[] low)
-			{
-				colours.put(id, low);
-			}
-
-			@Override
-			public void unregister(String id)
-			{
-				colours.remove(id);
-			}
-		}, () -> { });
+		}, colours::put, colours::remove, () -> { });
 		designs.setShowOthers(true);
 		DesignShare.Outgoing d = deck();
 		feed(designs, d, 0f);

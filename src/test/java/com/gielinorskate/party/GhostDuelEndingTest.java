@@ -38,9 +38,9 @@ public class GhostDuelEndingTest
 	}
 
 	/** A walker standing with the board in hand at sender time {@code t} (as the tantrum shares it). */
-	private static GhostFrame standing()
+	private static GhostState standing()
 	{
-		return GhostFrame.onFoot(330, 0, 1_409_664f, 1_411_200f, 0f, 0.7f, 0f, 0f, 0f, false, 0f,
+		return GhostFeed.onFoot(330, 0, 1_409_664f, 1_411_200f, 0f, 0.7f, 0f, 0f, 0f, false, 0f,
 			BoardState.CARRIED, 0f, 0f, 0f, 0f);
 	}
 
@@ -88,7 +88,7 @@ public class GhostDuelEndingTest
 		// a celebration's bit still waiting for a token when the winner pops a flip: every event bit, the longest
 		// trick names and deck, the duel version, a fast skater's positions to fit
 		int every = (1 << 14) - 1;
-		GhostFrame busy = new GhostFrame(330, 2, 1_409_664f, 1_411_200f, -1237f, -3.14159f, -2600f, -2600f, -1820f,
+		GhostState busy = GhostFeed.frame(330, 2, 1_409_664f, 1_411_200f, -1237f, -3.14159f, -2600f, -2600f, -1820f,
 			SkaterState.AIRBORNE, Trick.BOARDSLIDE, Trick.NOLLIE_INWARD_HEELFLIP, 0.5f, -TurnRateMeter.MAX_RATE,
 			-4 * (float) Math.PI, -11.424f);
 		SkateGhostUpdate m = GhostCodec.encode(busy, every, null);
@@ -100,7 +100,7 @@ public class GhostDuelEndingTest
 		GhostTrail trail = new GhostTrail();
 		for (float t = 0f; t <= 1f; t += 0.02f)
 		{
-			trail.record(new GhostFrame(330, 2, 1_409_664f - 2600f * (1f - t), 1_411_200f - 2600f * (1f - t),
+			trail.record(GhostFeed.frame(330, 2, 1_409_664f - 2600f * (1f - t), 1_411_200f - 2600f * (1f - t),
 				-1237f, -3.14159f + 10f * (1f - t), 0f, 0f, 0f, SkaterState.AIRBORNE, null, null, 0f), t);
 		}
 		trail.noteEvents(every, 0.1f);
@@ -185,21 +185,8 @@ public class GhostDuelEndingTest
 		assertEquals(net.runelite.api.gameval.AnimationID.EMOTE_STAMPFEET, GhostAnim.STOMP.id(-1, -1));
 		assertEquals(net.runelite.api.gameval.AnimationID.EMOTE_CHEER, GhostAnim.CHEER.id(-1, -1));
 		assertEquals(net.runelite.api.gameval.AnimationID.EMOTE_JUMP_WITH_JOY, GhostAnim.JOY.id(-1, -1));
-		assertTrue(!GhostAnim.STOMP.loops() && !GhostAnim.CHEER.loops() && !GhostAnim.JOY.loops());
+		assertTrue(!GhostAnim.STOMP.loops && !GhostAnim.CHEER.loops && !GhostAnim.JOY.loops);
 		assertEquals(0.5f, GhostAnim.endingProgress(GhostAnim.CHEER, nan,
 			com.gielinorskate.render.CelebrationSequence.DURATION / 2), 1e-6f);
-	}
-
-	@Test
-	public void anOlderSendersUpdateWithoutATimelineStillCelebrates()
-	{
-		GhostPredictor g = new GhostPredictor();
-		SkateGhostUpdate m = GhostCodec.encode(new GhostFrame(330, 0, 0f, 0f, 0f, 0f, 300f, 0f, 0f,
-			SkaterState.ROLLING, null, null, 0f), GhostCodec.EV_CELEBRATE, null);
-		m.seq = 5;
-		g.accept(GhostCodec.decode(m), 2f, FLAT);
-		assertEquals(1, g.celebrateCount());
-		assertEquals(0.5f, g.celebrateAge(2.5f), 1e-6f);
-		assertEquals(0, g.tantrumCount());
 	}
 }

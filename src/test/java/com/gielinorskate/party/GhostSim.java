@@ -48,13 +48,11 @@ final class GhostSim
 		float stallEvery = 9f;
 		float stall = 0.5f;
 		long seed = 42;
-		/** Leave the timeline out of every update (an older version sending). */
-		boolean old;
 	}
 
 	// the true path, every sender frame
 	final List<float[]> truth = new ArrayList<>();
-	// what was drawn: {our time, x, y, h, heading, playback time (sender s; NaN dead reckoning), rate}
+	// what was drawn: {our time, x, y, h, heading, playback time (sender s), rate}
 	final List<double[]> drawn = new ArrayList<>();
 	final List<float[]> pops = new ArrayList<>();
 	int sentUpdates;
@@ -197,7 +195,7 @@ final class GhostSim
 				progress = (s - flipStart) / flip.duration;
 			}
 			truth.add(new float[]{s, x, y, h, heading});
-			GhostFrame frame = new GhostFrame(330, 0, x, y, h, heading, vx, vy,
+			GhostState frame = GhostFeed.frame(330, 0, x, y, h, heading, vx, vy,
 				state == SkaterState.AIRBORNE ? vh : 0f, state, null, flipNow, progress, w);
 			out.clear();
 			sender.onLocalFrame(frame, events, (events & GhostCodec.EV_TRICK) != 0 ? flip : null, false, true, s);
@@ -209,10 +207,6 @@ final class GhostSim
 				}
 				SkateGhostUpdate u = (SkateGhostUpdate) m;
 				sentUpdates++;
-				if (net.old)
-				{
-					u.tj = null;
-				}
 				String json = GSON.toJson(u, WebsocketMessage.class);
 				maxJson = Math.max(maxJson, json.length());
 				if (rnd.nextFloat() < net.loss)
@@ -243,8 +237,8 @@ final class GhostSim
 				{
 					float now = nextDraw + CLOCK_OFFSET;
 					com.gielinorskate.render.RenderPose p = g.pose(now, GROUND);
-					drawn.add(new double[]{nextDraw, p.x, p.y, p.h, p.heading, g.playbackTime(), g.playbackRate(),
-						g.playbackDelay(), g.playbackUnderrun() ? 1 : 0});
+					drawn.add(new double[]{nextDraw, p.x, p.y, p.h, p.heading, g.tp, g.rate,
+						g.sync.delay(), g.dry || g.n > 0 && g.tp > g.t[g.n - 1] ? 1 : 0});
 					popCounts.add(g.popCount());
 				}
 				drawNo++;

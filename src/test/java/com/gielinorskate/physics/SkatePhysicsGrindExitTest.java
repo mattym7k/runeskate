@@ -29,7 +29,7 @@ public class SkatePhysicsGrindExitTest
 	private SkatePhysics lockOn(GrindMap m, float speed, SkateInput in)
 	{
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.flat(), m, 0, 0, 0);
-		p.setSpeed(speed);
+		p.setRollingSpeed(speed);
 		in.crouch = true;
 		for (int i = 0; i < 12; i++)
 		{
@@ -152,7 +152,7 @@ public class SkatePhysicsGrindExitTest
 			p.step(DT, in);
 		}
 		assertEquals(SkaterState.AIRBORNE, p.getState());
-		return p.getVerticalSpeed();
+		return p.getVerticalVelocity();
 	}
 
 	@Test
@@ -161,8 +161,8 @@ public class SkatePhysicsGrindExitTest
 		// the closest point is clamped to the y = 100 end; heading north only 10 units of rail are left
 		GrindMap m = new GrindMap();
 		m.add(new GrindSegment(0, 0, 0, 100, 30));
-		assertNull(m.nearest(10, 90, 30, 0f));
-		assertTrue(m.nearest(10, 90, 30, (float) Math.PI) != null);
+		assertNull(m.nearest(10, 90, 30, 0f, null, GrindMap.SNAP_DISTANCE));
+		assertTrue(m.nearest(10, 90, 30, (float) Math.PI, null, GrindMap.SNAP_DISTANCE) != null);
 	}
 
 	@Test

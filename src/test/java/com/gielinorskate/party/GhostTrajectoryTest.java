@@ -10,9 +10,9 @@ import org.junit.Test;
 
 public class GhostTrajectoryTest
 {
-	private static GhostFrame at(float x, float y, float h, float heading, SkaterState st)
+	private static GhostState at(float x, float y, float h, float heading, SkaterState st)
 	{
-		return new GhostFrame(330, 1, x, y, h, heading, 0f, 0f, 0f, st, null, null, 0f);
+		return GhostFeed.frame(330, 1, x, y, h, heading, 0f, 0f, 0f, st, null, null, 0f);
 	}
 
 	@Test
@@ -29,7 +29,7 @@ public class GhostTrajectoryTest
 		eventAgo[0] = 0.33f;
 		eventAgo[6] = 0f;
 		int ev = GhostCodec.EV_POP | GhostCodec.EV_TRICK;
-		String tj = GhostTrajectory.encode(123_456, ev, eventAgo, 4, ago, xs, ys, hs, hd, st, 1_409_664, 1_411_200,
+		String tj = GhostFeed.wire(123_456, ev, eventAgo, 4, ago, xs, ys, hs, hd, st, 1_409_664, 1_411_200,
 			-150, -3140);
 		GhostTrajectory back = GhostTrajectory.decode(tj, ev, 1_409_664, 1_411_200, -150, -3140);
 		assertNotNull(back);

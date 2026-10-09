@@ -45,14 +45,14 @@ public class BoardPlacementTest
 	@Test
 	public void zeroPitchIsUnchanged()
 	{
-		float[] base = BoardGeometry.standardBoard().tris;
+		float[] base = ClassicBoard.standardBoard().tris;
 		assertArrayEquals(BoardGeometry.rotate(base, 0.3f, 0f), BoardPlacement.pose(base, 0.3f, 0f), 1e-5f);
 	}
 
 	@Test
 	public void manualAndGrindPitchesKeepTheContactWheelsOnTheGround()
 	{
-		float[] base = BoardGeometry.standardBoard().tris;
+		float[] base = ClassicBoard.standardBoard().tris;
 		for (float pitch : new float[]{0.25f, -0.25f, 0.2f, -0.2f})
 		{
 			float[] posed = BoardPlacement.pose(base, 0f, pitch);
@@ -69,14 +69,14 @@ public class BoardPlacementTest
 	public void centrePivotWouldSinkTheContactTruck()
 	{
 		// the old centre pivot puts the tail wheels 30 * sin(0.25) = 7.4 units under the ground
-		float[] old = BoardGeometry.rotate(BoardGeometry.standardBoard().tris, 0f, 0.25f);
+		float[] old = BoardGeometry.rotate(ClassicBoard.standardBoard().tris, 0f, 0.25f);
 		assertTrue(lowest(old) > 6f);
 	}
 
 	@Test
 	public void bundledBoardAlsoStaysOnTheGround()
 	{
-		float[] base = BoardGeometry.defaultBoard().tris;
+		float[] base = ClassicBoard.defaultBoard().tris;
 		for (float pitch : new float[]{0.25f, -0.25f})
 		{
 			float lowest = lowest(BoardPlacement.pose(base, 0f, pitch));
@@ -110,8 +110,8 @@ public class BoardPlacementTest
 	@Test
 	public void zeroFlipIsTheRollAndPitchPose()
 	{
-		float[] tris = BoardGeometry.defaultBoard().tris;
-		assertArrayEquals(BoardPlacement.pose(tris, 0.4f, 0.2f), BoardPlacement.pose(tris, 0.4f, 0.2f, 0f, -61f), 0f);
+		float[] tris = ClassicBoard.defaultBoard().tris;
+		assertArrayEquals(BoardPlacement.pose(tris, 0.4f, 0.2f), flipped(tris, 0.4f, 0.2f, 0f, -61f), 0f);
 	}
 
 	@Test
@@ -127,15 +127,15 @@ public class BoardPlacementTest
 	@Test
 	public void flipTurnsTheBoardRigidlyAboutThePivot()
 	{
-		float[] tris = BoardGeometry.defaultBoard().tris;
-		float[] f = BoardPlacement.pose(tris, 0f, 0f, 1.1f, -61f);
+		float[] tris = ClassicBoard.defaultBoard().tris;
+		float[] f = flipped(tris, 0f, 0f, 1.1f, -61f);
 		for (int i = 0; i < tris.length; i += 3)
 		{
 			assertEquals(tris[i], f[i], 1e-4f);
 			assertEquals(Math.hypot(tris[i + 1] + 61f, tris[i + 2]), Math.hypot(f[i + 1] + 61f, f[i + 2]), 1e-3f);
 		}
 		// half a turn puts the board upside down 2 * 61 - 16 above its rest: the deck top at -16 goes to -106
-		float[] half = BoardPlacement.pose(new float[]{0f, -16f, 0f}, 0f, 0f, (float) Math.PI, -61f);
+		float[] half = flipped(new float[]{0f, -16f, 0f}, 0f, 0f, (float) Math.PI, -61f);
 		assertEquals(-106f, half[1], 1e-3f);
 	}
 
@@ -163,7 +163,7 @@ public class BoardPlacementTest
 					float[] zs = {p[2]};
 					MeshDeformer.deform(xs, ys, zs, 1, pose);
 
-					float[] b = BoardPlacement.pose(new float[]{p[2], p[1] + offset, -p[0]}, 0f, 0f, flip,
+					float[] b = flipped(new float[]{p[2], p[1] + offset, -p[0]}, 0f, 0f, flip,
 						BoardPlacement.boardFlipPivotY(deckLift));
 					assertEquals(b[0], zs[0], 1e-2f);
 					assertEquals(b[1], ys[0] + offset, 1e-2f);
@@ -182,7 +182,7 @@ public class BoardPlacementTest
 		// not in a bail, never down, never past the cap, nothing odd
 		assertEquals(0, BoardPlacement.grabLift(20f, true));
 		assertEquals(0, BoardPlacement.grabLift(-5f, false));
-		assertEquals(Math.round(BoardPlacement.MAX_GRAB_LIFT), BoardPlacement.grabLift(500f, false));
+		assertEquals(Math.round(Tuning.MAX_GRAB_LIFT), BoardPlacement.grabLift(500f, false));
 		assertEquals(0, BoardPlacement.grabLift(Float.NaN, false));
 		assertEquals(0, BoardPlacement.grabLift(Float.POSITIVE_INFINITY, false));
 	}
@@ -193,5 +193,10 @@ public class BoardPlacementTest
 		// the board drawn `lift` units higher (and the body not): the centre of mass is that much lower against it
 		int lift = 20;
 		assertEquals(BoardPlacement.boardFlipPivotY(0) + lift, BoardPlacement.boardFlipPivotY(-lift), 1e-4f);
+	}
+
+	private static float[] flipped(float[] tris, float roll, float pitch, float flip, float pivotY)
+	{
+		return BoardPlacement.poseInto(tris, roll, pitch, flip, pivotY, new float[tris.length]);
 	}
 }

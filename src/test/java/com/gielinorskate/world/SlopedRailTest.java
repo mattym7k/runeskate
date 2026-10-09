@@ -30,8 +30,8 @@ public class SlopedRailTest
 		m.add(new GrindSegment(0, 0, 0, 400, 30, 230));
 		// at y = 350 the rail is 205 high: the mean top 130 would put 200 in the window, the local top does too,
 		// but at y = 50 (top 55) h 200 is far above it
-		assertNotNull(m.nearest(10, 350, 200, 0f));
-		assertNull(m.nearest(10, 50, 200, 0f));
+		assertNotNull(m.nearest(10, 350, 200, 0f, null, GrindMap.SNAP_DISTANCE));
+		assertNull(m.nearest(10, 50, 200, 0f, null, GrindMap.SNAP_DISTANCE));
 	}
 
 	@Test
@@ -65,8 +65,8 @@ public class SlopedRailTest
 	public void wallEdgeRailsFollowTheGroundAtEachEnd()
 	{
 		GridCollisionWorld w = new GridCollisionWorld(4);
-		w.setCornerHeight(1, 1, 0);
-		w.setCornerHeight(2, 1, 64);
+		WorldTests.setCornerHeight(w, 1, 1, 0);
+		WorldTests.setCornerHeight(w, 2, 1, 64);
 		w.addEdgeGrind(1, 1, GridCollisionWorld.WALL_S, 40);
 		w.rebuildGrinds();
 		GrindSegment s = w.getGrinds().segments().get(0);
@@ -85,7 +85,7 @@ public class SlopedRailTest
 		{
 			for (int cy = 0; cy <= 6; cy++)
 			{
-				w.setCornerHeight(cx, cy, cx * 32f);
+				WorldTests.setCornerHeight(w, cx, cy, cx * 32f);
 			}
 		}
 		w.addObjectGrind(384, 384, new float[]{-128, 128, -4, 4}, 0, 50);

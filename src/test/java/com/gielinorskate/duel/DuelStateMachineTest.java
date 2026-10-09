@@ -211,7 +211,7 @@ public class DuelStateMachineTest
 		a.machine.comboLanded(1_000, 1, t + 0.4f);
 		bus.settle(t + 0.4f);
 		assertEquals(96, b.machine.myHp());
-		assertEquals(2, a.machine.queuedHits());
+		assertEquals(2, a.machine.cooldown.queue.size());
 		bus.tick(t + 1.49f);
 		assertEquals(96, b.machine.myHp());
 		bus.tick(t + 1.5f);
@@ -601,7 +601,7 @@ public class DuelStateMachineTest
 		{
 			b.machine.bail(t);
 		}
-		assertTrue(b.machine.isSelfKo());
+		assertTrue(b.machine.selfKo());
 		// nothing reaches A, and A's answer never comes
 		b.outbound.clear();
 		b.machine.heard(A_ID, t + 9f);

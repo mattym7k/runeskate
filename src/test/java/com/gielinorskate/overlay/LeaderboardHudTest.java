@@ -106,7 +106,7 @@ public class LeaderboardHudTest
 	public void collapsedShowsOnlyTheTitleBar()
 	{
 		LeaderboardHud.Model m = LeaderboardHud.build(on(page("combo", 8, null)), true);
-		assertTrue(m.collapsed);
+		assertNull(m.subtitle);
 		assertTrue(m.title.startsWith(LeaderboardHud.TITLE));
 		assertTrue(m.title.contains("(collapsed)"));
 		assertNull(m.subtitle);
@@ -128,17 +128,17 @@ public class LeaderboardHudTest
 			new Hud(State.ON, true, "combo", "week", page("combo", 3, null), null), false);
 		assertEquals(1, other.lines.size());
 		assertEquals(LeaderboardHud.Kind.STATUS, other.lines.get(0).kind);
-		assertEquals(LeaderboardHud.NORMAL_WORLDS_ONLY, other.lines.get(0).left);
+		assertEquals("Normal worlds only.", other.lines.get(0).left);
 
 		LeaderboardHud.Model loading = LeaderboardHud.build(on(null), false);
-		assertEquals(LeaderboardHud.LOADING, loading.lines.get(0).left);
+		assertEquals("Loading...", loading.lines.get(0).left);
 
 		LeaderboardHud.Model error = LeaderboardHud.build(
 			new Hud(State.ON, false, "combo", "week", null, "Couldn't load."), false);
 		assertEquals("Couldn't load.", error.lines.get(0).left);
 
 		LeaderboardHud.Model empty = LeaderboardHud.build(on(page("combo", 0, null)), false);
-		assertEquals(LeaderboardHud.NO_SCORES, empty.lines.get(0).left);
+		assertEquals("No scores yet.", empty.lines.get(0).left);
 	}
 
 	@Test

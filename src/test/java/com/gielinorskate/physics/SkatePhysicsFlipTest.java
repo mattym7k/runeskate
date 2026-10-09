@@ -27,7 +27,7 @@ public class SkatePhysicsFlipTest
 	private SkatePhysics rolling(CollisionWorld w, float speed)
 	{
 		SkatePhysics p = new SkatePhysics(t, w, 0, 0, 0);
-		p.setSpeed(speed);
+		p.setRollingSpeed(speed);
 		return p;
 	}
 
@@ -169,7 +169,7 @@ public class SkatePhysicsFlipTest
 			GrindMap rail = new GrindMap();
 			rail.add(new GrindSegment(10, 300, 10, 3000, 30));
 			SkatePhysics p = new SkatePhysics(t, TestWorlds.flat(), rail, 0, 0, 0);
-			p.setSpeed(500);
+			p.setRollingSpeed(500);
 			SkateInput in = new SkateInput();
 			in.gestures.add(flick(Direction.UP));
 			p.step(DT, in);

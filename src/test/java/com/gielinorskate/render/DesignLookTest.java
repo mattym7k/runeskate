@@ -160,7 +160,7 @@ public class DesignLookTest
 			Arrays.fill(c1, 64);
 			Arrays.fill(c2, 64);
 			Arrays.fill(c3, 64);
-			BakedBoardModel.shade(c1, c2, c3, looks[k]);
+			BakedBoardModel.shade(c1, c2, c3, looks[k], null);
 			lit[k] = c1;
 		}
 		assertFalse(Arrays.equals(lit[0], lit[1]));
@@ -249,8 +249,8 @@ public class DesignLookTest
 		// drawn for a frame before (or after) it is registered: no entry is kept for it
 		assertNull(DesignColours.colours("CUSTOM_7E570002", false, grip));
 		assertNull(DesignColours.colours("PARTY_1f_0a1b2c3d", false, grip));
-		assertFalse(DesignColours.held("CUSTOM_7E570002"));
-		assertFalse(DesignColours.held("PARTY_1f_0a1b2c3d"));
+		assertFalse(held("CUSTOM_7E570002"));
+		assertFalse(held("PARTY_1f_0a1b2c3d"));
 		// converted colours of every revision go with forgetDesign
 		int[] colours = new int[grip.cornerRgb.length];
 		Arrays.fill(colours, 0x445566);
@@ -261,10 +261,28 @@ public class DesignLookTest
 				rev);
 			BakedBoardModel.partHsl(grip, BoardLook.defaults(DESIGNS).with(d), false, 0.7);
 		}
-		assertTrue(BakedBoardModel.hslHeld("CUSTOM_7E570002"));
+		assertTrue(hslHeld("CUSTOM_7E570002"));
 		DesignColours.unregister("CUSTOM_7E570002");
 		BakedBoardModel.forgetDesign("CUSTOM_7E570002");
-		assertFalse(BakedBoardModel.hslHeld("CUSTOM_7E570002"));
-		assertFalse(DesignColours.held("CUSTOM_7E570002"));
+		assertFalse(hslHeld("CUSTOM_7E570002"));
+		assertFalse(held("CUSTOM_7E570002"));
+	}
+
+	/** Whether converted colours of design {@code id} are kept. */
+	private static boolean hslHeld(String id)
+	{
+		synchronized (BakedBoardModel.HSL_CACHE)
+		{
+			return BakedBoardModel.HSL_CACHE.keySet().stream().anyMatch(k -> k.startsWith(id + "#"));
+		}
+	}
+
+	/** Whether anything is kept for design {@code id}. */
+	private static boolean held(String id)
+	{
+		synchronized (DesignColours.CACHE)
+		{
+			return DesignColours.CACHE.containsKey(id + ".high") || DesignColours.CACHE.containsKey(id + ".low");
+		}
 	}
 }

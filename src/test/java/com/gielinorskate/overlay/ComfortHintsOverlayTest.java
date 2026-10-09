@@ -22,7 +22,7 @@ public class ComfortHintsOverlayTest
 			FontMetrics m = g.getFontMetrics();
 			String text = "The game hasn't seen input for 4 minutes and will log you out soon. "
 				+ "Skate keys don't count: move the mouse to stay logged in.";
-			List<String> lines = ComfortHintsOverlay.wrap(text, m, 300);
+			List<String> lines = ControlsCardOverlay.wrap(text, m, 300);
 			assertTrue(lines.size() > 1);
 			for (String line : lines)
 			{

@@ -71,18 +71,18 @@ public class GrindMapTest
 		GrindMap m = new GrindMap();
 		GrindSegment s = new GrindSegment(0, 0, 0, 400, 50);
 		m.add(s);
-		GrindMap.Hit hit = m.nearest(20, 100, 60, NORTH);
+		GrindMap.Hit hit = m.nearest(20, 100, 60, NORTH, null, GrindMap.SNAP_DISTANCE);
 		assertNotNull(hit);
 		assertSame(s, hit.segment);
 		assertEquals(0.25f, hit.t, 1e-5f);
 
-		assertNotNull("44 sideways", m.nearest(44, 100, 60, NORTH));
-		assertNull("too far sideways", m.nearest(45, 100, 60, NORTH));
-		assertNotNull("lowest h", m.nearest(0, 100, 34, NORTH));
-		assertNull("below the window", m.nearest(0, 100, 33, NORTH));
-		assertNotNull("highest h", m.nearest(0, 100, 98, NORTH));
-		assertNull("above the window", m.nearest(0, 100, 99, NORTH));
-		assertNull("past the end", m.nearest(0, 445, 50, NORTH));
+		assertNotNull("44 sideways", m.nearest(44, 100, 60, NORTH, null, GrindMap.SNAP_DISTANCE));
+		assertNull("too far sideways", m.nearest(45, 100, 60, NORTH, null, GrindMap.SNAP_DISTANCE));
+		assertNotNull("lowest h", m.nearest(0, 100, 34, NORTH, null, GrindMap.SNAP_DISTANCE));
+		assertNull("below the window", m.nearest(0, 100, 33, NORTH, null, GrindMap.SNAP_DISTANCE));
+		assertNotNull("highest h", m.nearest(0, 100, 98, NORTH, null, GrindMap.SNAP_DISTANCE));
+		assertNull("above the window", m.nearest(0, 100, 99, NORTH, null, GrindMap.SNAP_DISTANCE));
+		assertNull("past the end", m.nearest(0, 445, 50, NORTH, null, GrindMap.SNAP_DISTANCE));
 	}
 
 	/** MAX_APPROACH is 88 degrees (review P3; was 80). */
@@ -91,12 +91,12 @@ public class GrindMapTest
 	{
 		GrindMap m = new GrindMap();
 		m.add(new GrindSegment(0, 0, 0, 400, 50));
-		assertNotNull(m.nearest(0, 100, 50, deg(87)));
-		assertNotNull(m.nearest(0, 100, 50, deg(180 + 87)));
-		assertNotNull(m.nearest(0, 100, 50, deg(180)));
-		assertNull(m.nearest(0, 100, 50, deg(89)));
-		assertNull(m.nearest(0, 100, 50, EAST));
-		assertNull(m.nearest(0, 100, 50, deg(-91)));
+		assertNotNull(m.nearest(0, 100, 50, deg(87), null, GrindMap.SNAP_DISTANCE));
+		assertNotNull(m.nearest(0, 100, 50, deg(180 + 87), null, GrindMap.SNAP_DISTANCE));
+		assertNotNull(m.nearest(0, 100, 50, deg(180), null, GrindMap.SNAP_DISTANCE));
+		assertNull(m.nearest(0, 100, 50, deg(89), null, GrindMap.SNAP_DISTANCE));
+		assertNull(m.nearest(0, 100, 50, EAST, null, GrindMap.SNAP_DISTANCE));
+		assertNull(m.nearest(0, 100, 50, deg(-91), null, GrindMap.SNAP_DISTANCE));
 	}
 
 	@Test
@@ -107,13 +107,13 @@ public class GrindMapTest
 		GrindSegment near = new GrindSegment(-5, 0, -5, 400, 50);
 		m.add(far);
 		m.add(near);
-		assertSame(near, m.nearest(0, 100, 50, NORTH).segment);
+		assertSame(near, m.nearest(0, 100, 50, NORTH, null, GrindMap.SNAP_DISTANCE).segment);
 	}
 
 	@Test
 	public void emptyMapFindsNothing()
 	{
-		assertNull(new GrindMap().nearest(0, 0, 0, NORTH));
+		assertNull(new GrindMap().nearest(0, 0, 0, NORTH, null, GrindMap.SNAP_DISTANCE));
 	}
 
 	@Test
@@ -222,7 +222,7 @@ public class GrindMapTest
 			float x = r.nextFloat() * 3200 - 1100;
 			float y = r.nextFloat() * 3200 - 1100;
 			float travel = r.nextFloat() * 6.28f;
-			GrindMap.Hit hit = m.nearest(x, y, 50, travel);
+			GrindMap.Hit hit = m.nearest(x, y, 50, travel, null, GrindMap.SNAP_DISTANCE);
 			assertSame(bruteNearest(all, x, y, 50, travel), hit == null ? null : hit.segment);
 		}
 	}
@@ -232,10 +232,10 @@ public class GrindMapTest
 	{
 		GrindMap m = new GrindMap();
 		m.add(new GrindSegment(0, 0, 0, 400, 50));
-		assertNotNull(m.nearest(10, 100, 50, NORTH));
-		assertNull(m.nearest(-5000, 100, 50, NORTH));
+		assertNotNull(m.nearest(10, 100, 50, NORTH, null, GrindMap.SNAP_DISTANCE));
+		assertNull(m.nearest(-5000, 100, 50, NORTH, null, GrindMap.SNAP_DISTANCE));
 		GrindSegment late = new GrindSegment(-5000, 0, -5000, 400, 50);
 		m.add(late);
-		assertSame(late, m.nearest(-5000, 100, 50, NORTH).segment);
+		assertSame(late, m.nearest(-5000, 100, 50, NORTH, null, GrindMap.SNAP_DISTANCE).segment);
 	}
 }

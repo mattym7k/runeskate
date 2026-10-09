@@ -30,7 +30,7 @@ public class GhostFailureGuardTest
 		assertEquals(3, frames);
 		assertEquals(0, cleanups);
 		assertTrue(logged.isEmpty());
-		assertFalse(guard.isDisabled());
+		assertFalse(guard.disabled);
 	}
 
 	@Test
@@ -43,7 +43,7 @@ public class GhostFailureGuardTest
 		assertEquals("later frames are skipped", 1, frames);
 		assertEquals("ghosts despawned once", 1, cleanups);
 		assertEquals("logged once", 1, logged.size());
-		assertTrue(guard.isDisabled());
+		assertTrue(guard.disabled);
 	}
 
 	@Test
@@ -53,7 +53,7 @@ public class GhostFailureGuardTest
 		{
 			throw new IllegalStateException("despawn boom");
 		}, logged::add);
-		assertTrue(guard.isDisabled());
+		assertTrue(guard.disabled);
 		assertEquals(1, logged.size());
 	}
 
@@ -62,7 +62,7 @@ public class GhostFailureGuardTest
 	{
 		guard.run(this::throwingFrame, () -> cleanups++, logged::add);
 		guard.reset();
-		assertFalse(guard.isDisabled());
+		assertFalse(guard.disabled);
 		guard.run(() -> frames++, () -> cleanups++, logged::add);
 		assertEquals(2, frames);
 	}

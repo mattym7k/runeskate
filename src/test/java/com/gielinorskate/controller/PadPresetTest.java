@@ -37,21 +37,12 @@ public class PadPresetTest
 	}
 
 	@Test
-	public void theQtCodesAreTheOnesAntiMicroXStoresForThosePadKeys()
+	public void functionKeyButtonsAreNamedAfterTheirKeys()
 	{
-		// Qt::Key_F13 = 0x100003c ... Qt::Key_F24 = 0x1000047; Insert / Delete / Home / End from qnamespace.h
-		assertEquals(0x100003c, PadButton.A.qtCode);
-		assertEquals(0x100003d, PadButton.B.qtCode);
-		assertEquals(0x1000047, PadButton.R3.qtCode);
-		assertEquals(0x1000006, PadButton.DPAD_UP.qtCode);
-		assertEquals(0x1000007, PadButton.DPAD_DOWN.qtCode);
-		assertEquals(0x1000010, PadButton.DPAD_LEFT.qtCode);
-		assertEquals(0x1000011, PadButton.DPAD_RIGHT.qtCode);
 		for (PadButton b : PadButton.values())
 		{
 			if (b.keyCode >= KeyEvent.VK_F13 && b.keyCode <= KeyEvent.VK_F24)
 			{
-				assertEquals(b.label, 0x1000030 + 12 + (b.keyCode - KeyEvent.VK_F13), b.qtCode);
 				assertEquals("F" + (13 + b.keyCode - KeyEvent.VK_F13), b.keyName);
 			}
 		}
@@ -83,7 +74,6 @@ public class PadPresetTest
 		for (PadAction a : Arrays.asList(PadAction.FLIP_BUTTON, PadAction.GRAB_BUTTON, PadAction.GRIND_BUTTON,
 			PadAction.SPIN_ASSIST))
 		{
-			assertTrue(a.implemented);
 			assertTrue(a.allowedIn(PadContext.BOARD));
 			assertTrue(a.allowedIn(PadContext.AIR));
 			assertFalse(a.allowedIn(PadContext.FOOT));

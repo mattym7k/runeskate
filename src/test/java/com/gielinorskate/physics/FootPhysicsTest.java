@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import com.gielinorskate.world.GridCollisionWorld;
+import com.gielinorskate.world.WorldTests;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.Test;
@@ -72,7 +73,7 @@ public class FootPhysicsTest
 		assertEquals(256f / 0.6f, FootPhysics.GAME_RUN_SPEED, 0.01f);
 		assertEquals(2f, FootPhysics.SPRINT_SPEED_SCALE, 0f);
 		assertEquals(512f / 0.6f, FootPhysics.SPRINT_SPEED, 0.01f);
-		assertTrue(p.isSprinting());
+		assertTrue(p.sprinting);
 	}
 
 	@Test
@@ -87,7 +88,7 @@ public class FootPhysicsTest
 	{
 		FootPhysics p = at(TestWorlds.flat(), 0, 0, 0);
 		run(p, move(0, 0, true), 0.2f);
-		assertFalse(p.isSprinting());
+		assertFalse(p.sprinting);
 		assertEquals(0f, p.getSpeed(), 0f);
 	}
 
@@ -114,7 +115,7 @@ public class FootPhysicsTest
 	@Test
 	public void turnTowardTakesTheShortWayRound()
 	{
-		float h = FootPhysics.turnToward((float) Math.toRadians(170), (float) Math.toRadians(-170), 0.1f);
+		float h = Angles.turnToward((float) Math.toRadians(170), (float) Math.toRadians(-170), 0.1f);
 		assertTrue(Math.toDegrees(h) > 170 || Math.toDegrees(h) < -170);
 	}
 
@@ -365,7 +366,7 @@ public class FootPhysicsTest
 		{
 			for (int y = 0; y <= size; y++)
 			{
-				w.setCornerHeight(x, y, 0f);
+				WorldTests.setCornerHeight(w, x, y, 0f);
 			}
 		}
 		return w;
@@ -378,7 +379,7 @@ public class FootPhysicsTest
 		GridCollisionWorld w = world(6);
 		w.setTile(2, 2, GridCollisionWorld.FULL, height);
 		w.markShaped(2, 2);
-		w.addObjectBlocker(2.5f * t, 2.5f * t, new float[]{-half, half, -half, half}, 0, height, pass);
+		w.addObjectBlocker(2.5f * t, 2.5f * t, new float[]{-half, half, -half, half}, 0, height, pass, true);
 		return w;
 	}
 

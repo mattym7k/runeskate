@@ -5,6 +5,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import com.gielinorskate.tricks.Gesture;
 import com.gielinorskate.world.GridCollisionWorld;
+import com.gielinorskate.world.WorldTests;
 import java.util.List;
 import java.util.Random;
 import org.junit.Test;
@@ -77,7 +78,7 @@ public class SkatePhysicsTerrainTest
 		// at 1000: 240 * (1 - 1000/1500)^0.5 = 138.56 -> 1138.56, then friction + drag for one step:
 		// (45 + 0.00012 * 1138.56^2) * 0.02 = 4.01
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.flat(), 0, 0, 0);
-		p.setSpeed(1000f);
+		p.setRollingSpeed(1000f);
 		SkateInput in = new SkateInput();
 		in.pushPressed = true;
 		p.step(DT, in);
@@ -89,7 +90,7 @@ public class SkatePhysicsTerrainTest
 	{
 		// at 1450: 240 * (50/1500)^0.5 = 43.8 < the 60 minimum, capped at maxPushSpeed 1500
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.flat(), 0, 0, 0);
-		p.setSpeed(1450f);
+		p.setRollingSpeed(1450f);
 		SkateInput in = new SkateInput();
 		in.pushPressed = true;
 		p.step(DT, in);
@@ -101,7 +102,7 @@ public class SkatePhysicsTerrainTest
 	{
 		// stalled and rolling back at 200 (not a fakie landing): max(60, -200 + 360) = 160 forward
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.flat(), 0, 0, 0);
-		p.setSpeed(-200f);
+		p.setRollingSpeed(-200f);
 		SkateInput in = new SkateInput();
 		in.pushPressed = true;
 		p.step(DT, in);
@@ -113,7 +114,7 @@ public class SkatePhysicsTerrainTest
 	{
 		// half spin at 300: 7 rad/s * 0.44 s = 176.5 deg, lands fakie at about -300 (above -400)
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.flat(), 0, 0, 0);
-		p.setSpeed(300f);
+		p.setRollingSpeed(300f);
 		SkatePhysicsAirTest.ollie(p, 0.4f, 1f, 0.44f);
 		assertEquals(SkaterState.ROLLING, p.getState());
 		float landed = p.getSpeed();
@@ -129,7 +130,7 @@ public class SkatePhysicsTerrainTest
 	{
 		// (45 + 0.00006 * 2000^2) * 0.02 = 5.7 in one step
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.flat(), 0, 0, 0);
-		p.setSpeed(2000f);
+		p.setRollingSpeed(2000f);
 		p.step(DT, new SkateInput());
 		assertEquals(1994.3f, p.getSpeed(), 0.05f);
 	}
@@ -141,7 +142,7 @@ public class SkatePhysicsTerrainTest
 		// -> 794.33; vh = 0.92 * 820 + 794.33 * 0.25 = 952.98 (minPopFraction 0.85 -> 0.92). The next step:
 		// vh -= 40, h += 912.98 * 0.02 = 18.26
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.downhillNorth(-0.25f), 0, 0, 0);
-		p.setSpeed(800f);
+		p.setRollingSpeed(800f);
 		SkateInput in = new SkateInput();
 		in.gestures.add(new Gesture(Gesture.Direction.UP, false, 0f));
 		p.step(DT, in);
@@ -156,7 +157,7 @@ public class SkatePhysicsTerrainTest
 	{
 		// 110 per tile = 0.86: a whole 0.02 s step at 1500 used to rise 26 > maxStepUp 24 and hit a "wall"
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.downhillNorth(-110f / 128f), 0, 0, 0);
-		p.setSpeed(1500f);
+		p.setRollingSpeed(1500f);
 		SkatePhysicsRollingTest.run(p, new SkateInput(), 1f);
 		assertEquals(SkaterState.ROLLING, p.getState());
 		assertTrue(p.getSpeed() > 500f);
@@ -168,7 +169,7 @@ public class SkatePhysicsTerrainTest
 	{
 		// 80 per tile down from 1500 used to reach ~1930 and roll off (a 0.02 s step dropping > 24)
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.downhillNorth(80f / 128f), 0, 0, 0);
-		p.setSpeed(1500f);
+		p.setRollingSpeed(1500f);
 		for (int i = 0; i < 150; i++)
 		{
 			p.step(DT, new SkateInput());
@@ -191,11 +192,11 @@ public class SkatePhysicsTerrainTest
 				{
 					for (int cy = 0; cy <= 40; cy++)
 					{
-						w.setCornerHeight(cx, cy, (float) r.nextGaussian() * sigma);
+						WorldTests.setCornerHeight(w, cx, cy, (float) r.nextGaussian() * sigma);
 					}
 				}
 				SkatePhysics p = new SkatePhysics(t, w, 20 * 128 + 40, 4 * 128 + 20, 0);
-				p.setSpeed(speed);
+				p.setRollingSpeed(speed);
 				for (int i = 0; i < 60; i++)
 				{
 					p.step(DT, new SkateInput());
@@ -214,7 +215,7 @@ public class SkatePhysicsTerrainTest
 	public void sixtyUnitPlatformStillBlocks()
 	{
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.platformAtY(200, 60), 0, 0, 0);
-		p.setSpeed(500f);
+		p.setRollingSpeed(500f);
 		SkatePhysicsRollingTest.run(p, new SkateInput(), 1f);
 		assertTrue(p.getY() < 200f);
 		assertEquals(0f, p.getH(), 0f);
@@ -225,7 +226,7 @@ public class SkatePhysicsTerrainTest
 	{
 		// on the platform (y >= 200 is 60 high) heading south off its edge
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.platformAtY(200, 60), 0, 300, Angles.PI);
-		p.setSpeed(500f);
+		p.setRollingSpeed(500f);
 		boolean airborne = false;
 		for (int i = 0; i < 100; i++)
 		{
@@ -241,7 +242,7 @@ public class SkatePhysicsTerrainTest
 	public void twentyUnitCurbRollsUp()
 	{
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.platformAtY(200, 20), 0, 0, 0);
-		p.setSpeed(500f);
+		p.setRollingSpeed(500f);
 		SkatePhysicsRollingTest.run(p, new SkateInput(), 1f);
 		assertTrue(p.getY() > 300f);
 		assertEquals(20f, p.getH(), 0f);

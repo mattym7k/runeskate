@@ -11,6 +11,7 @@ import com.gielinorskate.tricks.TrickEvent;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import net.runelite.api.SoundEffectID;
 import org.junit.Test;
 
 public class SoundPickerTest
@@ -29,8 +30,8 @@ public class SoundPickerTest
 	{
 		SoundPicker picker = new SoundPicker();
 		assertEquals(0, picker.pick(NONE, NO_TRICKS, false, 0f, null, DT).size());
-		assertEquals(SoundPicker.POP, ids(picker.pick(Arrays.asList(SkateEvent.POP), NO_TRICKS, false, 0f, null, DT))[0]);
-		assertEquals(SoundPicker.BAIL, ids(picker.pick(Arrays.asList(SkateEvent.BAIL), NO_TRICKS, false, 0f, null, DT))[0]);
+		assertEquals(SoundEffectID.UI_BOOP, ids(picker.pick(Arrays.asList(SkateEvent.POP), NO_TRICKS, false, 0f, null, DT))[0]);
+		assertEquals(SoundEffectID.MAGIC_SPLASH_BOING, ids(picker.pick(Arrays.asList(SkateEvent.BAIL), NO_TRICKS, false, 0f, null, DT))[0]);
 		// a plain kickflip makes no extra sound
 		assertEquals(0, picker.pick(NONE, Arrays.asList(TrickEvent.trick(Trick.KICKFLIP)), false, 0f, null, DT).size());
 	}
@@ -45,7 +46,7 @@ public class SoundPickerTest
 		assertFalse(SoundPicker.isBig(Trick.KICKFLIP));
 		assertFalse(SoundPicker.isBig(Trick.POP_SHOVE_IT));
 		SoundPicker picker = new SoundPicker();
-		assertEquals(SoundPicker.BIG_TRICK,
+		assertEquals(SoundEffectID.FIRE_WOOSH,
 			ids(picker.pick(NONE, Arrays.asList(TrickEvent.trick(Trick.TRE_FLIP)), false, 0f, null, DT))[0]);
 	}
 
@@ -67,7 +68,7 @@ public class SoundPickerTest
 		List<SoundPicker.Cue> lock = picker.pick(NONE, Arrays.asList(TrickEvent.holdStart(Trick.FIFTY_FIFTY)), true,
 			0f, null, DT);
 		assertEquals(1, lock.size());
-		assertEquals(SoundPicker.GRIND_LOCK, lock.get(0).id);
+		assertEquals(SoundEffectID.SMITH_ANVIL_TONK, lock.get(0).id);
 		int tinks = 0;
 		// just over a second more on the rail (float steps of 0.02 s): 0.25 s apart, so 4 tinks
 		for (int i = 0; i < 52; i++)
@@ -93,7 +94,7 @@ public class SoundPickerTest
 		SoundPicker picker = new SoundPicker();
 		assertEquals(SoundPicker.COMBO_LANDED,
 			ids(picker.pick(NONE, NO_TRICKS, false, 0f, ComboScorer.Result.landed(14_999), DT))[0]);
-		assertEquals(SoundPicker.BIG_COMBO_LANDED,
+		assertEquals(SoundEffectID.GE_ADD_OFFER_DINGALING,
 			ids(picker.pick(NONE, NO_TRICKS, false, 0f, ComboScorer.Result.landed(15_000), DT))[0]);
 		assertEquals(0, picker.pick(NONE, NO_TRICKS, false, 0f, ComboScorer.Result.bailed(20_000), DT).size());
 	}
@@ -101,7 +102,7 @@ public class SoundPickerTest
 	@Test
 	public void throttleAllowsEachSoundOncePerTenthOfASecond()
 	{
-		SoundThrottle throttle = new SoundThrottle();
+		SkateSounds throttle = new SkateSounds();
 		assertTrue(throttle.allow(1, 0f));
 		assertFalse(throttle.allow(1, 0.05f));
 		assertTrue("other sounds are separate", throttle.allow(2, 0.05f));

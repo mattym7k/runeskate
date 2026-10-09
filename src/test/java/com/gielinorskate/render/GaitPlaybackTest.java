@@ -20,7 +20,7 @@ public class GaitPlaybackTest
 	public void rateIsNeverSlowerThanTheGameOrWildlyFaster()
 	{
 		assertEquals(1f, GaitPlayback.rate(FootBody.Gait.WALK, 50f), 0f);
-		assertEquals(GaitPlayback.MAX_RATE, GaitPlayback.rate(FootBody.Gait.RUN, 100000f), 0f);
+		assertEquals(Tuning.MAX_RATE, GaitPlayback.rate(FootBody.Gait.RUN, 100000f), 0f);
 		assertEquals(1f, GaitPlayback.rate(FootBody.Gait.WALK, Float.NaN), 0f);
 	}
 

@@ -11,6 +11,8 @@ import org.junit.Test;
 /** The knockdown sequence: knock-off, lie down, get up; its timing, the skips and the duel rules. */
 public class KnockdownTest
 {
+	/** The longest the whole sequence can take (plus a physics step per phase). */
+	private static final float MAX_TOTAL = Knockdown.MAX_TUMBLE + Knockdown.LIE_SECONDS + Knockdown.GET_UP_SECONDS;
 	private static final float DT = 0.02f;
 	private static final SkateTuning T = new SkateTuning();
 
@@ -87,7 +89,7 @@ public class KnockdownTest
 	public void theWholeSequenceIsShort()
 	{
 		// the longest it can ever take, by design
-		assertTrue(Knockdown.MAX_TOTAL <= 2.0f);
+		assertTrue(MAX_TOTAL <= 2.0f);
 		assertTrue(Knockdown.LIE_SECONDS <= 0.5f);
 		assertTrue(Knockdown.GET_UP_SECONDS <= 0.4f);
 		for (float speed : new float[]{0f, 300f, 900f, 1500f, 2600f})
@@ -105,7 +107,7 @@ public class KnockdownTest
 		Knockdown k = knocked(cliff(), 1500f, false);
 		float t = runIdle(k);
 		assertTrue("done: " + t, k.isDone());
-		assertTrue(t <= Knockdown.MAX_TOTAL + 3 * DT + 1e-4f);
+		assertTrue(t <= MAX_TOTAL + 3 * DT + 1e-4f);
 		assertTrue(t <= 2.0f);
 	}
 

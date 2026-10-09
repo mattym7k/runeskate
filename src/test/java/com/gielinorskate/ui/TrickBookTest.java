@@ -6,6 +6,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import com.gielinorskate.controller.PadPreset;
 import com.gielinorskate.progression.BoardDesign;
 import com.gielinorskate.progression.BoardDesigns;
 import com.gielinorskate.tricks.Gesture.Direction;
@@ -20,7 +21,7 @@ public class TrickBookTest
 {
 	private static TrickBook.Settings mouse()
 	{
-		return new TrickBook.Settings("Ctrl+K", "F", "Space", "right", false, true, false, false, "B", "Up", "Down");
+		return new TrickBook.Settings("Ctrl+K", "F", "Space", "right", false, true, false, false, "B", "Up", "Down", PadPreset.skate3(), "Skate 3");
 	}
 
 	private static List<TrickBook.Entry> entries(List<TrickBook.Section> book)
@@ -98,7 +99,7 @@ public class TrickBookTest
 	public void mirroredFlicksSwapThePictureAndTheWords()
 	{
 		TrickBook.Settings mirrored = new TrickBook.Settings("Ctrl+K", "F", "Space", "right", true, true, false,
-			false, "B", "Up", "Down");
+			false, "B", "Up", "Down", PadPreset.skate3(), "Skate 3");
 		TrickBook.Entry kickflip = entry(TrickBook.build(mirrored), Trick.KICKFLIP);
 		assertEquals(Direction.UP_RIGHT, kickflip.gesture.direction);
 		assertEquals("Pull down, flick up-right", kickflip.detail);
@@ -108,7 +109,7 @@ public class TrickBookTest
 	public void keyboardModeNamesTheKeysAndDrawsNoFlicks()
 	{
 		TrickBook.Settings keys = new TrickBook.Settings("Ctrl+K", "F", "C", "right", false, false, true, false, "B",
-			"Up", "Down");
+			"Up", "Down", PadPreset.skate3(), "Skate 3");
 		List<TrickBook.Section> book = TrickBook.build(keys);
 		TrickBook.Entry kickflip = entry(book, Trick.KICKFLIP);
 		assertEquals("1", kickflip.key);
@@ -132,7 +133,7 @@ public class TrickBookTest
 		assertTrue(text(grabs), text(grabs).contains("Up arrow"));
 
 		TrickBook.Settings mirrored = new TrickBook.Settings("Ctrl+K", "F", "Space", "right", true, true, false,
-			false, "B", "Up", "Down");
+			false, "B", "Up", "Down", PadPreset.skate3(), "Skate 3");
 		assertTrue(section(TrickBook.build(mirrored), "Grabs").table.contains(Arrays.asList("Left (toe)", "Mute",
 			"Indy")));
 	}
@@ -141,7 +142,7 @@ public class TrickBookTest
 	public void theBasicsAndOffTheBoardUseTheConfiguredKeys()
 	{
 		TrickBook.Settings s = new TrickBook.Settings("Ctrl+J", "G", "Space", "right", false, true, false, false,
-			"N", "Up", "Down");
+			"N", "Up", "Down", PadPreset.skate3(), "Skate 3");
 		List<TrickBook.Section> book = TrickBook.build(s);
 		String basics = text(section(book, "Basics"));
 		assertTrue(basics, basics.contains("Ctrl+J"));
@@ -160,7 +161,7 @@ public class TrickBookTest
 	public void controllerModeUsesPadButtons()
 	{
 		TrickBook.Settings pad = new TrickBook.Settings("Ctrl+K", "F", "Space", "right", false, true, false, true,
-			"B", "Up", "Down");
+			"B", "Up", "Down", PadPreset.skate3(), "Skate 3");
 		List<TrickBook.Section> book = TrickBook.build(pad);
 		TrickBook.Entry crail = entry(book, Trick.CRAIL);
 		assertEquals("{RT}", crail.pad.substring(crail.pad.indexOf("{RT}"), crail.pad.indexOf("{RT}") + 4));

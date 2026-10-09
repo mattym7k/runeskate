@@ -571,12 +571,6 @@ final class LegacyInputController extends MouseAdapter implements KeyListener, M
 		return controlsToggle.getAndSet(false);
 	}
 
-	/** The last completed right-mouse stroke, for the {@code ::skategesture} dev overlay; null until the first flick. */
-	public StrokeSnapshot getLastStrokeSnapshot()
-	{
-		return gesture.getLastStrokeSnapshot();
-	}
-
 	public int drainZoomNotches()
 	{
 		return zoomNotches.getAndSet(0);

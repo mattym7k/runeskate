@@ -29,7 +29,7 @@ public class KeyboardTrickInputTest
 
 	private static InputController controller(TrickControls controls)
 	{
-		InputController c = new InputController();
+		InputController c = new InputController(System::currentTimeMillis);
 		c.setEnabled(true);
 		c.configureTricks(controls, FlickButton.RIGHT, false);
 		c.configure(KeyEvent.VK_SPACE, 100);

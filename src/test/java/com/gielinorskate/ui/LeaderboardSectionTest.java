@@ -98,8 +98,7 @@ public class LeaderboardSectionTest
 	@Test
 	public void tableReusesItsLabelsAndNeverRendersNamesAsHtml()
 	{
-		LeaderboardTable t = new LeaderboardTable(200, new java.awt.Font(java.awt.Font.SANS_SERIF, java.awt.Font.PLAIN, 10),
-			java.awt.Color.GRAY, java.awt.Color.ORANGE);
+		LeaderboardTable t = new LeaderboardTable(java.awt.Color.ORANGE);
 		Gson gson = new Gson();
 		StringBuilder rows = new StringBuilder();
 		for (int i = 1; i <= 100; i++)
@@ -120,13 +119,13 @@ public class LeaderboardSectionTest
 		{
 			assertEquals(Boolean.TRUE, ((javax.swing.JLabel) c).getClientProperty("html.disable"));
 		}
-		assertEquals(200, t.getPreferredSize().width);
+		assertEquals(Widgets.TEXT_WIDTH, t.getPreferredSize().width);
 	}
 
 	@Test
 	public void panelTakesTheSection()
 	{
-		SkatePanel panel = new SkatePanel(() -> { }, (k, v) -> { });
+		SkatePanel panel = new SkatePanel(() -> { }, (k, v) -> { }, d -> { });
 		LeaderboardSection s = new LeaderboardSection(() -> { }, (c, p, r) -> { });
 		panel.addSection(s);
 		assertTrue(buttons(panel, new ArrayList<>()).stream().anyMatch(b -> "Start 2-minute run".equals(b.getText())));

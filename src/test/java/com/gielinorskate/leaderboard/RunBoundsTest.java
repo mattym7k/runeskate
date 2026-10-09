@@ -412,7 +412,7 @@ public class RunBoundsTest
 		scorer.accept(TrickEvent.trick(Trick.OLLIE), 0f);
 		scorer.accept(TrickEvent.landed(), 0.5f);
 		RunSubmission.Body body = new RunSubmission.Body(RunSubmission.combo(scorer.lastLanded()), "-12345",
-			"s3cr3t", "Zezima", "1.0.0", false);
+			"s3cr3t", "Zezima", "1.0.0");
 		JsonObject json = new JsonParser().parse(GSON.toJson(body)).getAsJsonObject();
 		assertEquals("-12345", json.get("accountHash").getAsString());
 		assertEquals("combo", json.get("kind").getAsString());
@@ -431,9 +431,8 @@ public class RunBoundsTest
 		assertEquals(false, body.toString().contains("s3cr3t"));
 
 		JsonObject xp = new JsonParser().parse(GSON.toJson(new RunSubmission.Body(RunSubmission.xp(77), "1", "s",
-			"A", "1", true))).getAsJsonObject();
+			"A", "1"))).getAsJsonObject();
 		assertEquals(77, xp.get("xp").getAsInt());
-		assertEquals(true, xp.get("devLevelSet").getAsBoolean());
 		assertEquals(false, xp.has("score"));
 		assertEquals(false, xp.has("tricks"));
 	}

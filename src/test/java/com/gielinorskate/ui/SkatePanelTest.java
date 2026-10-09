@@ -40,8 +40,8 @@ public class SkatePanelTest
 	{
 		int[] toggles = {0};
 		List<String> set = new ArrayList<>();
-		SkatePanel panel = new SkatePanel(() -> toggles[0]++, (k, v) -> set.add(k + "=" + v));
-		panel.setSettings("Ctrl+K", "C", true, true, true, true, false);
+		SkatePanel panel = new SkatePanel(() -> toggles[0]++, (k, v) -> set.add(k + "=" + v), d -> { });
+		panel.setSettings("Ctrl+K", "C", true, true, true, true, false, false, "F");
 		panel.update(new PanelState(true, null, 1200, 900, 4));
 		List<AbstractButton> found = buttons(panel, new ArrayList<>());
 		AbstractButton start = found.stream().filter(b -> b.getText().endsWith("skating")).findFirst().get();
@@ -61,7 +61,7 @@ public class SkatePanelTest
 		List<BoardDesign> picked = new ArrayList<>();
 		SkatePanel panel = new SkatePanel(() -> { }, (k, v) -> { }, picked::add);
 		BoardLook look = BoardLook.defaults(designs).with(designs.byId("IRON"));
-		panel.updateProgress(new ProgressState(50, 101_333, 10_000, 0.1f, look));
+		panel.updateProgress(new ProgressState(50, 101_333, 10_000, 0.1f, look, List.of()));
 		List<AbstractButton> found = buttons(panel, new ArrayList<>());
 		AbstractButton rune = byName(found, "design:RUNE");
 		AbstractButton dragon = byName(found, "design:DRAGON");
@@ -95,10 +95,10 @@ public class SkatePanelTest
 	{
 		BoardDesigns designs = BoardDesigns.bundled();
 		SkatePanel panel = new SkatePanel(() -> { }, (k, v) -> { }, d -> { });
-		panel.updateProgress(new ProgressState(99, 13_034_431, 0, 1f, BoardLook.defaults(designs)));
+		panel.updateProgress(new ProgressState(99, 13_034_431, 0, 1f, BoardLook.defaults(designs), List.of()));
 		assertTrue(byName(buttons(panel, new ArrayList<>()), "design:DECK_TROPICAL").isSelected());
 		panel.updateProgress(new ProgressState(99, 13_034_431, 0, 1f,
-			BoardLook.defaults(designs).with(designs.byId("TORVA"))));
+			BoardLook.defaults(designs).with(designs.byId("TORVA")), List.of()));
 		List<AbstractButton> found = buttons(panel, new ArrayList<>());
 		assertFalse(byName(found, "design:DECK_TROPICAL").isSelected());
 		assertTrue(byName(found, "design:TORVA").isSelected());
@@ -167,25 +167,25 @@ public class SkatePanelTest
 	@Test
 	public void controllerModeDrawsThePadButtonsInTheBasics()
 	{
-		SkatePanel panel = new SkatePanel(() -> { }, (k, v) -> { });
+		SkatePanel panel = new SkatePanel(() -> { }, (k, v) -> { }, d -> { });
 		List<javax.swing.JLabel> plain = labels(panel, new ArrayList<>());
 		assertFalse(plain.stream().anyMatch(l -> l.getIcon() instanceof ControllerGlyphIcon && l.isShowing()));
 
-		panel.setSettings("Ctrl+K", "Space", true, false, false, false, true, true);
+		panel.setSettings("Ctrl+K", "Space", true, false, false, false, true, true, "F");
 		List<javax.swing.JLabel> all = labels(panel, new ArrayList<>());
 		long icons = all.stream().filter(l -> l.getIcon() instanceof ControllerGlyphIcon).count();
 		assertTrue("glyph rows " + icons, icons >= 8);
 		assertTrue(all.stream().anyMatch(l -> l.getText() != null && l.getText().contains("Brake")));
 
 		// and back: the keyboard basics return
-		panel.setSettings("Ctrl+K", "Space", true, false, false, false, true, false);
+		panel.setSettings("Ctrl+K", "Space", true, false, false, false, true, false, "F");
 		assertTrue(labels(panel, new ArrayList<>()).stream().noneMatch(l -> l.getIcon() instanceof ControllerGlyphIcon));
 	}
 
 	@Test
 	public void theKoFiSupportLinkSitsAtTheTopOfThePanel()
 	{
-		SkatePanel panel = new SkatePanel(() -> { }, (k, v) -> { });
+		SkatePanel panel = new SkatePanel(() -> { }, (k, v) -> { }, d -> { });
 		AbstractButton support = named(panel, "support:kofi");
 		// its row is the first thing in the panel's content, above the title and Start
 		java.awt.Container row = support.getParent();
@@ -200,12 +200,12 @@ public class SkatePanelTest
 	@Test
 	public void theTrickListLivesInTheTrickBookNotThePanel()
 	{
-		SkatePanel panel = new SkatePanel(() -> { }, (k, v) -> { });
+		SkatePanel panel = new SkatePanel(() -> { }, (k, v) -> { }, d -> { });
 		assertFalse(texts(panel, new ArrayList<>()).stream().anyMatch(t -> t.equals("Tailslide")));
 		AbstractButton open = named(panel, "trickBook:open");
 		assertEquals("Open Trick Book", open.getText());
 		open.doClick();
-		assertTrue(panel.isTrickBookOpen());
+		assertTrue(panel.view == panel.book);
 		List<String> book = texts(panel, new ArrayList<>());
 		assertTrue(book.contains("Trick Book"));
 		assertTrue(book.contains("Tailslide"));
@@ -214,7 +214,7 @@ public class SkatePanelTest
 		assertFalse("the panel's own content is swapped out", book.stream().anyMatch(t -> t.equals("This session")));
 
 		named(panel, "trickBook:back").doClick();
-		assertFalse(panel.isTrickBookOpen());
+		assertFalse(panel.view == panel.book);
 		List<String> back = texts(panel, new ArrayList<>());
 		assertTrue(back.contains("This session"));
 		assertFalse(back.contains("Tailslide"));
@@ -223,9 +223,9 @@ public class SkatePanelTest
 	@Test
 	public void theOpenTrickBookFollowsTheSettings()
 	{
-		SkatePanel panel = new SkatePanel(() -> { }, (k, v) -> { });
+		SkatePanel panel = new SkatePanel(() -> { }, (k, v) -> { }, d -> { });
 		named(panel, "trickBook:open").doClick();
-		panel.setSettings("Ctrl+K", "Space", true, false, false, false, true, true);
+		panel.setSettings("Ctrl+K", "Space", true, false, false, false, true, true, "F");
 		List<String> pad = texts(panel, new ArrayList<>());
 		assertTrue(pad.contains("Hold LT in the air (or RT, aiming right stick to the toe side)"));
 		assertTrue(pad.contains("right stick pull down, flick up-left"));
@@ -235,7 +235,7 @@ public class SkatePanelTest
 
 		panel.setKeyNames("left", "N", "Up", "Down");
 		assertTrue(texts(panel, new ArrayList<>()).stream().noneMatch(t -> t.contains("right mouse button")));
-		panel.setSettings("Ctrl+K", "Space", true, false, false, false, true, false);
+		panel.setSettings("Ctrl+K", "Space", true, false, false, false, true, false, "F");
 		assertTrue(texts(panel, new ArrayList<>()).stream().anyMatch(t -> t.contains("left mouse button")));
 	}
 
@@ -266,7 +266,7 @@ public class SkatePanelTest
 		List<BoardDesign> picked = new ArrayList<>();
 		List<String> actions = new ArrayList<>();
 		SkatePanel panel = new SkatePanel(() -> { }, (k, v) -> { }, picked::add, designs);
-		panel.updateProgress(new ProgressState(1, 0, 83, 0f, BoardLook.defaults(designs)));
+		panel.updateProgress(new ProgressState(1, 0, 83, 0f, BoardLook.defaults(designs), List.of()));
 		// no "+ Custom" until the plugin gives the actions
 		assertFalse(buttons(panel, new ArrayList<>()).stream().anyMatch(b -> "customAdd:grip".equals(b.getName())));
 		panel.setCustomActions(new SkatePanel.CustomActions()
@@ -328,7 +328,7 @@ public class SkatePanelTest
 		// shipped designs have no menu
 		assertEquals(null, byName(found, "design:GRIP_RUNE").getComponentPopupMenu());
 		// in use: highlighted
-		panel.updateProgress(new ProgressState(1, 0, 83, 0f, BoardLook.defaults(designs).with(mine)));
+		panel.updateProgress(new ProgressState(1, 0, 83, 0f, BoardLook.defaults(designs).with(mine), List.of()));
 		assertTrue(byName(buttons(panel, new ArrayList<>()), "design:CUSTOM_0A1B2C3D").isSelected());
 	}
 }

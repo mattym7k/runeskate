@@ -29,7 +29,7 @@ public class GhostWireFormatTest
 	@Test
 	public void aBusyUpdateIsSmallAndRoundTrips()
 	{
-		GhostFrame f = new GhostFrame(330, 2, 1_409_664f, 1_411_200f, -1237f, -3.14159f, -2600f, -2600f, -1820f,
+		GhostState f = GhostFeed.frame(330, 2, 1_409_664f, 1_411_200f, -1237f, -3.14159f, -2600f, -2600f, -1820f,
 			SkaterState.AIRBORNE, Trick.BOARDSLIDE, Trick.NOLLIE_INWARD_HEELFLIP, 0.5f, -TurnRateMeter.MAX_RATE,
 			-4 * (float) Math.PI, -11.424f);
 		SkateGhostUpdate m = GhostCodec.encode(f, 255, null);
@@ -52,7 +52,7 @@ public class GhostWireFormatTest
 	@Test
 	public void namesNotOrdinalsGoOnTheWire()
 	{
-		GhostFrame f = new GhostFrame(330, 2, 0f, 0f, 0f, 0f, 0f, 0f, 0f, SkaterState.MANUAL, Trick.NOSE_MANUAL,
+		GhostState f = GhostFeed.frame(330, 2, 0f, 0f, 0f, 0f, 0f, 0f, 0f, SkaterState.MANUAL, Trick.NOSE_MANUAL,
 			null, 0f);
 		String json = GSON.toJson(GhostCodec.encode(f, 0, null), WebsocketMessage.class);
 		assertTrue(json, json.contains("\"st\":\"MANUAL\""));
@@ -80,12 +80,12 @@ public class GhostWireFormatTest
 	public void theDeckNameIsShortAndRoundTrips()
 	{
 		BoardDesigns designs = BoardDesigns.bundled();
-		GhostFrame f = new GhostFrame(330, 2, 0f, 0f, 0f, 0f, 0f, 0f, 0f, SkaterState.ROLLING, null, null, 0f);
+		GhostState f = GhostFeed.frame(330, 2, 0f, 0f, 0f, 0f, 0f, 0f, 0f, SkaterState.ROLLING, null, null, 0f);
 		SkateGhostUpdate m = GhostCodec.encode(f, 0, null);
 		BoardLook sara = new BoardLook(designs.byId("GRIP_SARADOMIN"), designs.byId("SARADOMIN"),
 			designs.byId("WHEELS_SARADOMIN"));
-		m.dk = GhostCodec.deckWire(sara);
-		m.gw = GhostCodec.lookWire(sara);
+		m.dk = GhostCodec.deckWire(sara, null);
+		m.gw = GhostCodec.lookWire(sara, null);
 		String json = GSON.toJson(m, WebsocketMessage.class);
 		// an old ladder deck goes under its old name, so older versions still draw it
 		assertTrue(json, json.contains("\"dk\":\"SARADOMIN\""));
@@ -93,9 +93,9 @@ public class GhostWireFormatTest
 		SkateGhostUpdate back = (SkateGhostUpdate) GSON.fromJson(json, WebsocketMessage.class);
 		assertEquals("SARADOMIN", back.dk);
 		assertTrue(back.sameState(m));
-		assertEquals(sara, GhostCodec.decodeLook(back.dk, back.gw, null, designs));
+		assertEquals(sara, GhostCodec.decodeLook(back.dk, back.gw, null, designs, null));
 		// the default deck is not sent at all
-		assertEquals(null, GhostCodec.deckWire(BoardLook.defaults(designs)));
+		assertEquals(null, GhostCodec.deckWire(BoardLook.defaults(designs), null));
 	}
 
 	@Test
@@ -106,9 +106,9 @@ public class GhostWireFormatTest
 			.with(com.gielinorskate.progression.BoardDesign.custom("CUSTOM_0A1B2C3D", "Mine", DesignPart.GRIP, 1))
 			.with(com.gielinorskate.progression.BoardDesign.custom("CUSTOM_0A1B2C3E", "Mine", DesignPart.DECK, 1))
 			.with(com.gielinorskate.progression.BoardDesign.custom("CUSTOM_0A1B2C3F", "Mine", DesignPart.WHEELS, 1));
-		assertEquals(null, GhostCodec.deckWire(mine));
-		assertEquals(GhostCodec.lookWire(BoardLook.defaults(designs)), GhostCodec.lookWire(mine));
-		assertFalse(GhostCodec.lookWire(mine).contains("CUSTOM"));
+		assertEquals(null, GhostCodec.deckWire(mine, null));
+		assertEquals(GhostCodec.lookWire(BoardLook.defaults(designs), null), GhostCodec.lookWire(mine, null));
+		assertFalse(GhostCodec.lookWire(mine, null).contains("CUSTOM"));
 	}
 
 	/**
@@ -135,7 +135,7 @@ public class GhostWireFormatTest
 		// aBusyUpdateIsSmallAndRoundTrips with the longest deck name and the duel version. A shared custom deck
 		// ("C:" and 8 hex digits, 10 characters) is one longer than the longest shipped deck name: 281 measured, so
 		// the bound here is 284 (still about 1.1 KB/s at the 4 msg/s cap)
-		GhostFrame busy = new GhostFrame(330, 2, 1_409_664f, 1_411_200f, -1237f, -3.14159f, -2600f, -2600f, -1820f,
+		GhostState busy = GhostFeed.frame(330, 2, 1_409_664f, 1_411_200f, -1237f, -3.14159f, -2600f, -2600f, -1820f,
 			SkaterState.AIRBORNE, Trick.BOARDSLIDE, Trick.NOLLIE_INWARD_HEELFLIP, 0.5f, -TurnRateMeter.MAX_RATE,
 			-4 * (float) Math.PI, -11.424f);
 		SkateGhostUpdate m = GhostCodec.encode(busy, 255, null);
@@ -147,7 +147,7 @@ public class GhostWireFormatTest
 		assertTrue(json.length() + " " + json, json.length() <= 284);
 
 		// the busiest update that may carry them: no flip, a hold, every event bit, the longest names
-		GhostFrame grind = new GhostFrame(330, 2, 1_409_664f, 1_411_200f, -1237f, -3.14159f, -2600f, -2600f, -1820f,
+		GhostState grind = GhostFeed.frame(330, 2, 1_409_664f, 1_411_200f, -1237f, -3.14159f, -2600f, -2600f, -1820f,
 			SkaterState.GRINDING, Trick.BOARDSLIDE, null, 0f, -TurnRateMeter.MAX_RATE, -4 * (float) Math.PI,
 			-11.424f);
 		SkateGhostUpdate g = GhostCodec.encode(grind, 0x3ff, null);
@@ -160,7 +160,7 @@ public class GhostWireFormatTest
 		assertTrue(gj.length() + " " + gj, gj.length() <= 284);
 
 		// on foot carrying the board; a dropped board's place is big enough that the designs wait
-		GhostFrame foot = GhostFrame.onFoot(330, 2, 1_409_664f, 1_411_200f, -1237f, -3.14159f, -384f, -384f, -1820f,
+		GhostState foot = GhostFeed.onFoot(330, 2, 1_409_664f, 1_411_200f, -1237f, -3.14159f, -384f, -384f, -1820f,
 			true, -TurnRateMeter.MAX_RATE, BoardState.CARRIED, 0f, 0f, 0f, 0f);
 		SkateGhostUpdate o = GhostCodec.encode(foot, 0x3ff, null);
 		o.seq = 1_234_567_890;
@@ -170,7 +170,7 @@ public class GhostWireFormatTest
 		o.gw = longest(DesignPart.GRIP) + "." + longest(DesignPart.WHEELS);
 		String oj = GSON.toJson(o, WebsocketMessage.class);
 		assertTrue(oj.length() + " " + oj, oj.length() <= 284);
-		GhostFrame dropped = GhostFrame.onFoot(330, 2, 1_409_664f, 1_411_200f, -1237f, -3.14159f, -384f, -384f,
+		GhostState dropped = GhostFeed.onFoot(330, 2, 1_409_664f, 1_411_200f, -1237f, -3.14159f, -384f, -384f,
 			-1820f, true, -TurnRateMeter.MAX_RATE, BoardState.DROPPED, 1_409_000f, 1_411_999f, -1237f, -3.14159f);
 		assertFalse(GhostCodec.mayCarryLook(GhostCodec.encode(dropped, 0, null)));
 	}
@@ -182,9 +182,9 @@ public class GhostWireFormatTest
 		String json = "{\"type\":\"SkateGhostUpdate\",\"w\":330,\"x\":5,\"st\":\"ROLLING\",\"seq\":3}";
 		SkateGhostUpdate back = (SkateGhostUpdate) GSON.fromJson(json, WebsocketMessage.class);
 		assertNull(back.gw);
-		assertEquals(BoardLook.defaults(designs), GhostCodec.decodeLook(back.dk, back.gw, null, designs));
+		assertEquals(BoardLook.defaults(designs), GhostCodec.decodeLook(back.dk, back.gw, null, designs, null));
 		// an old version's ladder deck still shows
-		assertEquals("BANDOS", GhostCodec.decodeLook("BANDOS", null, null, designs).deck.id);
+		assertEquals("BANDOS", GhostCodec.decodeLook("BANDOS", null, null, designs, null).deck.id);
 	}
 
 	@Test
@@ -207,7 +207,7 @@ public class GhostWireFormatTest
 	@Test
 	public void theDuelCapabilityIsOptionalOnTheWire()
 	{
-		GhostFrame f = new GhostFrame(330, 2, 0f, 0f, 0f, 0f, 0f, 0f, 0f, SkaterState.ROLLING, null, null, 0f);
+		GhostState f = GhostFeed.frame(330, 2, 0f, 0f, 0f, 0f, 0f, 0f, 0f, SkaterState.ROLLING, null, null, 0f);
 		SkateGhostUpdate m = GhostCodec.encode(f, 0, null);
 		String without = GSON.toJson(m, WebsocketMessage.class);
 		assertFalse(without, without.contains("\"dv\""));
@@ -227,7 +227,7 @@ public class GhostWireFormatTest
 		GhostTrail trail = new GhostTrail();
 		for (float t = 0f; t <= seconds; t += 0.02f)
 		{
-			trail.record(new GhostFrame(330, 2, 1_409_664f - 2600f * (seconds - t), 1_411_200f - 2600f * (seconds - t),
+			trail.record(GhostFeed.frame(330, 2, 1_409_664f - 2600f * (seconds - t), 1_411_200f - 2600f * (seconds - t),
 				-1237f + 900f * (seconds - t), -3.14159f + 10f * (seconds - t), 0f, 0f, 0f, SkaterState.AIRBORNE,
 				null, null, 0f), t);
 		}
@@ -240,7 +240,7 @@ public class GhostWireFormatTest
 	{
 		// the busiest updates of theBiggestUpdatesWithDesignsStayWithinTheBound, now with every event bit (pushes
 		// included) set long before, and the fastest skater's positions to send
-		GhostFrame busy = new GhostFrame(330, 2, 1_409_664f, 1_411_200f, -1237f, -3.14159f, -2600f, -2600f, -1820f,
+		GhostState busy = GhostFeed.frame(330, 2, 1_409_664f, 1_411_200f, -1237f, -3.14159f, -2600f, -2600f, -1820f,
 			SkaterState.AIRBORNE, Trick.BOARDSLIDE, Trick.NOLLIE_INWARD_HEELFLIP, 0.5f, -TurnRateMeter.MAX_RATE,
 			-4 * (float) Math.PI, -11.424f);
 		SkateGhostUpdate m = GhostCodec.encode(busy, 0xfff, null);
@@ -253,7 +253,7 @@ public class GhostWireFormatTest
 		System.out.println("busiest flip: " + json.length() + " chars, timeline " + m.tj);
 		assertTrue(json.length() + " " + json, json.length() <= GhostWire.MAX_UPDATE_CHARS);
 
-		GhostFrame grind = new GhostFrame(330, 2, 1_409_664f, 1_411_200f, -1237f, -3.14159f, -2600f, -2600f, -1820f,
+		GhostState grind = GhostFeed.frame(330, 2, 1_409_664f, 1_411_200f, -1237f, -3.14159f, -2600f, -2600f, -1820f,
 			SkaterState.GRINDING, Trick.BOARDSLIDE, null, 0f, -TurnRateMeter.MAX_RATE, -4 * (float) Math.PI,
 			-11.424f);
 		SkateGhostUpdate g = GhostCodec.encode(grind, 0xfff, null);
@@ -271,7 +271,7 @@ public class GhostWireFormatTest
 	public void aTypicalUpdateCarriesItsFourPositionsAndAPopItsTime()
 	{
 		// rolling at speed, a custom deck, seq of today's size, the duel version
-		GhostFrame rolling = new GhostFrame(330, 2, 1_409_664f, 1_411_200f, -237f, 1.234f, 1200f, -900f, 0f,
+		GhostState rolling = GhostFeed.frame(330, 2, 1_409_664f, 1_411_200f, -237f, 1.234f, 1200f, -900f, 0f,
 			SkaterState.ROLLING, null, null, 0f, 1.2f);
 		SkateGhostUpdate m = GhostCodec.encode(rolling, GhostCodec.EV_PUSH, null);
 		m.seq = 412_345_678;
@@ -290,7 +290,7 @@ public class GhostWireFormatTest
 		assertTrue(withTimeline <= GhostWire.MAX_UPDATE_CHARS);
 
 		// a kickflip's pop, sent at once
-		GhostFrame pop = new GhostFrame(330, 2, 1_409_664f, 1_411_200f, -237f, 1.234f, 1200f, -900f, 820f,
+		GhostState pop = GhostFeed.frame(330, 2, 1_409_664f, 1_411_200f, -237f, 1.234f, 1200f, -900f, 820f,
 			SkaterState.AIRBORNE, null, Trick.KICKFLIP, 0.04f, 1.2f);
 		SkateGhostUpdate p = GhostCodec.encode(pop, GhostCodec.EV_POP | GhostCodec.EV_TRICK, Trick.KICKFLIP);
 		p.seq = 412_345_679;
@@ -307,7 +307,7 @@ public class GhostWireFormatTest
 	@Test
 	public void olderVersionsReadAnUpdateWithATimelineAsBefore()
 	{
-		GhostFrame f = new GhostFrame(330, 2, 1_409_664f, 1_411_200f, 0f, 1f, 600f, 0f, 0f, SkaterState.ROLLING, null,
+		GhostState f = GhostFeed.frame(330, 2, 1_409_664f, 1_411_200f, 0f, 1f, 600f, 0f, 0f, SkaterState.ROLLING, null,
 			null, 0f);
 		SkateGhostUpdate m = GhostCodec.encode(f, GhostCodec.EV_PUSH, null);
 		m.seq = 5;

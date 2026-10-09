@@ -39,7 +39,7 @@ public class ControlsCardThawTest
 		assertTrue(card, card.contains("{BACK}: get up"));
 		assertTrue(card, card.contains("{START}: stop"));
 		assertFalse(card, card.contains("flick"));
-		assertTrue(card, card.contains(ControlsCardOverlay.TRICK_BOOK_LINE));
+		assertTrue(card, card.contains("Full trick list: Trick Book in the side panel"));
 		assertTrue(ControlsCardOverlay.rows(spec(false, false)).size() <= 9);
 	}
 
@@ -56,7 +56,7 @@ public class ControlsCardThawTest
 	@Test
 	public void theCardFitsTheFixedModeRegion()
 	{
-		int[] r = ControlsCardOverlay.region(4, 4, 512, 334, 765, 503);
+		int[] r = ControlsCardOverlay.region(new HudLayout(4, 4, 512, 334, 765, 503, HudLayout.NO_OBSTACLE));
 		Graphics2D g = new BufferedImage(8, 8, BufferedImage.TYPE_INT_ARGB).createGraphics();
 		try
 		{

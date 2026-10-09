@@ -25,8 +25,8 @@ public class GridGrindExtractionTest
 	public void lowEastWallBecomesARailAlongThatEdge()
 	{
 		GridCollisionWorld w = new GridCollisionWorld(4);
-		w.setCornerHeight(2, 1, 10f);
-		w.setCornerHeight(2, 2, 30f);
+		WorldTests.setCornerHeight(w, 2, 1, 10f);
+		WorldTests.setCornerHeight(w, 2, 2, 30f);
 		w.setTile(1, 1, GridCollisionWorld.WALL_E, 50f);
 		List<GrindSegment> s = grinds(w);
 		assertEquals(1, s.size());

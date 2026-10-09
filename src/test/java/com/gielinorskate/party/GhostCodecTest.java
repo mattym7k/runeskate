@@ -16,15 +16,15 @@ import org.junit.Test;
 
 public class GhostCodecTest
 {
-	static GhostFrame frame(float x, float y, float h, float heading, SkaterState state)
+	static GhostState frame(float x, float y, float h, float heading, SkaterState state)
 	{
-		return new GhostFrame(420, 1, x, y, h, heading, 0f, 0f, 0f, state, null, null, 0f);
+		return GhostFeed.frame(420, 1, x, y, h, heading, 0f, 0f, 0f, state, null, null, 0f);
 	}
 
 	@Test
 	public void roundTripStaysWithinRounding()
 	{
-		GhostFrame f = new GhostFrame(330, 2, 409_664.4f, 411_200.6f, -37.3f, 2.71828f, 812.4f, -1201.6f, 455.5f,
+		GhostState f = GhostFeed.frame(330, 2, 409_664.4f, 411_200.6f, -37.3f, 2.71828f, 812.4f, -1201.6f, 455.5f,
 			SkaterState.AIRBORNE, Trick.INDY, Trick.KICKFLIP, 0.4f);
 		SkateGhostUpdate m = GhostCodec.encode(f, GhostCodec.EV_POP | GhostCodec.EV_TRICK, Trick.KICKFLIP);
 		m.seq = 77;
@@ -52,7 +52,7 @@ public class GhostCodecTest
 	{
 		for (Trick grab : new Trick[]{Trick.MUTE, Trick.CRAIL, Trick.METHOD, Trick.CRAIL_TWEAK})
 		{
-			GhostFrame f = new GhostFrame(330, 0, 0f, 0f, 0f, 0f, 0f, 0f, 0f, SkaterState.AIRBORNE, grab, null, 0f);
+			GhostState f = GhostFeed.frame(330, 0, 0f, 0f, 0f, 0f, 0f, 0f, 0f, SkaterState.AIRBORNE, grab, null, 0f);
 			SkateGhostUpdate m = GhostCodec.encode(f, GhostCodec.EV_TRICK, grab);
 			assertEquals(grab.name(), m.hold);
 			GhostState s = GhostCodec.decode(m);
@@ -101,7 +101,7 @@ public class GhostCodecTest
 	@Test
 	public void tricksAndStatesGoByName()
 	{
-		GhostFrame f = new GhostFrame(330, 2, 0f, 0f, 0f, 0f, 0f, 0f, 0f, SkaterState.GRINDING, Trick.FEEBLE,
+		GhostState f = GhostFeed.frame(330, 2, 0f, 0f, 0f, 0f, 0f, 0f, 0f, SkaterState.GRINDING, Trick.FEEBLE,
 			Trick.TRIPLE_KICKFLIP, 0.5f);
 		SkateGhostUpdate m = GhostCodec.encode(f, 0, null);
 		assertEquals("GRINDING", m.st);
@@ -136,7 +136,7 @@ public class GhostCodecTest
 	@Test
 	public void turnRateRoundTripsInMilliradiansPerSecond()
 	{
-		GhostFrame f = new GhostFrame(420, 1, 0f, 0f, 0f, 0f, 0f, 0f, 0f, SkaterState.ROLLING, null, null, 0f,
+		GhostState f = GhostFeed.frame(420, 1, 0f, 0f, 0f, 0f, 0f, 0f, 0f, SkaterState.ROLLING, null, null, 0f,
 			-2.3456f);
 		SkateGhostUpdate m = GhostCodec.encode(f, 0, null);
 		assertEquals(-2346, m.tw);
@@ -164,7 +164,7 @@ public class GhostCodecTest
 	@Test
 	public void bodyFlipRoundTripsInMilliradians()
 	{
-		GhostFrame f = new GhostFrame(420, 1, 0f, 0f, 0f, 0f, 0f, 0f, 0f, SkaterState.AIRBORNE, null, null, 0f, 0f,
+		GhostState f = GhostFeed.frame(420, 1, 0f, 0f, 0f, 0f, 0f, 0f, 0f, SkaterState.AIRBORNE, null, null, 0f, 0f,
 			7.5f, -11.424f);
 		SkateGhostUpdate m = GhostCodec.encode(f, 0, null);
 		assertEquals(7500, m.bf);
@@ -242,7 +242,6 @@ public class GhostCodecTest
 	@Test
 	public void absoluteCoordinatesUseTheSceneBase()
 	{
-		assertEquals(3200 * 128 + 6464f, GhostCodec.toAbsolute(6464f, 3200), 0f);
 		assertEquals(6464f, GhostCodec.toLocal(3200 * 128 + 6464f, 3200), 0f);
 	}
 }

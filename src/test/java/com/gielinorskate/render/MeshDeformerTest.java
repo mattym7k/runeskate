@@ -41,8 +41,8 @@ public class MeshDeformerTest
 	{
 		// 0.45 * 200 = 90
 		assertEquals(90f, MeshDeformer.hipHeight(-200f), 1e-4f);
-		assertEquals(MeshDeformer.MIN_HIP, MeshDeformer.hipHeight(-20f), 0f);
-		assertEquals(MeshDeformer.MAX_HIP, MeshDeformer.hipHeight(-1000f), 0f);
+		assertEquals(Tuning.MIN_HIP, MeshDeformer.hipHeight(-20f), 0f);
+		assertEquals(Tuning.MAX_HIP, MeshDeformer.hipHeight(-1000f), 0f);
 		assertEquals(90f, MeshDeformer.hipHeight(0f), 1e-4f);
 	}
 
@@ -366,14 +366,13 @@ public class MeshDeformerTest
 		p.grabAlong = -6f;
 		p.grabAcross = -13f;
 		p.grabBoardY = -14f;
-		p.forwardX = 1f;
 		return p;
 	}
 
 	private static float[] targetOf(BodyPose p)
 	{
 		float[] t = new float[3];
-		GrabReach.target(p.grabAlong, p.grabAcross, p.grabBoardY, p.forwardX, p.boardRoll, p.boardPitch, p.deckLift,
+		BoardPlacement.grabTarget(p.grabAlong, p.grabAcross, p.grabBoardY, p.boardRoll, p.boardPitch, p.deckLift,
 			t);
 		return t;
 	}
@@ -501,7 +500,6 @@ public class MeshDeformerTest
 			p.grabAlong = (r.nextFloat() - 0.5f) * 90f;
 			p.grabAcross = (r.nextFloat() - 0.5f) * 26f;
 			p.grabBoardY = -14f;
-			p.forwardX = r.nextBoolean() ? 1f : -1f;
 			p.boardRoll = (r.nextFloat() - 0.5f) * 7f;
 			p.boardPitch = (r.nextFloat() - 0.5f) * 1.2f;
 			// a grab's knees-up: any fold, any lift (even past what the legs can fold to)

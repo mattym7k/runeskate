@@ -49,7 +49,7 @@ public class SkatePhysicsGrindMagnetTest
 		float perp = 150f;
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.flat(), map(new GrindSegment(-2000, 0, 2000, 0, 30)),
 			0, -perp, heading);
-		p.setSpeed(1000);
+		p.setRollingSpeed(1000);
 		SkateInput in = new SkateInput();
 		in.gestures.add(new Gesture(Direction.UP, false, 0f));
 		p.step(DT, in);
@@ -66,7 +66,7 @@ public class SkatePhysicsGrindMagnetTest
 		float heading = (float) Math.toRadians(85);
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.flat(), map(new GrindSegment(60, -1000, 60, 1000, 30)),
 			0, 0, heading);
-		p.setSpeed(500);
+		p.setRollingSpeed(500);
 		SkateInput in = new SkateInput();
 		in.gestures.add(new Gesture(Direction.UP, false, 0f));
 		p.step(DT, in);
@@ -83,7 +83,7 @@ public class SkatePhysicsGrindMagnetTest
 		{
 			SkatePhysics p = new SkatePhysics(t, TestWorlds.flat(), map(new GrindSegment(60, -1000, 60, 1000, 30)),
 				0, 0, heading);
-			p.setSpeed(600);
+			p.setRollingSpeed(600);
 			SkateInput in = new SkateInput();
 			in.gestures.add(new Gesture(Direction.UP, false, 0f));
 			p.step(DT, in);
@@ -102,7 +102,7 @@ public class SkatePhysicsGrindMagnetTest
 		// rail alongside from the start; the kickflip (0.35 s) may lock at 0.175 s (was 75%, and the rising
 		// h = 754.4 * 0.26 - 1000 * 0.26^2 = 128 was then far above the old top + 48 window)
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.flat(), map(new GrindSegment(10, 30, 10, 1500, 30)), 0, 0, 0);
-		p.setSpeed(500);
+		p.setRollingSpeed(500);
 		SkateInput in = new SkateInput();
 		in.gestures.add(new Gesture(Direction.UP_LEFT, false, 0f));
 		p.step(DT, in);
@@ -119,7 +119,7 @@ public class SkatePhysicsGrindMagnetTest
 		// (inside top + 90): the old 0.45 s global cooldown blocked that transfer
 		GrindMap m = map(new GrindSegment(10, 30, 10, 3000, 30), new GrindSegment(70, 30, 70, 3000, 30));
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.flat(), m, 0, 0, 0);
-		p.setSpeed(600);
+		p.setRollingSpeed(600);
 		SkateInput in = new SkateInput();
 		in.gestures.add(new Gesture(Direction.UP, false, 0f));
 		p.step(DT, in);

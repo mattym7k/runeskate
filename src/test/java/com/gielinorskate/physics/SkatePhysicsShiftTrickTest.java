@@ -21,7 +21,7 @@ public class SkatePhysicsShiftTrickTest
 	private SkatePhysics rolling(float speed)
 	{
 		SkatePhysics p = new SkatePhysics(t, TestWorlds.flat(), 0, 0, 0);
-		p.setSpeed(speed);
+		p.setRollingSpeed(speed);
 		return p;
 	}
 
@@ -118,7 +118,7 @@ public class SkatePhysicsShiftTrickTest
 		steps(p, in, 24); // 0.48 s > 0.45 s
 		// the body has turned 180 clockwise; the board a whole 360 in the world, i.e. 180 past the body
 		assertEquals(PI, Math.abs(p.getHeading()), 1e-3f);
-		assertEquals(PI, p.getAirSpin(), 1e-3f);
+		assertEquals(PI, p.airSpin, 1e-3f);
 		assertEquals(PI, p.getBoardYawOffset(), 1e-3f);
 		List<TrickEvent> events = land(p, in);
 		assertEquals(SkaterState.ROLLING, p.getState());
@@ -136,7 +136,7 @@ public class SkatePhysicsShiftTrickTest
 		SkateInput in = new SkateInput();
 		chargedShiftPop(p, in, Direction.RIGHT, false);
 		steps(p, in, 24);
-		assertEquals(-PI, p.getAirSpin(), 1e-3f);
+		assertEquals(-PI, p.airSpin, 1e-3f);
 		assertEquals(-PI, p.getBoardYawOffset(), 1e-3f);
 		List<TrickEvent> events = land(p, in);
 		assertEquals(TrickEvent.trick(Trick.FS_BIGSPIN), events.get(0));
@@ -151,7 +151,7 @@ public class SkatePhysicsShiftTrickTest
 		chargedShiftPop(p, in, Direction.LEFT, false);
 		steps(p, in, 5);
 		// world board yaw (heading + offset) is the whole eased 360 turn: offset = 2 pi e - pi e = pi e
-		float e = p.getAirSpin() / PI;
+		float e = p.airSpin / PI;
 		assertTrue(e > 0.2f && e < 0.9f);
 		assertEquals(PI * e, p.getBoardYawOffset(), 1e-3f);
 	}

@@ -20,7 +20,7 @@ public class ControlsCardTimerTest
 	public void theBasicsPageStaysUpUntilThePlayerHasPushedAndJumped()
 	{
 		ControlsCardTimer t = new ControlsCardTimer();
-		t.onSkateStart(5f, true);
+		t.onSkateStart(true);
 		assertEquals(1f, t.alpha(500f), 0f);
 		t.onPush(500f);
 		assertEquals("pushing alone is not enough", 1f, t.alpha(900f), 0f);
@@ -36,12 +36,12 @@ public class ControlsCardTimerTest
 	public void itComesBackNextSessionUntilTheBasicsAreLearned()
 	{
 		ControlsCardTimer t = new ControlsCardTimer();
-		t.onSkateStart(0f, true);
+		t.onSkateStart(true);
 		t.onPush(1f);
-		t.onSkateStart(10f, true);
+		t.onSkateStart(true);
 		assertEquals(1f, t.alpha(10f), 0f);
 		t.onJump(11f);
-		t.onSkateStart(100f, true);
+		t.onSkateStart(true);
 		assertEquals(0f, t.alpha(100f), 0f);
 	}
 
@@ -49,12 +49,12 @@ public class ControlsCardTimerTest
 	public void settingOffOrLearnedEarlierMeansNoAutoShow()
 	{
 		ControlsCardTimer off = new ControlsCardTimer();
-		off.onSkateStart(0f, false);
+		off.onSkateStart(false);
 		assertEquals(0f, off.alpha(0f), 0f);
 
 		ControlsCardTimer learned = new ControlsCardTimer();
 		learned.markLearned();
-		learned.onSkateStart(0f, true);
+		learned.onSkateStart(true);
 		assertEquals(0f, learned.alpha(0f), 0f);
 	}
 
@@ -75,7 +75,7 @@ public class ControlsCardTimerTest
 	public void hDuringTheAutoShowHidesIt()
 	{
 		ControlsCardTimer t = new ControlsCardTimer();
-		t.onSkateStart(0f, true);
+		t.onSkateStart(true);
 		assertEquals(1f, t.alpha(0.5f), 0f);
 		t.toggle(1f);
 		assertEquals(0f, t.alpha(1f), 0f);
@@ -89,7 +89,7 @@ public class ControlsCardTimerTest
 	public void hShownCardIsNotFadedByLearningTheBasics()
 	{
 		ControlsCardTimer t = new ControlsCardTimer();
-		t.onSkateStart(0f, true);
+		t.onSkateStart(true);
 		t.toggle(1f);
 		t.toggle(2f);
 		t.onPush(3f);
@@ -103,7 +103,7 @@ public class ControlsCardTimerTest
 		ControlsCardTimer t = new ControlsCardTimer();
 		t.markLearned();
 		t.toggle(0f);
-		t.onSkateStart(10f, true);
+		t.onSkateStart(true);
 		assertFalse(t.alpha(10f) > 0f);
 	}
 }

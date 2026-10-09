@@ -31,7 +31,7 @@ public class InputControllerTest
 	@Test
 	public void disabledControllerDoesNotConsumeOrRegisterPush()
 	{
-		InputController controller = new InputController();
+		InputController controller = new InputController(System::currentTimeMillis);
 		KeyEvent press = key(KeyEvent.VK_W, true);
 
 		controller.keyPressed(press);
@@ -46,7 +46,7 @@ public class InputControllerTest
 	@Test
 	public void enabledWPressIsConsumedAndSetsPushPressedOnce()
 	{
-		InputController controller = new InputController();
+		InputController controller = new InputController(System::currentTimeMillis);
 		controller.setEnabled(true);
 		KeyEvent press = key(KeyEvent.VK_W, true);
 
@@ -66,7 +66,7 @@ public class InputControllerTest
 	@Test
 	public void heldHTogglesTheControlsCardOnceDespiteKeyRepeat()
 	{
-		InputController controller = new InputController();
+		InputController controller = new InputController(System::currentTimeMillis);
 		controller.setEnabled(true);
 		controller.keyPressed(key(KeyEvent.VK_H, true));
 		assertTrue(controller.consumeControlsToggle());
@@ -82,7 +82,7 @@ public class InputControllerTest
 	@Test
 	public void holdingWSetsPushHeldUntilRelease()
 	{
-		InputController controller = new InputController();
+		InputController controller = new InputController(System::currentTimeMillis);
 		controller.setEnabled(true);
 		controller.keyPressed(key(KeyEvent.VK_W, true));
 
@@ -103,7 +103,7 @@ public class InputControllerTest
 	@Test
 	public void arrowKeyAliasesSteerLeftAndRight()
 	{
-		InputController controller = new InputController();
+		InputController controller = new InputController(System::currentTimeMillis);
 		controller.setEnabled(true);
 
 		controller.keyPressed(key(KeyEvent.VK_LEFT, true));
@@ -121,7 +121,7 @@ public class InputControllerTest
 	@Test
 	public void focusLostClearsSteer()
 	{
-		InputController controller = new InputController();
+		InputController controller = new InputController(System::currentTimeMillis);
 		controller.setEnabled(true);
 		controller.keyPressed(key(KeyEvent.VK_A, true));
 
@@ -145,7 +145,7 @@ public class InputControllerTest
 				return true;
 			}
 		};
-		InputController c = new InputController();
+		InputController c = new InputController(System::currentTimeMillis);
 		c.setEnabled(true);
 		java.awt.event.MouseEvent press = new java.awt.event.MouseEvent(canvas, java.awt.event.MouseEvent.MOUSE_PRESSED,
 			0L, java.awt.event.InputEvent.BUTTON1_DOWN_MASK, 10, 10, 1, false, java.awt.event.MouseEvent.BUTTON1);
@@ -163,7 +163,7 @@ public class InputControllerTest
 	@Test
 	public void wheelIsLeftAloneWhenNotSkating()
 	{
-		InputController c = new InputController();
+		InputController c = new InputController(System::currentTimeMillis);
 		java.awt.event.MouseWheelEvent e = wheel(2);
 		c.mouseWheelMoved(e);
 		assertFalse(e.isConsumed());
@@ -173,7 +173,7 @@ public class InputControllerTest
 	@Test
 	public void wheelNotchesAccumulateWhileSkating()
 	{
-		InputController c = new InputController();
+		InputController c = new InputController(System::currentTimeMillis);
 		c.setEnabled(true);
 		java.awt.event.MouseWheelEvent e = wheel(2);
 		c.mouseWheelMoved(e);
@@ -186,7 +186,7 @@ public class InputControllerTest
 	@Test
 	public void rightMouseFlickUpQueuesGesture()
 	{
-		InputController c = new InputController();
+		InputController c = new InputController(System::currentTimeMillis);
 		c.setEnabled(true);
 
 		c.mousePressed(rightMouse(MouseEvent.MOUSE_PRESSED, 50, 200, 0));
@@ -211,7 +211,7 @@ public class InputControllerTest
 	@Test
 	public void slowRightMouseDragQueuesNoGesture()
 	{
-		InputController c = new InputController();
+		InputController c = new InputController(System::currentTimeMillis);
 		c.setEnabled(true);
 
 		c.mousePressed(rightMouse(MouseEvent.MOUSE_PRESSED, 0, 0, 0));
@@ -226,7 +226,7 @@ public class InputControllerTest
 	@Test
 	public void spaceIsConsumedAndHeldAsTheManualKey()
 	{
-		InputController c = new InputController();
+		InputController c = new InputController(System::currentTimeMillis);
 		c.setEnabled(true);
 		KeyEvent press = key(KeyEvent.VK_SPACE, true);
 		c.keyPressed(press);
@@ -296,7 +296,7 @@ public class InputControllerTest
 	@Test
 	public void disabledControllerIgnoresMouseFlicks()
 	{
-		InputController c = new InputController();
+		InputController c = new InputController(System::currentTimeMillis);
 		MouseEvent press = rightMouse(MouseEvent.MOUSE_PRESSED, 50, 200, 0);
 
 		c.mousePressed(press);
@@ -312,7 +312,7 @@ public class InputControllerTest
 	@Test
 	public void qAndEHoldGrabLeftAndGrabRight()
 	{
-		InputController c = new InputController();
+		InputController c = new InputController(System::currentTimeMillis);
 		c.setEnabled(true);
 
 		c.keyPressed(key(KeyEvent.VK_Q, true));
@@ -350,7 +350,7 @@ public class InputControllerTest
 	@Test
 	public void movingTheMouseWithAGrabKeyHeldAimsTheGrab()
 	{
-		InputController c = new InputController();
+		InputController c = new InputController(System::currentTimeMillis);
 		c.setEnabled(true);
 		c.mouseMoved(move(100, 100));
 		c.keyPressed(key(KeyEvent.VK_Q, true));
@@ -374,7 +374,7 @@ public class InputControllerTest
 	@Test
 	public void mouseMovesWithoutAGrabKeyDoNotAim()
 	{
-		InputController c = new InputController();
+		InputController c = new InputController(System::currentTimeMillis);
 		c.setEnabled(true);
 		c.mouseMoved(move(100, 100));
 		c.mouseMoved(move(100, 40));
@@ -385,7 +385,7 @@ public class InputControllerTest
 	@Test
 	public void theFirstMoveAfterEnablingIsTheOriginNotAnAim()
 	{
-		InputController c = new InputController();
+		InputController c = new InputController(System::currentTimeMillis);
 		c.setEnabled(true);
 		c.keyPressed(key(KeyEvent.VK_Q, true)); // the mouse position is not known yet
 		c.mouseMoved(move(400, 300));
@@ -397,7 +397,7 @@ public class InputControllerTest
 	@Test
 	public void aRightDragWithAGrabHeldIsStillAFlickAndNotAnAim()
 	{
-		InputController c = new InputController();
+		InputController c = new InputController(System::currentTimeMillis);
 		c.setEnabled(true);
 		c.mouseMoved(move(50, 200));
 		c.keyPressed(key(KeyEvent.VK_Q, true));
@@ -412,7 +412,7 @@ public class InputControllerTest
 	@Test
 	public void aFlickDragMadeWithAGrabHeldDoesNotCountTowardsItsAim()
 	{
-		InputController c = new InputController();
+		InputController c = new InputController(System::currentTimeMillis);
 		c.setEnabled(true);
 		c.mouseMoved(move(50, 200));
 		c.keyPressed(key(KeyEvent.VK_Q, true));
@@ -431,7 +431,7 @@ public class InputControllerTest
 	@Test
 	public void aGrabPressedMidFlickMeasuresItsAimFromTheRelease()
 	{
-		InputController c = new InputController();
+		InputController c = new InputController(System::currentTimeMillis);
 		c.setEnabled(true);
 		c.mouseMoved(move(50, 200));
 		c.mousePressed(rightMouse(MouseEvent.MOUSE_PRESSED, 50, 200, 0));
@@ -467,7 +467,7 @@ public class InputControllerTest
 	@Test
 	public void keyRemappingsWAndSStillPushAndCrouchButNeverLean()
 	{
-		InputController c = new InputController();
+		InputController c = new InputController(System::currentTimeMillis);
 		c.setEnabled(true);
 		// Key Remapping rewrites W / S to the arrow key codes and keeps the letter as the key char
 		KeyEvent w = new KeyEvent(SOURCE, KeyEvent.KEY_PRESSED, 0, 0, KeyEvent.VK_UP, 'w');
@@ -486,7 +486,7 @@ public class InputControllerTest
 	@Test
 	public void mirroredFlicksMirrorTheGrabAim()
 	{
-		InputController c = new InputController();
+		InputController c = new InputController(System::currentTimeMillis);
 		c.configureTricks(com.gielinorskate.GielinorSkateConfig.TrickControls.MOUSE,
 			com.gielinorskate.GielinorSkateConfig.FlickButton.RIGHT, true);
 		c.setEnabled(true);
@@ -499,7 +499,7 @@ public class InputControllerTest
 	@Test
 	public void arrowKeysAreTheLeanKeysAndStillPushAndCrouch()
 	{
-		InputController c = new InputController();
+		InputController c = new InputController(System::currentTimeMillis);
 		c.setEnabled(true);
 		KeyEvent up = key(KeyEvent.VK_UP, true);
 		c.keyPressed(up);
@@ -528,7 +528,7 @@ public class InputControllerTest
 	@Test
 	public void leanKeysCanBeRebound()
 	{
-		InputController c = new InputController();
+		InputController c = new InputController(System::currentTimeMillis);
 		c.configureLeanKeys(KeyEvent.VK_I, KeyEvent.VK_K);
 		c.setEnabled(true);
 		KeyEvent i = key(KeyEvent.VK_I, true);
@@ -549,7 +549,7 @@ public class InputControllerTest
 	@Test
 	public void setEnabledFalseDiscardsAnyPendingGesture()
 	{
-		InputController c = new InputController();
+		InputController c = new InputController(System::currentTimeMillis);
 		c.setEnabled(true);
 		c.mousePressed(rightMouse(MouseEvent.MOUSE_PRESSED, 50, 200, 0));
 		c.mouseDragged(rightMouse(MouseEvent.MOUSE_DRAGGED, 50, 230, 50));
@@ -566,7 +566,7 @@ public class InputControllerTest
 	@Test
 	public void sKeySetsLeanBackAndCrouchUntilRelease()
 	{
-		InputController c = new InputController();
+		InputController c = new InputController(System::currentTimeMillis);
 		c.setEnabled(true);
 		c.keyPressed(key(KeyEvent.VK_S, true));
 		SkateInput held = new SkateInput();
@@ -583,7 +583,7 @@ public class InputControllerTest
 	@Test
 	public void manualKeyCanBeRebound()
 	{
-		InputController c = new InputController();
+		InputController c = new InputController(System::currentTimeMillis);
 		c.configure(KeyEvent.VK_M, 100);
 		c.setEnabled(true);
 		KeyEvent m = key(KeyEvent.VK_M, true);
@@ -600,7 +600,7 @@ public class InputControllerTest
 	@Test
 	public void manualKeyOnASkateKeyFallsBackToSpace()
 	{
-		InputController c = new InputController();
+		InputController c = new InputController(System::currentTimeMillis);
 		c.configure(KeyEvent.VK_W, 100);
 		c.setEnabled(true);
 		c.keyPressed(key(KeyEvent.VK_W, true));
@@ -623,11 +623,11 @@ public class InputControllerTest
 		for (int code : bad)
 		{
 			assertFalse(KeyEvent.getKeyText(code), InputController.isValidManualKey(code));
-			assertEquals(KeyEvent.VK_SPACE, InputController.effectiveManualKey(code));
+			assertEquals(KeyEvent.VK_SPACE, InputController.effectiveManualKey(code, false));
 		}
 		assertTrue(InputController.isValidManualKey(KeyEvent.VK_SPACE));
 		assertTrue(InputController.isValidManualKey(KeyEvent.VK_M));
-		assertEquals(KeyEvent.VK_M, InputController.effectiveManualKey(KeyEvent.VK_M));
+		assertEquals(KeyEvent.VK_M, InputController.effectiveManualKey(KeyEvent.VK_M, false));
 	}
 
 	/** Winds up and flicks an ollie with the right mouse button; `shiftAtFlick` decides Shift as the flick fires. */
@@ -657,7 +657,7 @@ public class InputControllerTest
 	@Test
 	public void shiftHeldAsTheFlickFiresMarksTheGestureModified()
 	{
-		InputController c = new InputController();
+		InputController c = new InputController(System::currentTimeMillis);
 		c.setEnabled(true);
 		assertTrue(flickWithShift(c, false, true).modified);
 	}
@@ -665,7 +665,7 @@ public class InputControllerTest
 	@Test
 	public void onlyShiftAtTheMomentOfTheFlickCounts()
 	{
-		InputController c = new InputController();
+		InputController c = new InputController(System::currentTimeMillis);
 		c.setEnabled(true);
 		// held through the wind-up but released before the flick: a plain trick
 		assertFalse(flickWithShift(c, true, false).modified);
@@ -674,7 +674,7 @@ public class InputControllerTest
 	@Test
 	public void shiftIsForgottenWhenFocusIsLost()
 	{
-		InputController c = new InputController();
+		InputController c = new InputController(System::currentTimeMillis);
 		c.setEnabled(true);
 		c.keyPressed(key(KeyEvent.VK_SHIFT, true));
 		c.focusLost();

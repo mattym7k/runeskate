@@ -185,7 +185,7 @@ public class ProgressionTest
 		store.current = "rsprofile.a";
 		progression.load();
 		assertEquals("GRIP_RUNE/RUNE/WHEELS_NATURAL", progression.look().toString());
-		assertEquals("RUNE", progression.design(DesignPart.DECK).id);
+		assertEquals("RUNE", progression.look().deck.id);
 	}
 
 	@Test
@@ -209,7 +209,7 @@ public class ProgressionTest
 		store.values.put("rsprofile.a.skateXp", "500");
 		progression.load();
 		assertEquals(BoardLook.defaults(DESIGNS), progression.look());
-		progression.setLevelForDev(99);
+		levelTo(99);
 		assertEquals("GRIP_TORVA/TORVA/WHEELS_NATURAL", progression.look().toString());
 	}
 
@@ -221,11 +221,11 @@ public class ProgressionTest
 		store.values.put("rsprofile.a.skateGrip", "MAX_CAPE");
 		store.values.put("rsprofile.a.skateWheels", "GRIP_RUNE");
 		progression.load();
-		progression.setLevelForDev(99);
+		levelTo(99);
 		assertEquals(BoardLook.defaults(DESIGNS), progression.look());
 		store.values.put("rsprofile.a.skateDeck", "MAX_CAPE");
 		progression.load();
-		assertEquals("DECK_TROPICAL", progression.design(DesignPart.DECK).id);
+		assertEquals("DECK_TROPICAL", progression.look().deck.id);
 	}
 
 	@Test
@@ -235,7 +235,7 @@ public class ProgressionTest
 		store.values.put("rsprofile.a.skateDeck", "DECK_RED_CAMO");
 		store.values.put("rsprofile.a.skateWheels", "WHEELS_DEATH");
 		progression.load();
-		progression.setLevelForDev(99);
+		levelTo(99);
 		assertEquals(BoardLook.defaults(DESIGNS), progression.look());
 		assertEquals("GRIP_BLACK/DECK_TROPICAL/WHEELS_NATURAL", progression.look().toString());
 	}
@@ -245,8 +245,8 @@ public class ProgressionTest
 	{
 		store.values.put("rsprofile.a.skateDeck", "SARADOMIN");
 		progression.load();
-		progression.setLevelForDev(70);
-		assertEquals("SARADOMIN", progression.design(DesignPart.DECK).id);
+		levelTo(70);
+		assertEquals("SARADOMIN", progression.look().deck.id);
 	}
 
 	@Test
@@ -258,20 +258,10 @@ public class ProgressionTest
 		}
 	}
 
-	@Test
-	public void devLevelSetsExactXpSavesAndMarksTheAccount()
+	/** Gives the account the XP of {@code level} and loads it again. */
+	private void levelTo(int level)
 	{
+		store.values.put("rsprofile.a.skateXp", Integer.toString(SkateLevels.xpForLevel(level)));
 		progression.load();
-		progression.setLevelForDev(70);
-		assertEquals(70, progression.level());
-		assertEquals(737_627, progression.xp());
-		assertEquals("737627", store.values.get("rsprofile.a.skateXp"));
-		assertEquals("true", store.values.get("rsprofile.a.devLevelSet"));
-		progression.setLevelForDev(1);
-		assertEquals(0, progression.xp());
-		// nothing pending afterwards
-		int writes = store.writes.size();
-		progression.flush();
-		assertEquals(writes, store.writes.size());
 	}
 }

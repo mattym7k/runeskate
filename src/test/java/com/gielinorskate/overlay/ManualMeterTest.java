@@ -1,9 +1,8 @@
 package com.gielinorskate.overlay;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 
 import com.gielinorskate.tricks.Trick;
 import org.junit.Test;
@@ -15,7 +14,7 @@ public class ManualMeterTest
 	{
 		ManualMeter m = new ManualMeter();
 		m.update(null, 10f);
-		assertFalse(m.isActive());
+		assertNull(m.text(0f));
 		assertNull(m.text(10f));
 	}
 
@@ -34,10 +33,10 @@ public class ManualMeterTest
 		ManualMeter m = new ManualMeter();
 		m.update(Trick.MANUAL, 0f);
 		m.update(Trick.MANUAL, 1f);
-		assertTrue(m.isActive());
+		assertNotNull(m.text(1f));
 
 		m.update(null, 1.5f);
-		assertFalse(m.isActive());
+		assertNull(m.text(0f));
 		assertNull(m.text(1.5f));
 	}
 

@@ -75,9 +75,9 @@ public class DesignBudgetTest
 		return DesignShare.outgoing(MY_DECK.id, "Mine", new SharedDesignImage.Encoded(DesignPart.DECK, 35, 96, png));
 	}
 
-	private static GhostFrame frame(float x)
+	private static GhostState frame(float x)
 	{
-		return new GhostFrame(420, 0, x, 0f, 0f, 0f, 0f, 0f, 0f, SkaterState.ROLLING, null, null, 0f);
+		return GhostFeed.frame(420, 0, x, 0f, 0f, 0f, 0f, 0f, 0f, SkaterState.ROLLING, null, null, 0f);
 	}
 
 	private static SkateGhostUpdate remote(int seq)
@@ -100,7 +100,7 @@ public class DesignBudgetTest
 	}
 
 	/** One frame the way the plugin runs it: the skate frame (when skating), then the duel tick's flush. */
-	private static void step(GhostHub hub, FakeLink link, float now, GhostFrame f, int events, boolean audience)
+	private static void step(GhostHub hub, FakeLink link, float now, GhostState f, int events, boolean audience)
 	{
 		link.now = now;
 		if (audience)
@@ -277,7 +277,7 @@ public class DesignBudgetTest
 		}
 		// the whole deck went: its offer and every chunk
 		assertEquals(deck(1).messages().size(), with.designs());
-		assertEquals(0, b.designsQueued());
+		assertEquals(0, b.designOut.queue.size());
 	}
 
 	@Test
@@ -321,14 +321,14 @@ public class DesignBudgetTest
 		GhostHub hub = hub(link, true);
 		for (int k = 0; k < 4; k++)
 		{
-			hub.sendDuel(new SkateDuelHit());
+			hub.sendDuel(new SkateDuelHit(), false);
 		}
 		for (int i = 0; i < 300; i++)
 		{
 			step(hub, link, i * FRAME, null, 0, false);
 			if (i == 150)
 			{
-				hub.sendDuel(new SkateDuelHit());
+				hub.sendDuel(new SkateDuelHit(), false);
 			}
 		}
 		// every duel hit went out before the first design message, or as soon as it was queued
@@ -366,7 +366,7 @@ public class DesignBudgetTest
 			step(hub, link, i * FRAME, null, 0, false);
 		}
 		assertEquals(0, link.designs());
-		assertEquals(0, hub.designsQueued());
+		assertEquals(0, hub.designOut.queue.size());
 		link.inParty = true;
 		for (int i = 200; i < 400; i++)
 		{
@@ -375,14 +375,14 @@ public class DesignBudgetTest
 		}
 		assertEquals(0, link.designs());
 		// joined: queued again
-		assertEquals(deck(1).messages().size(), hub.designsQueued());
+		assertEquals(deck(1).messages().size(), hub.designOut.queue.size());
 		hub.setDesignSharing(false);
 		for (int i = 400; i < 600; i++)
 		{
 			step(hub, link, i * FRAME, null, 0, false);
 		}
 		assertEquals(0, link.designs());
-		assertEquals(0, hub.designsQueued());
+		assertEquals(0, hub.designOut.queue.size());
 	}
 
 	@Test
@@ -418,22 +418,22 @@ public class DesignBudgetTest
 		int all = deck(1).messages().size();
 		assertEquals(all, link.designs());
 		hub.onRemoteUpdate(5L, remote(1), 20f, null);
-		assertEquals(all, hub.designsQueued());
-		hub.onRemoteStop(5L);
+		assertEquals(all, hub.designOut.queue.size());
+		hub.onMemberLeft(5L);
 		hub.onRemoteUpdate(5L, remote(2), 30f, null);
 		// already queued, and not again within the minute
-		assertEquals(all, hub.designsQueued());
+		assertEquals(all, hub.designOut.queue.size());
 		for (int i = 1500; i < 3000; i++)
 		{
 			step(hub, link, i * FRAME, null, 0, false);
 		}
 		assertEquals(2 * all, link.designs());
-		hub.onRemoteStop(5L);
+		hub.onMemberLeft(5L);
 		hub.onRemoteUpdate(5L, remote(3), 70f, null);
-		assertEquals(0, hub.designsQueued());
-		hub.onRemoteStop(5L);
+		assertEquals(0, hub.designOut.queue.size());
+		hub.onMemberLeft(5L);
 		hub.onRemoteUpdate(5L, remote(4), 81f, null);
-		assertEquals(all, hub.designsQueued());
+		assertEquals(all, hub.designOut.queue.size());
 	}
 
 	@Test
@@ -442,14 +442,14 @@ public class DesignBudgetTest
 		FakeLink link = new FakeLink();
 		GhostHub hub = hub(link, true);
 		int all = deck(1).messages().size();
-		assertEquals(all, hub.designsQueued());
+		assertEquals(all, hub.designOut.queue.size());
 		hub.setLocalDesign(DesignPart.DECK, deck(2));
-		assertEquals(deck(2).messages().size(), hub.designsQueued());
+		assertEquals(deck(2).messages().size(), hub.designOut.queue.size());
 		// the same again changes nothing
 		hub.setLocalDesign(DesignPart.DECK, deck(2));
-		assertEquals(deck(2).messages().size(), hub.designsQueued());
+		assertEquals(deck(2).messages().size(), hub.designOut.queue.size());
 		hub.setLocalDesign(DesignPart.DECK, null);
-		assertEquals(0, hub.designsQueued());
+		assertEquals(0, hub.designOut.queue.size());
 		assertFalse(link.designs() > 0);
 	}
 }

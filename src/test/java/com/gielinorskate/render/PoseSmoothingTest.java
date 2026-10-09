@@ -113,7 +113,7 @@ public class PoseSmoothingTest
 			last = w;
 		}
 		assertTrue("visible: " + peak, peak > 0.1f);
-		assertTrue("small: " + peak, peak <= PoseSmoothing.STUMBLE_ROLL);
+		assertTrue("small: " + peak, peak <= Tuning.STUMBLE_ROLL);
 		assertTrue(bothWays);
 		assertEquals(0f, PoseSmoothing.stumbleWobble(PoseSmoothing.STUMBLE_TIME), 0f);
 		assertEquals(0f, PoseSmoothing.stumbleWobble(Float.MAX_VALUE), 0f);

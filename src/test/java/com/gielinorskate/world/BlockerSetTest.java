@@ -15,34 +15,34 @@ public class BlockerSetTest
 	/** One axis-aligned 40x40 rock (half 20) centred in tile (2, 2), top 70. */
 	private static BlockerSet rock(byte kind, int flags)
 	{
-		return new BlockerSet.Builder().add(2.5f * T, 2.5f * T, 20, 20, 1, 0, 70, kind, flags).build(5);
+		return new BlockerSetBuilder().add(2.5f * T, 2.5f * T, 20, 20, 1, 0, 70, kind, flags).build(5);
 	}
 
 	@Test
 	public void registersOnlyInTilesItsExpandedBoundsTouch()
 	{
 		BlockerSet s = rock(BlockerSet.SOLID, 0);
-		assertEquals(1, s.countAt(2, 2));
-		assertEquals(0, s.countAt(1, 2));
-		assertEquals(0, s.countAt(3, 3));
+		assertEquals(1, WorldTests.countAt(s, 2, 2));
+		assertEquals(0, WorldTests.countAt(s, 1, 2));
+		assertEquals(0, WorldTests.countAt(s, 3, 3));
 		// half 50 + skater radius 12 = 62 from the centre at 2.5 T reaches 2.5 T + 62 = 382 < 384: still one tile
-		BlockerSet wide = new BlockerSet.Builder().add(2.5f * T, 2.5f * T, 50, 50, 1, 0, 70, BlockerSet.SOLID, 0).build(5);
-		assertEquals(0, wide.countAt(3, 2));
+		BlockerSet wide = new BlockerSetBuilder().add(2.5f * T, 2.5f * T, 50, 50, 1, 0, 70, BlockerSet.SOLID, 0).build(5);
+		assertEquals(0, WorldTests.countAt(wide, 3, 2));
 		// half 60 + 12 = 72 > 64: spills into all eight neighbours
-		BlockerSet wider = new BlockerSet.Builder().add(2.5f * T, 2.5f * T, 60, 60, 1, 0, 70, BlockerSet.SOLID, 0).build(5);
-		assertEquals(1, wider.countAt(3, 3));
-		assertEquals(1, wider.countAt(1, 2));
-		assertEquals(0, wider.countAt(4, 2));
+		BlockerSet wider = new BlockerSetBuilder().add(2.5f * T, 2.5f * T, 60, 60, 1, 0, 70, BlockerSet.SOLID, 0).build(5);
+		assertEquals(1, WorldTests.countAt(wider, 3, 3));
+		assertEquals(1, WorldTests.countAt(wider, 1, 2));
+		assertEquals(0, WorldTests.countAt(wider, 4, 2));
 	}
 
 	@Test
 	public void boxesOutsideTheGridAreClipped()
 	{
-		BlockerSet s = new BlockerSet.Builder().add(-300, 2.5f * T, 20, 20, 1, 0, 70, BlockerSet.SOLID, 0).build(5);
-		assertEquals(1, s.count());
+		BlockerSet s = new BlockerSetBuilder().add(-300, 2.5f * T, 20, 20, 1, 0, 70, BlockerSet.SOLID, 0).build(5);
+		assertEquals(1, s.boxes.length);
 		for (int tx = 0; tx < 5; tx++)
 		{
-			assertEquals(0, s.countAt(tx, 2));
+			assertEquals(0, WorldTests.countAt(s, tx, 2));
 		}
 	}
 
@@ -104,14 +104,14 @@ public class BlockerSetTest
 		Contact c = new Contact();
 		assertFalse(s.contact(2.5f * T, 2.5f * T, R, 0, 24, c));
 		assertEquals(Float.NEGATIVE_INFINITY, s.landTop(2.5f * T, 2.5f * T), 0f);
-		assertEquals(Float.NEGATIVE_INFINITY, s.blockTop(2.5f * T - 40, 2.5f * T, 2.5f * T, 2.5f * T), 0f);
+		assertEquals(Float.NEGATIVE_INFINITY, s.blockTop(2.5f * T - 40, 2.5f * T, 2.5f * T, 2.5f * T, BlockerSet.SKATER_R), 0f);
 	}
 
 	@Test
 	public void rotatedBoxUsesItsOwnAxes()
 	{
 		// 100 x 10 plank turned 45 degrees: its long (u) axis runs north-east, v = (-sin, cos) north-west
-		BlockerSet s = new BlockerSet.Builder().add(2.5f * T, 2.5f * T, 50, 5, S45, S45, 150, BlockerSet.SOLID, 0).build(5);
+		BlockerSet s = new BlockerSetBuilder().add(2.5f * T, 2.5f * T, 50, 5, S45, S45, 150, BlockerSet.SOLID, 0).build(5);
 		Contact c = new Contact();
 		// 40 along the plank then 10 off its north-west side: 5 clear of the face, inside the radius
 		float ax = 40 * S45 - 10 * S45;
@@ -128,7 +128,7 @@ public class BlockerSetTest
 	@Test
 	public void deepestOfSeveralContactsWins()
 	{
-		BlockerSet s = new BlockerSet.Builder()
+		BlockerSet s = new BlockerSetBuilder()
 			.add(2.5f * T, 2.5f * T, 20, 20, 1, 0, 70, BlockerSet.SOLID, 0)
 			.add(2.5f * T + 50, 2.5f * T, 20, 20, 1, 0, 300, BlockerSet.SOLID, 0)
 			.build(5);
@@ -166,8 +166,8 @@ public class BlockerSetTest
 		BlockerSet s = rock(BlockerSet.SOLID, 0);
 		float face = 2.5f * T - 20;
 		// 13 west of the west face -> 11 west: inside the 12-unit skater radius
-		assertEquals(70f, s.blockTop(face - 13, 2.5f * T, face - 11, 2.5f * T), 0f);
-		assertEquals(Float.NEGATIVE_INFINITY, s.blockTop(face - 30, 2.5f * T, face - 13, 2.5f * T), 0f);
+		assertEquals(70f, s.blockTop(face - 13, 2.5f * T, face - 11, 2.5f * T, BlockerSet.SKATER_R), 0f);
+		assertEquals(Float.NEGATIVE_INFINITY, s.blockTop(face - 30, 2.5f * T, face - 13, 2.5f * T, BlockerSet.SKATER_R), 0f);
 	}
 
 	@Test
@@ -176,17 +176,17 @@ public class BlockerSetTest
 		BlockerSet s = rock(BlockerSet.SOLID, 0);
 		float cx = 2.5f * T;
 		// 15 east of centre (5 inside the east face): east is out, along the face is no deeper, west is deeper
-		assertEquals(Float.NEGATIVE_INFINITY, s.blockTop(cx + 15, cx, cx + 18, cx), 0f);
-		assertEquals(Float.NEGATIVE_INFINITY, s.blockTop(cx + 15, cx, cx + 15, cx + 3), 0f);
-		assertEquals(70f, s.blockTop(cx + 15, cx, cx + 12, cx), 0f);
+		assertEquals(Float.NEGATIVE_INFINITY, s.blockTop(cx + 15, cx, cx + 18, cx, BlockerSet.SKATER_R), 0f);
+		assertEquals(Float.NEGATIVE_INFINITY, s.blockTop(cx + 15, cx, cx + 15, cx + 3, BlockerSet.SKATER_R), 0f);
+		assertEquals(70f, s.blockTop(cx + 15, cx, cx + 12, cx, BlockerSet.SKATER_R), 0f);
 	}
 
 	@Test
 	public void blockTopCatchesAFastMoveSkippingOverAThinBox()
 	{
 		// 4 thick (half 2) box: expanded by the radius it is 28 thick; a 40-unit step jumps right over it
-		BlockerSet s = new BlockerSet.Builder().add(2.5f * T, 2.5f * T, 60, 2, 1, 0, 300, BlockerSet.SOLID, 0).build(5);
-		assertEquals(300f, s.blockTop(2.5f * T, 2.5f * T - 20, 2.5f * T, 2.5f * T + 20), 0f);
+		BlockerSet s = new BlockerSetBuilder().add(2.5f * T, 2.5f * T, 60, 2, 1, 0, 300, BlockerSet.SOLID, 0).build(5);
+		assertEquals(300f, s.blockTop(2.5f * T, 2.5f * T - 20, 2.5f * T, 2.5f * T + 20, BlockerSet.SKATER_R), 0f);
 	}
 
 	@Test
@@ -195,17 +195,17 @@ public class BlockerSetTest
 		// a 45-degree rock (half 20): its east corner 20 sqrt 2 east of the centre. A move north 11.9 east of
 		// that corner starts and ends 12.55 from it (clear of the radius) and passes within it only in the
 		// middle: grazing the corner, not stepping over the rock
-		BlockerSet s = new BlockerSet.Builder().add(2.5f * T, 2.5f * T, 20, 20, S45, S45, 70, BlockerSet.SOLID, 0).build(5);
+		BlockerSet s = new BlockerSetBuilder().add(2.5f * T, 2.5f * T, 20, 20, S45, S45, 70, BlockerSet.SOLID, 0).build(5);
 		float x = 2.5f * T + 20 * (float) Math.sqrt(2) + 11.9f;
 		float y = 2.5f * T;
-		assertEquals(Float.NEGATIVE_INFINITY, s.blockTop(x, y - 4, x, y + 4), 0f);
+		assertEquals(Float.NEGATIVE_INFINITY, s.blockTop(x, y - 4, x, y + 4, BlockerSet.SKATER_R), 0f);
 	}
 
 	@Test
 	public void blockTopIgnoresLowBoxesWhichBlockThroughTheirRaisedGround()
 	{
 		BlockerSet s = rock(BlockerSet.LOW, BlockerSet.LANDABLE);
-		assertEquals(Float.NEGATIVE_INFINITY, s.blockTop(2.5f * T - 40, 2.5f * T, 2.5f * T, 2.5f * T), 0f);
+		assertEquals(Float.NEGATIVE_INFINITY, s.blockTop(2.5f * T - 40, 2.5f * T, 2.5f * T, 2.5f * T, BlockerSet.SKATER_R), 0f);
 		Contact c = new Contact();
 		assertTrue("LOW boxes still collide on their sides", s.contact(2.5f * T - 25, 2.5f * T, R, 0, 24, c));
 	}
@@ -213,9 +213,9 @@ public class BlockerSetTest
 	@Test
 	public void cornersFollowTheRotation()
 	{
-		BlockerSet s = new BlockerSet.Builder().add(100, 200, 10, 5, 0, 1, 50, BlockerSet.SOLID, 0).build(5);
+		BlockerSet s = new BlockerSetBuilder().add(100, 200, 10, 5, 0, 1, 50, BlockerSet.SOLID, 0).build(5);
 		float[] out = new float[8];
-		s.corners(0, out);
+		BlockerSet.corners(s.boxes[0], out);
 		// u = (0, 1) points north, v = (-1, 0) west; corner 0 = -hx u - hy v, corner 1 = +hx u - hy v
 		assertEquals(105, out[0], 1e-4f);
 		assertEquals(190, out[1], 1e-4f);

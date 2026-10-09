@@ -7,13 +7,13 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Pattern;
 import org.junit.Test;
 
 /** The design manifest (designs.json), id fallbacks, the old deck names, unlocks and wire names. */
@@ -28,15 +28,39 @@ public class BoardDesignsTest
 		+ "{\"id\": \"WHEELS_RUNE\", \"name\": \"Rune\", \"part\": \"wheels\", \"unlock\": 50}"
 		+ "]}";
 
+	private static final Pattern ID = Pattern.compile("[A-Z][A-Z0-9_]{0,23}");
+
 	private static BoardDesigns small()
 	{
-		try
+		return checked(BoardDesigns.parse(new StringReader(SMALL)));
+	}
+
+	/**
+	 * The manifest's rules (also checked by tools/designs.py when it writes the manifest): ids in uppercase A-Z,
+	 * 0-9 and _, unique and never with the custom designs' prefix; a known part; a name; an unlock level 1..99;
+	 * wire names short and unique within a part; each part has designs and its first (the default) unlocks at 1.
+	 */
+	private static BoardDesigns checked(BoardDesigns d)
+	{
+		Set<String> ids = new HashSet<>();
+		Set<String> wires = new HashSet<>();
+		Set<DesignPart> parts = new HashSet<>();
+		for (BoardDesign b : d.all())
 		{
-			return BoardDesigns.parse(new StringReader(SMALL));
+			check(ID.matcher(b.id).matches() && !b.id.startsWith(BoardDesigns.CUSTOM_PREFIX) && ids.add(b.id), b);
+			check(b.part != null && !b.name.trim().isEmpty() && b.unlock >= 1 && b.unlock <= SkateLevels.MAX_LEVEL, b);
+			check(b.wireName().length() <= BoardDesigns.WIRE_MAX && wires.add(b.part + ":" + b.wireName()), b);
+			check(!parts.add(b.part) || b.unlock == 1, b);
 		}
-		catch (IOException e)
+		check(parts.size() == DesignPart.values().length, "a part without designs");
+		return d;
+	}
+
+	private static void check(boolean ok, Object what)
+	{
+		if (!ok)
 		{
-			throw new AssertionError(e);
+			throw new IllegalArgumentException("designs.json: " + what);
 		}
 	}
 
@@ -44,13 +68,20 @@ public class BoardDesignsTest
 	{
 		try
 		{
-			BoardDesigns.parse(new StringReader(json));
+			checked(BoardDesigns.parse(new StringReader(json)));
 			fail("accepted " + json);
 		}
-		catch (IllegalArgumentException | IOException expected)
+		catch (RuntimeException expected)
 		{
 			// refused
 		}
+	}
+
+	@Test
+	public void theBundledManifestKeepsTheRules()
+	{
+		checked(BoardDesigns.bundled());
+		assertTrue(BoardDesigns.bundled().all().size() > 3);
 	}
 
 	@Test
@@ -162,22 +193,21 @@ public class BoardDesignsTest
 		assertEquals("WHEELS_NATURAL", d.defaultFor(DesignPart.WHEELS).id);
 		// every rung of the old ladder is a deck design under the same name and level, so a saved skateDeck or
 		// a party member's deck name keeps working
-		for (Deck old : Deck.values())
+		String[] ladder = {"BRONZE", "IRON", "STEEL", "MITHRIL", "ADAMANT", "RUNE", "DRAGON", "BANDOS", "ARMADYL",
+			"GUTHIX", "ZAMORAK", "SARADOMIN", "TORVA"};
+		int[] levels = {1, 10, 20, 30, 40, 50, 60, 70, 70, 70, 70, 70, 99};
+		for (int i = 0; i < ladder.length; i++)
 		{
-			if (old == Deck.CLASSIC)
-			{
-				continue;
-			}
-			BoardDesign b = d.byId(old.name());
-			assertEquals(old.name(), DesignPart.DECK, b.part);
-			assertEquals(old.name(), old.level, b.unlock);
-			assertEquals(old.name(), old.displayName, b.name);
+			String old = ladder[i];
+			BoardDesign b = d.byId(old);
+			assertEquals(old, DesignPart.DECK, b.part);
+			assertEquals(old, levels[i], b.unlock);
 			// with a grip and wheels of the same name and level: a full set
 			for (DesignPart p : new DesignPart[]{DesignPart.GRIP, DesignPart.WHEELS})
 			{
-				BoardDesign set = d.byId(p.prefix + old.name());
-				assertEquals(p + " " + old, old.level, set.unlock);
-				assertEquals(old.displayName, set.name);
+				BoardDesign set = d.byId(p.prefix + old);
+				assertEquals(p + " " + old, levels[i], set.unlock);
+				assertEquals(b.name, set.name);
 			}
 		}
 		// the old starter deck (and decks removed from the ladder long ago) are the default deck now
@@ -230,7 +260,7 @@ public class BoardDesignsTest
 		// on another part's key it is the default; the shipped catalogue leaves it out
 		assertEquals("DECK_A", d.find(DesignPart.DECK, "CUSTOM_0A1B2C3D").id);
 		assertEquals(6, d.all().size());
-		assertEquals(2, d.custom().size());
+		assertEquals(2, custom(d).size());
 	}
 
 	@Test
@@ -258,7 +288,7 @@ public class BoardDesignsTest
 		d.setCustom(Arrays.asList(new BoardDesign("CUSTOM_0A1B2C3D", "x", DesignPart.GRIP, 1, null),
 			BoardDesign.custom("GRIP_A", "shadow", DesignPart.GRIP, 1),
 			BoardDesign.custom("CUSTOM_00000002", "ok", DesignPart.WHEELS, 1)));
-		assertEquals(Arrays.asList("CUSTOM_00000002"), ids(d.custom()));
+		assertEquals(Arrays.asList("CUSTOM_00000002"), ids(custom(d)));
 		assertEquals("A", d.byId("GRIP_A").name);
 		refused("{\"designs\": [{\"id\": \"CUSTOM_1\", \"name\": \"A\", \"part\": \"grip\", \"unlock\": 1}]}");
 	}
@@ -273,6 +303,17 @@ public class BoardDesignsTest
 		assertEquals(before, same);
 		assertEquals(before.hashCode(), same.hashCode());
 		assertFalse(before.equals(edited));
+	}
+
+	/** The player's own designs in {@code d}. */
+	private static List<BoardDesign> custom(BoardDesigns d)
+	{
+		List<BoardDesign> out = new ArrayList<>();
+		for (DesignPart p : DesignPart.values())
+		{
+			d.of(p).stream().filter(b -> b.custom).forEach(out::add);
+		}
+		return out;
 	}
 
 	private static List<String> ids(List<BoardDesign> list)

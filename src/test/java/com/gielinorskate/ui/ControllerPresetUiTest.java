@@ -54,7 +54,7 @@ public class ControllerPresetUiTest
 	{
 		assertEquals(Arrays.asList(Glyph.L3, " ", Glyph.DDOWN, " ", Glyph.DLEFT, " ", Glyph.DRIGHT, " ", Glyph.R3),
 			ControllerGlyphs.split("{L3} {DDOWN} {DLEFT} {DRIGHT} {R3}"));
-		assertEquals("d-pad left", ControllerGlyphs.name(Glyph.DLEFT));
+		assertEquals("d-pad left", Glyph.DLEFT.spoken);
 		for (PadButton b : PadButton.values())
 		{
 			assertEquals(b, PadButton.values()[b.ordinal()]);
@@ -109,7 +109,7 @@ public class ControllerPresetUiTest
 	public void theSkate3TrickBookReadsAsBefore()
 	{
 		TrickBook.Settings pad = new TrickBook.Settings("Ctrl+K", "F", "Space", "right", false, true, false, true,
-			"B", "Up", "Down");
+			"B", "Up", "Down", PadPreset.skate3(), "Skate 3");
 		List<TrickBook.Section> book = TrickBook.build(pad);
 		TrickBook.Section hard = book.stream().filter(s -> s.title.startsWith("Hard flips")).findFirst().get();
 		assertEquals("Hold LB or RB as the trick fires for the harder version.", hard.intro);
@@ -126,7 +126,7 @@ public class ControllerPresetUiTest
 	public void customiseControllerSavesTheEditedLayoutAsACode()
 	{
 		List<String> saved = new ArrayList<>();
-		SkatePanel panel = new SkatePanel(() -> { }, (k, v) -> { });
+		SkatePanel panel = new SkatePanel(() -> { }, (k, v) -> { }, d -> { });
 		panel.setControllerActions(new SkatePanel.ControllerActions()
 		{
 			@Override
@@ -146,9 +146,9 @@ public class ControllerPresetUiTest
 			}
 		});
 		named(panel, "controller:customise").doClick();
-		assertTrue(panel.isLayoutOpen());
+		assertTrue(panel.view == panel.layoutView());
 		ControllerLayoutView v = panel.layoutView();
-		assertEquals(PadPreset.skate3(), v.edited());
+		assertEquals(PadPreset.skate3(), v.editing);
 		v.choose(PadButton.LB, PadContext.BOARD, PadAction.BRAKE);
 		v.choose(PadButton.L3, PadContext.FOOT, PadAction.CAMERA_ORBIT);
 		named(panel, "layout:save").doClick();
@@ -157,24 +157,24 @@ public class ControllerPresetUiTest
 			.with(PadButton.L3, PadContext.FOOT, PadAction.CAMERA_ORBIT);
 		assertEquals(expected, LayoutCode.decode(saved.get(0)).preset);
 		named(panel, "layout:back").doClick();
-		assertFalse(panel.isLayoutOpen());
+		assertFalse(panel.view == panel.layoutView());
 	}
 
 	@Test
 	public void thePresetsAreOfferedOnlyWhereTheyCanBeBound()
 	{
-		SkatePanel panel = new SkatePanel(() -> { }, (k, v) -> { });
+		SkatePanel panel = new SkatePanel(() -> { }, (k, v) -> { }, d -> { });
 		named(panel, "controller:customise").doClick();
 		ControllerLayoutView v = panel.layoutView();
 		// push on foot is not offered, so choosing it changes nothing
 		v.choose(PadButton.A, PadContext.FOOT, PadAction.PUSH);
-		assertEquals(PadAction.SPRINT, v.edited().action(PadButton.A, PadContext.FOOT));
+		assertEquals(PadAction.SPRINT, v.editing.action(PadButton.A, PadContext.FOOT));
 		v.choose(PadButton.A, PadContext.FOOT, PadAction.FLIP_BUTTON);
-		assertEquals(PadAction.SPRINT, v.edited().action(PadButton.A, PadContext.FOOT));
+		assertEquals(PadAction.SPRINT, v.editing.action(PadButton.A, PadContext.FOOT));
 		// the button tricks are offered on the board
 		v.choose(PadButton.A, PadContext.BOARD, PadAction.FLIP_BUTTON);
-		assertEquals(PadAction.FLIP_BUTTON, v.edited().action(PadButton.A, PadContext.BOARD));
-		assertNull(v.edited().problem());
+		assertEquals(PadAction.FLIP_BUTTON, v.editing.action(PadButton.A, PadContext.BOARD));
+		assertNull(v.editing.problem());
 	}
 
 	@Test
@@ -184,14 +184,14 @@ public class ControllerPresetUiTest
 		ControllerLayoutView v = new ControllerLayoutView(() -> { }, saved::add);
 		v.showFor(PadPreset.skate3(), null);
 		assertNull(v.preview("RSK9:abc"));
-		assertTrue(v.statusText().contains("newer RuneSkate"));
+		assertTrue(v.status.getText().contains("newer RuneSkate"));
 		assertTrue(saved.isEmpty());
 		String code = LayoutCode.encode(CUSTOM);
 		List<String> changes = v.preview(code);
 		assertTrue(changes.contains("LB, on the board: Hard tricks (Shift) to Brake"));
-		assertEquals(PadPreset.skate3(), v.edited());
+		assertEquals(PadPreset.skate3(), v.editing);
 		v.apply(code);
-		assertEquals(CUSTOM, v.edited());
+		assertEquals(CUSTOM, v.editing);
 		assertEquals(Arrays.asList(code), saved);
 		assertTrue(v.preview(code).isEmpty());
 	}
@@ -199,39 +199,61 @@ public class ControllerPresetUiTest
 	@Test
 	public void controllerSetupListensOnlyWhileOpen()
 	{
-		SkatePanel panel = new SkatePanel(() -> { }, (k, v) -> { });
+		SkatePanel panel = new SkatePanel(() -> { }, (k, v) -> { }, d -> { });
 		named(panel, "controller:setup").doClick();
-		assertTrue(panel.isSetupOpen());
+		assertTrue(panel.view == panel.setupView());
 		ControllerSetupView v = panel.setupView();
-		assertTrue(v.isListening());
+		assertTrue(v.listening);
 		// another view closes it
 		panel.openTrickBook();
-		assertFalse(v.isListening());
-		assertTrue(panel.isTrickBookOpen());
+		assertFalse(v.listening);
+		assertTrue(panel.view == panel.book);
 		panel.openSetup();
-		assertFalse(panel.isTrickBookOpen());
-		assertTrue(v.isListening());
+		assertFalse(panel.view == panel.book);
+		assertTrue(v.listening);
 		named(panel, "setup:back").doClick();
-		assertFalse(v.isListening());
+		assertFalse(v.listening);
 		named(panel, "controller:setup").doClick();
 		panel.dispose();
-		assertFalse(v.isListening());
+		assertFalse(v.listening);
 	}
 
 	@Test
-	public void thePadTestSeesPadKeysWithoutConsumingThem()
+	public void thePadTestSeesPadKeysThroughTheClientKeyListener()
 	{
-		SkatePanel panel = new SkatePanel(() -> { }, (k, v) -> { });
+		SkatePanel panel = new SkatePanel(() -> { }, (k, v) -> { }, d -> { });
+		java.util.List<String> calls = new java.util.ArrayList<>();
+		panel.setControllerActions(new SkatePanel.ControllerActions()
+		{
+			@Override
+			public void saveCustomLayout(String code)
+			{
+			}
+
+			@Override
+			public void openReleases()
+			{
+			}
+
+			@Override
+			public void saveProfile(java.awt.Component from)
+			{
+			}
+
+			@Override
+			public void watchKeys(net.runelite.client.input.KeyListener l, boolean on)
+			{
+				calls.add(on ? "on" : "off");
+			}
+		});
 		named(panel, "controller:setup").doClick();
 		ControllerSetupView v = panel.setupView();
-		KeyEvent e = new KeyEvent(new java.awt.Canvas(), KeyEvent.KEY_PRESSED, 0, 0, KeyEvent.VK_F19,
-			KeyEvent.CHAR_UNDEFINED);
-		assertFalse("never consumed: the event goes on", v.watch(e));
+		v.watch(KeyEvent.VK_F19, true);
 		assertTrue(v.tester().isDown(PadButton.LT));
-		assertFalse(v.watch(new KeyEvent(new java.awt.Canvas(), KeyEvent.KEY_PRESSED, 0, 0, KeyEvent.VK_W,
-			KeyEvent.CHAR_UNDEFINED)));
-		assertFalse(e.isConsumed());
+		v.watch(KeyEvent.VK_F19, false);
+		assertFalse(v.tester().isDown(PadButton.LT));
 		panel.dispose();
+		assertEquals(Arrays.asList("on", "off"), calls);
 	}
 
 	@Test
@@ -247,8 +269,8 @@ public class ControllerPresetUiTest
 	@Test
 	public void thePanelBasicsNameThePresetsButtons()
 	{
-		SkatePanel panel = new SkatePanel(() -> { }, (k, v) -> { });
-		panel.setSettings("Ctrl+K", "Space", true, false, false, false, true, true);
+		SkatePanel panel = new SkatePanel(() -> { }, (k, v) -> { }, d -> { });
+		panel.setSettings("Ctrl+K", "Space", true, false, false, false, true, true, "F");
 		panel.setController(CUSTOM, "Custom", CUSTOM);
 		List<String> texts = new ArrayList<>();
 		collectTexts(panel, texts);
