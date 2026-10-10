@@ -1,8 +1,6 @@
 package com.gielinorskate.party;
 
 import java.util.Arrays;
-import lombok.Getter;
-import lombok.experimental.Accessors;
 
 /**
 * When the local skater's state goes to the party. While another party member is skating (an audience),
@@ -14,7 +12,6 @@ import lombok.experimental.Accessors;
 * into any second (events held back coalesce into the next message). Times are seconds on one monotonic clock.
 * Pure.
 */
-@Accessors(fluent = true)
 final class GhostSendPolicy
 {
 static final int MAX_PER_SECOND = 2;
@@ -31,7 +28,6 @@ static final float WINDOW = 1f;
 private final float[] recent = new float[MAX_PER_SECOND];
 private int recentNext;
 /** When the latest update, stop or duel message went out (negative infinity when none since a reset). */
-@Getter
 private float lastSend = Float.NEGATIVE_INFINITY;
 private int seq;
 
@@ -82,18 +78,9 @@ return free;
 /** Records a message (update or stop) sent at {@code now}. */
 void recordSend(float now)
 {
-recordSideSend(now);
-lastSend = now;
-}
-
-/**
-* Records a message that is not part of the skater's own stream (a custom design's offer or chunk) sent at
-* {@code now}: it counts in the per-second limit but does not move the snapshot, keep-alive or announce timing.
-*/
-void recordSideSend(float now)
-{
 recent[recentNext] = now;
 recentNext = (recentNext + 1) % MAX_PER_SECOND;
+lastSend = now;
 }
 
 /** Sharing (re)starts: the first snapshot may go out at once. The rate limit is kept. */

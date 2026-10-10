@@ -6,7 +6,7 @@ import java.util.Map;
 /**
 * A board snapped in two across the deck at its middle: the plane z = 0 of board model space (the long axis is z,
 * + toward the nose). Every triangle of every part goes to exactly one half by its centroid (z >= 0: the nose half),
-* so nothing is cut and each half keeps its triangles' corner colours (designs, custom designs) as they are: a half
+* so nothing is cut and each half keeps its triangles' corner colours (designs) as they are: a half
 * is the whole part's mesh with the other half's faces hidden. Each half has one centre shared by all its parts (so
 * the grip, deck, wheels and hardware of a half stay together as it spins), its parts' vertices are given relative to
 * that centre, and a vertex no face of the half uses is parked at the centre. Split once per mesh and kept

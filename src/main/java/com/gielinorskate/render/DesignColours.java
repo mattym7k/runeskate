@@ -17,8 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 * 8   int32 triangle count N
 * 12  N * 9 bytes: corners A, B, C of each triangle, R G B each
 * </pre>
-* Files are read once and kept (they are shared: never modify the arrays). A player's own design is baked at
-* runtime and {@link #register registered} instead of read from the plugin's resources.
+* Files are read once and kept (they are shared: never modify the arrays).
 */
 @Slf4j
 public final class DesignColours
@@ -43,29 +42,6 @@ ByteBuffer b = ByteBuffer.allocate(12 + rgb.length * 3).put(MAGIC).put((byte) VE
 for (int c : rgb)
 b.put((byte) (c >> 16)).put((byte) (c >> 8)).put((byte) c);
 return b.array();
-}
-
-/**
-* Makes {@code high} and {@code low} design {@code id}'s colours (a player's own design, baked at runtime),
-* replacing any before. Either may be null (that detail then draws the geometry's own colours).
-*/
-public static void register(String id, int[] high, int[] low)
-{
-synchronized (CACHE)
-{
-CACHE.put(id + ".high", high != null ? high : new int[0]);
-CACHE.put(id + ".low", low != null ? low : new int[0]);
-}
-}
-
-/** Forgets a registered design's colours. */
-public static void unregister(String id)
-{
-synchronized (CACHE)
-{
-CACHE.remove(id + ".high");
-CACHE.remove(id + ".low");
-}
 }
 
 /** The colour file's corner colours; IllegalArgumentException unless it is a valid file for {@code part}. */
@@ -98,10 +74,6 @@ int[] c;
 synchronized (CACHE)
 {
 c = CACHE.get(key);
-// a player's or party member's design (ids only ever registered at runtime, never shipped as files) not
-// registered (yet, or any more): nothing to load, and nothing kept for it
-if (c == null && (id.startsWith("CUSTOM_") || id.startsWith("PARTY_")))
-return null;
 if (c == null)
 {
 c = load(key, mesh.part);

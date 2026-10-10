@@ -1,7 +1,6 @@
 package com.gielinorskate.party;
 
 import com.gielinorskate.GielinorSkateConfig;
-import com.gielinorskate.design.*;
 import com.gielinorskate.feedback.SkateFeedback;
 import com.gielinorskate.physics.*;
 import com.gielinorskate.progression.*;
@@ -9,9 +8,7 @@ import com.gielinorskate.render.*;
 import com.gielinorskate.scoring.ScoreClock;
 import com.gielinorskate.tricks.Trick;
 import com.gielinorskate.tricks.TrickEvent;
-import java.awt.image.BufferedImage;
 import java.util.*;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.LongConsumer;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
@@ -58,10 +55,6 @@ private KnockdownPose.Stage lastKnockStage;
 /** The latest skate frame was somewhere nothing is shared from (PvP area, instance; false when not skating). */
 @Getter
 private volatile boolean sendBlocked;
-/** Our custom designs' party pictures. */
-private final CustomDesignService customDesigns;
-/** Party members' custom designs, in memory only. Client thread. */
-private final PartyDesigns partyDesigns;
 /** The local skater's collision world as a ghost ground (absolute coordinates), and the scene it covers. */
 private GhostPredictor.Ground collisionGround;
 private int collisionBaseX;
@@ -72,7 +65,7 @@ private int extraEvents;
 
 @Inject
 PartyGhostService(Client client, ClientThread clientThread, PartyService party, GielinorSkateConfig config,
-ScoreClock clock, ScheduledExecutorService executor, CustomDesignService customDesigns, SkateFeedback feedback)
+ScoreClock clock, SkateFeedback feedback)
 {
 this.client = client;
 this.clientThread = clientThread;
@@ -103,23 +96,6 @@ log.debug("Failed to send party ghost message", e);
 }
 }
 }, GhostHub.seqSeed(System.currentTimeMillis()));
-this.customDesigns = customDesigns;
-// ghosts are drawn at Normal detail only
-this.partyDesigns = new PartyDesigns(executor, clientThread::invoke, id -> party.getMemberById(id) != null,
-PartyGhostService::bakeReceived, (id, low) -> DesignColours.register(id, null, low), id ->
-{
-DesignColours.unregister(id);
-BakedBoardModel.forgetDesign(id);
-}, hub::relook);
-hub.setMemberDesigns(partyDesigns);
-}
-
-/** Executor: a party member's picture baked at Normal detail, or null when the board isn't there. */
-private static int[] bakeReceived(DesignPart part, BufferedImage picture)
-{
-BakedBoardGeometry.Mesh[] low = BakedBoardGeometry.sharedBoard(false);
-return low == null ? null : Arrays.stream(low).filter(m -> m.part == part.index).findFirst()
-.map(m -> SharedDesignImage.bake(picture, m, DesignLayout.bundled().of(part))).orElse(null);
 }
 
 /** Plugin start: sending may begin. */
@@ -138,8 +114,6 @@ hub.close();
 clientThread.invoke(() ->
 {
 hub.clearGhosts();
-// party members' designs never outlive the plugin
-partyDesigns.clear();
 renderer.despawnAll();
 });
 }
@@ -276,18 +250,10 @@ public void addEvents(int bits)
 extraEvents |= bits;
 }
 
-/** The local board's designs, shown to party members (custom ones as their small pictures, while shared). */
+/** The local board's designs, shown to party members. */
 public void setLocalLook(BoardLook look)
 {
 hub.setLocalLook(look);
-if (look == null)
-return;
-for (DesignPart part : DesignPart.values())
-{
-BoardDesign d = look.get(part);
-hub.setLocalDesign(part, d.custom ? DesignShare.outgoing(d.id, d.name, customDesigns.sharedPicture(d.id))
-: null);
-}
 }
 
 /** Local skate mode ended, client thread. */
@@ -356,37 +322,16 @@ fromOther(m, hub::onMemberLeft);
 }
 
 @Subscribe
-public void onSkateDesignOffer(SkateDesignOffer m)
-{
-fromOther(m, id -> partyDesigns.onOffer(id, m, clock.now()));
-}
-
-@Subscribe
-public void onSkateDesignChunk(SkateDesignChunk m)
-{
-fromOther(m, id -> partyDesigns.onChunk(id, m, clock.now()));
-}
-
-@Subscribe
 public void onUserPart(UserPart e)
 {
 long id = e.getMemberId();
-clientThread.invoke(() ->
-{
-hub.onMemberLeft(id);
-partyDesigns.forgetMember(id);
-});
+clientThread.invoke(() -> hub.onMemberLeft(id));
 }
 
 @Subscribe
 public void onPartyChanged(PartyChanged e)
 {
-clientThread.invoke(() ->
-{
-hub.onPartyChanged();
-// left (or changed) the party: its members' designs go
-partyDesigns.clear();
-});
+clientThread.invoke(hub::clearGhosts);
 }
 
 /**
@@ -445,10 +390,6 @@ hub.sendDuel(message, lastWord);
 */
 public void flushDuel(float now, boolean blocked)
 {
-// once a frame (the duel tick), client thread: the design settings, then what may go out
-hub.setDesignSharing(config.shareWithParty() && config.shareCustomDesigns());
-partyDesigns.setShowOthers(config.showPartyCustomDesigns());
-partyDesigns.expire(now);
 hub.flushDuel(now, blocked);
 }
 

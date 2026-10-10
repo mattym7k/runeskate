@@ -5,8 +5,6 @@ import com.gielinorskate.progression.*;
 import com.gielinorskate.render.KnockdownPose;
 import com.gielinorskate.tricks.*;
 import java.util.List;
-import java.util.function.BiFunction;
-import java.util.function.Function;
 
 /**
 * Local skater state to and from the compact ints of {@link SkateGhostUpdate}. Positions, heights and
@@ -198,53 +196,25 @@ static int swapBits(BoardState before, BoardState after)
 return before == after ? 0 : EV_BOARD_SWAP;
 }
 
-/** A custom design on the wire: this, then the 8 lowercase hex digits of its shared image's hash. */
-static final String CUSTOM_REF = "C:";
-/** Hex digits of a custom design's hash in ghost updates. */
-static final int REF_HASH_LENGTH = 8;
-/** Longest design name in an update: a shipped design's wire name or a custom reference. */
-static final int REF_MAX = Math.max(BoardDesigns.WIRE_MAX, CUSTOM_REF.length() + REF_HASH_LENGTH);
-/** Longest grip-and-wheels field a receiver reads; anything longer is junk. */
-static final int MAX_LOOK_WIRE = 2 * REF_MAX + 1;
-
 /**
-* The deck design as sent (dk): its wire name, or null (left out of the JSON) for the default deck. A custom deck
-* goes as {@link #CUSTOM_REF} and its hash while {@code refs} has one (it is shared), else as the default.
+* Longest grip-and-wheels field a receiver reads; anything longer is junk. Room for two 10-character names and the
+* dot, so every name another version may send still fits (an unknown one draws the part's default).
 */
-static String deckWire(BoardLook look, Function<BoardDesign, String> refs)
+static final int MAX_LOOK_WIRE = 21;
+
+/** The deck design as sent (dk): its wire name, or null (left out of the JSON) for the default deck. */
+static String deckWire(BoardLook look)
 {
 if (look == null)
 return null;
-String w = wire(look.deck, refs);
+String w = look.deck.wireName();
 return w.equals(BoardDesigns.bundled().defaultFor(DesignPart.DECK).wireName()) ? null : w;
 }
 
-/** The grip and wheels designs as sent (gw): "GRIP.WHEELS", each a wire name or a custom reference. */
-static String lookWire(BoardLook look, Function<BoardDesign, String> refs)
+/** The grip and wheels designs as sent (gw): "GRIP.WHEELS", each a wire name. */
+static String lookWire(BoardLook look)
 {
-return wire(look.grip, refs) + "." + wire(look.wheels, refs);
-}
-
-/** One design's name on the wire: a shipped one's wire name; a custom one's reference, or its part's default. */
-/** {@code refs}: the hash of a custom design's shared image while it is shared, else null. */
-private static String wire(BoardDesign d, Function<BoardDesign, String> refs)
-{
-if (!d.custom)
-return d.wireName();
-String hash = refs == null ? null : refs.apply(d);
-return isRefHash(hash) ? CUSTOM_REF + hash : BoardDesigns.bundled().defaultFor(d.part).wireName();
-}
-
-/** The hash of a custom reference ("C:" and 8 lowercase hex digits), or null when {@code wire} is not one. */
-static String customHash(String wire)
-{
-String h = wire == null || !wire.startsWith(CUSTOM_REF) ? null : wire.substring(CUSTOM_REF.length());
-return isRefHash(h) ? h : null;
-}
-
-private static boolean isRefHash(String h)
-{
-return h != null && h.length() == REF_HASH_LENGTH && DesignShare.validHash(h);
+return look.grip.wireName() + "." + look.wheels.wireName();
 }
 
 /**
@@ -260,14 +230,12 @@ return m.tr == null && m.bx == null && m.cr == null;
 /**
 * A party member's designs from an update: the deck from {@code dk} (every update), the grip and wheels from
 * {@code gw} when it is there, else as before ({@code previous}; the defaults when null). Unknown or junk
-* names are each part's default; a custom reference is what {@code custom} has for it (complete and wanted),
-* else the part's default.
+* names are each part's default.
 */
-static BoardLook decodeLook(String dk, String gw, BoardLook previous, BoardDesigns designs,
-BiFunction<DesignPart, String, BoardDesign> custom)
+static BoardLook decodeLook(String dk, String gw, BoardLook previous, BoardDesigns designs)
 {
 BoardLook before = previous != null ? previous : BoardLook.defaults(designs);
-BoardLook out = before.with(part(DesignPart.DECK, dk, designs, custom));
+BoardLook out = before.with(designs.fromWire(DesignPart.DECK, dk));
 if (gw == null)
 return out;
 if (gw.length() > MAX_LOOK_WIRE)
@@ -275,18 +243,8 @@ return out.with(designs.defaultFor(DesignPart.GRIP)).with(designs.defaultFor(Des
 int dot = gw.indexOf('.');
 String grip = dot < 0 ? gw : gw.substring(0, dot);
 String wheels = dot < 0 ? null : gw.substring(dot + 1);
-return out.with(part(DesignPart.GRIP, grip.isEmpty() ? null : grip, designs, custom))
-.with(part(DesignPart.WHEELS, wheels == null || wheels.isEmpty() ? null : wheels, designs, custom));
-}
-
-private static BoardDesign part(DesignPart part, String wire, BoardDesigns designs,
-BiFunction<DesignPart, String, BoardDesign> custom)
-{
-String hash = customHash(wire);
-if (hash == null)
-return designs.fromWire(part, wire);
-BoardDesign d = custom == null ? null : custom.apply(part, hash);
-return d != null && d.part == part ? d : designs.defaultFor(part);
+return out.with(designs.fromWire(DesignPart.GRIP, grip.isEmpty() ? null : grip))
+.with(designs.fromWire(DesignPart.WHEELS, wheels == null || wheels.isEmpty() ? null : wheels));
 }
 
 /** The value named {@code name} (an enum name on the wire), or {@code fallback} when none or unknown. */

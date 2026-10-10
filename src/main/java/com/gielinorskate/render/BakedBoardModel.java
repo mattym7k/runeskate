@@ -159,7 +159,7 @@ return look.get(p);
 return null;
 }
 
-/** Design colours as HSL by "ID#revision.detail@brightness". */
+/** Design colours as HSL by "ID.detail@brightness". */
 static final Map<String, short[]> HSL_CACHE = new HashMap<>();
 /** The geometry's own colours as HSL, by (mesh, brightness). */
 private static final Map<List<Object>, short[]> OWN_HSL = new HashMap<>();
@@ -175,23 +175,10 @@ BoardDesign d = designFor(mesh, look);
 int[] rgb = d == null ? null : DesignColours.colours(d.id, high, mesh);
 synchronized (HSL_CACHE)
 {
-// an edited custom design has a new revision (and new colours under the same id)
 return rgb == null
 ? OWN_HSL.computeIfAbsent(List.of(mesh, brightness), k -> BakedBoardGeometry.cornerHsl(mesh.cornerRgb, brightness))
-: HSL_CACHE.computeIfAbsent(d.id + "#" + d.revision + (high ? ".high@" : ".low@") + brightness,
+: HSL_CACHE.computeIfAbsent(d.id + (high ? ".high@" : ".low@") + brightness,
 k -> BakedBoardGeometry.cornerHsl(rgb, brightness));
-}
-}
-
-/**
-* Forgets design {@code id}'s converted colours, every revision (a party member's design that was let go, a
-* player's design deleted, edited or renamed).
-*/
-public static void forgetDesign(String id)
-{
-synchronized (HSL_CACHE)
-{
-HSL_CACHE.keySet().removeIf(k -> k.startsWith(id + "#"));
 }
 }
 

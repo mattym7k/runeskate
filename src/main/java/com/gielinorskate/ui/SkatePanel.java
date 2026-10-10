@@ -8,9 +8,7 @@ import com.gielinorskate.progression.*;
 import com.gielinorskate.ui.ControllerGlyphs.Glyph;
 import java.awt.*;
 import java.awt.event.*;
-import java.awt.image.BufferedImage;
 import java.util.List;
-import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -67,8 +65,6 @@ private final JLabel goalsHeading = heading("Daily goals");
 private final JLabel goalsText = greyLabel(null);
 private final Consumer<BoardDesign> onDesign;
 private final BoardDesigns designs;
-/** What the "+ Custom" tiles and the custom designs' menu do; none until the plugin sets them. */
-private CustomActions customActions;
 private final DesignThumbs thumbs = new DesignThumbs();
 /** The level and designs the Board section was last built for. */
 private int designLevel = -1;
@@ -388,38 +384,6 @@ rebuildBoard();
 }
 }
 
-/** What players' own designs do in the Board section: "+ Custom" per part, and a custom design's menu. */
-public interface CustomActions
-{
-/** "+ Custom": make a new design of {@code part}. */
-void add(DesignPart part, Component from);
-
-void edit(BoardDesign design, Component from);
-
-void rename(BoardDesign design, Component from);
-
-void delete(BoardDesign design, Component from);
-}
-
-/** Turns on the "+ Custom" tiles and the custom designs' menus. */
-public void setCustomActions(CustomActions actions)
-{
-customActions = actions;
-rebuildBoard();
-}
-
-/**
-* Players' own designs changed (they are in the design catalogue already): their thumbnails, by id. The Board
-* section is drawn again.
-*/
-public void setCustomThumbs(Map<String, BufferedImage> customThumbs)
-{
-// every custom design is in the map: any other's thumbnail is a deleted design's
-thumbs.retainCustom(customThumbs.keySet());
-customThumbs.forEach(thumbs::put);
-rebuildBoard();
-}
-
 /** Each goal on its own line: done ones ticked in green, the rest with their progress. */
 static String goalsHtml(List<ProgressState.GoalView> goals)
 {
@@ -468,8 +432,6 @@ boardSection.add(sub);
 JPanel grid = left(dark(new JPanel(new GridLayout(0, part == DesignPart.WHEELS ? 3 : 2, 3, 3))));
 for (BoardDesign d : designs.of(part))
 grid.add(designButton(d));
-if (customActions != null)
-grid.add(customTile(part));
 boardSection.add(grid);
 }
 boardSection.revalidate();
@@ -499,34 +461,6 @@ b.setToolTipText(Text.get("panel.design." + (locked ? "locked" : inUse ? "inUse"
 d.name));
 if (inUse)
 b.setBackground(ColorScheme.DARKER_GRAY_HOVER_COLOR);
-if (d.custom)
-{
-b.setToolTipText(b.getToolTipText() + Text.get("panel.menuTip"));
-JPopupMenu menu = new JPopupMenu();
-menuItem(menu, "Edit", e -> customActions.edit(d, b));
-menuItem(menu, "Rename", e -> customActions.rename(d, b));
-menuItem(menu, "Delete", e -> customActions.delete(d, b));
-b.setComponentPopupMenu(menu);
-}
-return b;
-}
-
-/** One entry of a custom design's right-click menu. */
-private static void menuItem(JPopupMenu menu, String text, ActionListener l)
-{
-JMenuItem item = new JMenuItem(text);
-item.setName("customMenu:" + text.toLowerCase());
-item.addActionListener(l);
-menu.add(item);
-}
-
-/** The "+ Custom" tile after a part's designs: make your own from an image. */
-private JButton customTile(DesignPart part)
-{
-JButton b = tile("<font color='#dcdcdc'>+ Custom</font>", "customAdd:" + part.key,
-BorderFactory.createDashedBorder(ColorScheme.MEDIUM_GRAY_COLOR, 3, 2), null);
-b.setToolTipText(Text.get("panel.addTip", part.key));
-b.addActionListener(e -> customActions.add(part, b));
 return b;
 }
 

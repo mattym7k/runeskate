@@ -4,7 +4,6 @@ import static com.gielinorskate.GielinorSkateConfig.GROUP;
 
 import com.gielinorskate.controller.LayoutCode;
 import com.gielinorskate.controller.PadPresets;
-import com.gielinorskate.design.CustomDesignService;
 import com.gielinorskate.duel.*;
 import com.gielinorskate.input.InputController;
 import com.gielinorskate.leaderboard.LeaderboardService;
@@ -57,8 +56,7 @@ GrindEdgesOverlay.class, ControlsCardOverlay.class, GhostLabelOverlay.class, Com
 RunOverlay.class, LeaderboardOverlay.class, DuelOverlay.class);
 /** The party messages, registered while the plugin runs. */
 private static final List<Class<? extends PartyMemberMessage>> MESSAGES = List.of(SkateGhostUpdate.class,
-SkateGhostStop.class, SkateDuelChallenge.class, SkateDuelReply.class, SkateDuelHit.class, SkateDuelEnd.class,
-SkateDesignOffer.class, SkateDesignChunk.class);
+SkateGhostStop.class, SkateDuelChallenge.class, SkateDuelReply.class, SkateDuelHit.class, SkateDuelEnd.class);
 
 @Inject
 private Client client;
@@ -100,8 +98,6 @@ private LeaderboardService leaderboard;
 private RunService runs;
 @Inject
 private ScheduledExecutorService executor;
-@Inject
-private CustomDesignService customDesigns;
 
 /** The sidebar panel and its button; built in startUp. */
 private SkatePanel panel;
@@ -176,9 +172,6 @@ clientThread.invoke(duel::withdraw);
 }
 });
 panel.addSection(duels);
-panel.setCustomActions(customDesigns);
-// players' own designs load in the background (file IO), then show in the panel and on the board
-customDesigns.startUp(this::getPluginDirectory, panel::setCustomThumbs);
 panel.setOnActivate(() -> boards.request(false));
 panel.setControllerActions(new SkatePanel.ControllerActions()
 {
@@ -244,7 +237,6 @@ protected void shutDown()
 {
 // nothing more goes to the leaderboard, not even from an answer still on its way
 leaderboard.shutDown();
-customDesigns.shutDown();
 clientToolbar.removeNavigation(navButton);
 navButton = null;
 SkatePanel closing = panel;

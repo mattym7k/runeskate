@@ -48,12 +48,11 @@ int seq;
 /**
 * The sender's deck design (progression.BoardDesign wire name: the id without DECK_; the old ladder's decks
 * keep their old names, so older versions still draw them), or null (left out) for the default deck. In every
-* update. Receivers check it against their own designs: an unknown name draws the default deck. A shared custom
-* deck goes as "C:" and its picture's 8-hex hash (GhostCodec.CUSTOM_REF), drawn once the picture has arrived.
+* update. Receivers check it against their own designs: an unknown name draws the default deck.
 */
 String dk;
 /**
-* The sender's grip and wheels designs as "GRIP.WHEELS" wire names (or "C:" references, as for dk), or null
+* The sender's grip and wheels designs as "GRIP.WHEELS" wire names, or null
 * (left out). Not in every update:
 * it rides along when the designs change and every few seconds after (GhostHub.LOOK_REFRESH_SECONDS), never
 * with a trick name (tr) or a dropped board's place (bx...), so the biggest updates stay as small as before. Receivers keep the last ones they got

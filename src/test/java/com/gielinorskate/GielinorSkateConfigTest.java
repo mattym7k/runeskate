@@ -111,26 +111,8 @@ public class GielinorSkateConfigTest
 		assertFalse(defaults.leaderboardOverlayCollapsed());
 		assertEquals("combo", defaults.leaderboardOverlayBoard());
 		assertEquals("week", defaults.leaderboardOverlayPeriod());
-		assertTrue(defaults.shareCustomDesigns());
-		assertFalse(defaults.showPartyCustomDesigns());
 		assertTrue(defaults.duelEndings());
 		assertEquals(GielinorSkateConfig.CameraHeight.HIGH, defaults.cameraHeight());
-	}
-
-	@Test
-	public void theCustomDesignSettingsAreInThePartySection() throws IOException
-	{
-		int found = 0;
-		for (String body : items())
-		{
-			String key = key(body);
-			if (key.equals("shareCustomDesigns") || key.equals("showPartyCustomDesigns"))
-			{
-				assertTrue(key, body.contains("section = PARTY"));
-				found++;
-			}
-		}
-		assertEquals(2, found);
 	}
 
 	/** The settings players look for first sit in the open sections at the top; the rest wait in Advanced. */
@@ -143,8 +125,8 @@ public class GielinorSkateConfigTest
 		{
 			expected.put(k, "GENERAL");
 		}
-		for (String k : Arrays.asList("shareWithParty", "showPartySkaters", "shareCustomDesigns",
-			"showPartyCustomDesigns", "allowDuelChallenges", "duelEndings"))
+		for (String k : Arrays.asList("shareWithParty", "showPartySkaters", "allowDuelChallenges",
+			"duelEndings"))
 		{
 			expected.put(k, "PARTY");
 		}

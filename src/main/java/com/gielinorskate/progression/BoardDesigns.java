@@ -14,27 +14,18 @@ import lombok.extern.slf4j.Slf4j;
 * of each part is its default, used for anything unknown or still locked. The old progression ladder's deck names
 * (BRONZE ... TORVA) are deck design ids, so saved and sent deck names keep working; the old starter CLASSIC is
 * not a design, so it is the default deck. The manifest is trusted: tools/designs.py checks its rules (ids, wire
-* names, defaults unlocked at level 1) when writing it, and the tests check the bundled copy.
-*
-* <p>A player's own designs ({@link BoardDesign#custom}, set with {@link #setCustom}) come after the shipped ones
-* in {@link #of}, are found by {@link #byId} / {@link #find} / {@link #usable}, but never by {@link #fromWire} (a
-* custom design goes to the party as "C:" and its picture's hash, which party.GhostCodec resolves; older versions
-* find no such name and draw the default) and are not in {@link #all} (the shipped catalogue). The shipped designs are
-* immutable once parsed; the custom list is swapped whole, so any thread may read it.
+* names, defaults unlocked at level 1) when writing it, and the tests check the bundled copy. Immutable once
+* parsed, so any thread may read it.
 */
 @Slf4j
 public final class BoardDesigns
 {
 /** Longest wire name (an id without its part's prefix), so party updates stay small. */
 public static final int WIRE_MAX = 9;
-/** Ids of players' own designs: never in the manifest. */
-public static final String CUSTOM_PREFIX = "CUSTOM_";
 
 private final List<BoardDesign> all;
 private final Map<String, BoardDesign> byId = new HashMap<>();
 private final Map<DesignPart, List<BoardDesign>> byPart = new EnumMap<>(DesignPart.class);
-/** The player's own designs, swapped whole by {@link #setCustom}. */
-private volatile List<BoardDesign> custom = Collections.emptyList();
 
 private BoardDesigns(List<BoardDesign> designs)
 {
@@ -89,36 +80,22 @@ credit == null ? null : credit.getAsString()));
 return new BoardDesigns(out);
 }
 
-/** Every shipped design in manifest order (no custom ones). */
+/** Every design in manifest order. */
 public List<BoardDesign> all()
 {
 return all;
 }
 
-/** The part's designs: the shipped ones in manifest order (the default first), then the player's own. */
+/** The part's designs in manifest order (the default first). */
 public List<BoardDesign> of(DesignPart part)
 {
-List<BoardDesign> l = new ArrayList<>(byPart.get(part));
-custom.stream().filter(d -> d.part == part).forEach(l::add);
-return l;
+return new ArrayList<>(byPart.get(part));
 }
 
-/** The design with this id (shipped or custom), or null. */
+/** The design with this id, or null. */
 public BoardDesign byId(String id)
 {
-BoardDesign d = byId.get(id);
-return d != null ? d : custom.stream().filter(c -> c.id.equals(id)).findFirst().orElse(null);
-}
-
-/**
-* Replaces the player's own designs. Each must be {@link BoardDesign#custom} with an id starting
-* {@link #CUSTOM_PREFIX}; others (and repeats) are left out.
-*/
-public void setCustom(List<BoardDesign> designs)
-{
-Set<String> seen = new HashSet<>();
-custom = designs.stream().filter(d -> d != null && d.custom && d.id.startsWith(CUSTOM_PREFIX)
-&& !byId.containsKey(d.id) && seen.add(d.id)).collect(Collectors.toList());
+return byId.get(id);
 }
 
 public BoardDesign defaultFor(DesignPart part)
@@ -140,10 +117,7 @@ BoardDesign d = find(part, id);
 return d.isUnlocked(skatingLevel) ? d : defaultFor(part);
 }
 
-/**
-* The design a party update names as {@code wire} (a wire name or a full id); the default when unknown. Only
-* shipped designs: a custom id never resolves.
-*/
+/** The design a party update names as {@code wire} (a wire name or a full id); the default when unknown. */
 public BoardDesign fromWire(DesignPart part, String wire)
 {
 String w = wire == null ? "" : wire.trim();

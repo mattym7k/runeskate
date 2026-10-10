@@ -19,7 +19,7 @@ String GENERAL = "general";
 
 @ConfigSection(name = "Play together",
 description = "Join a RuneLite Party with your friends (Party plugin → Create/Join party) on the same world "
-+ "to see each other skate, share custom boards and Skate Duel.",
++ "to see each other skate and Skate Duel.",
 position = 1)
 String PARTY = "party";
 
@@ -255,37 +255,11 @@ return true;
 }
 
 @ConfigItem(
-keyName = "shareCustomDesigns",
-name = "Share my custom designs",
-description = "Party members who see your skater also see the board designs you made, if they turned on "
-+ "\"Show party members' custom designs\" (needs \"Share my skater with my party\").",
-position = 2,
-section = PARTY
-)
-default boolean shareCustomDesigns()
-{
-return true;
-}
-
-@ConfigItem(
-keyName = "showPartyCustomDesigns",
-name = "Show party members' custom designs",
-description = "Off by default. When on, shows the images your party members drew or picked for their own "
-+ "board designs (kept in memory only); when off, their custom parts use the default design.",
-position = 3,
-section = PARTY
-)
-default boolean showPartyCustomDesigns()
-{
-return false;
-}
-
-@ConfigItem(
 keyName = "allowDuelChallenges",
 name = "Allow duel challenges",
 description = "Lets skating party members challenge you to a Skate Duel, and you them, from the side panel: "
 + "own Skate HP, nothing at stake, and turning it off forfeits a duel in progress.",
-position = 4,
+position = 2,
 section = PARTY
 )
 default boolean allowDuelChallenges()
@@ -299,7 +273,7 @@ name = "Duel endings (tantrum & celebration)",
 description = "When a Skate Duel ends in a knockout, the loser throws a tantrum and snaps their board and "
 + "the winner celebrates (any key skips the celebration; Esc always stops skating). Party members see "
 + "yours too. Just for show: nothing in the game changes.",
-position = 5,
+position = 3,
 section = PARTY
 )
 default boolean duelEndings()

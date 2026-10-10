@@ -202,7 +202,7 @@ public class DesignLookTest
 	}
 
 	@Test
-	public void packedColoursReadBackAndRegisteredDesignsAreDrawn()
+	public void packedColoursReadBack()
 	{
 		BakedBoardGeometry.Mesh grip = null;
 		for (BakedBoardGeometry.Mesh m : BakedBoardGeometry.sharedBoard(true))
@@ -216,73 +216,5 @@ public class DesignLookTest
 		int[] colours = new int[grip.cornerRgb.length];
 		Arrays.fill(colours, 0x123456);
 		assertArrayEquals(colours, DesignColours.parse(DesignColours.pack(0, colours), 0));
-		BoardDesign mine = BoardDesign.custom("CUSTOM_7E570001", "Mine", com.gielinorskate.progression.DesignPart.GRIP, 1);
-		BoardLook look = BoardLook.defaults(DESIGNS).with(mine);
-		// not registered yet: the geometry's own colours
-		assertNull(DesignColours.colours(mine.id, true, grip));
-		DesignColours.register(mine.id, colours, null);
-		assertArrayEquals(colours, DesignColours.colours(mine.id, true, grip));
-		short[] hsl = BakedBoardModel.partHsl(grip, look, true, 0.7);
-		assertEquals(BakedBoardGeometry.cornerHsl(colours, 0.7)[0], hsl[0]);
-		// edited: new colours under the same id, a new revision
-		int[] edited = colours.clone();
-		Arrays.fill(edited, 0xFEDCBA);
-		DesignColours.register(mine.id, edited, null);
-		BoardDesign mine2 = BoardDesign.custom(mine.id, "Mine", com.gielinorskate.progression.DesignPart.GRIP, 2);
-		short[] hsl2 = BakedBoardModel.partHsl(grip, BoardLook.defaults(DESIGNS).with(mine2), true, 0.7);
-		assertEquals(BakedBoardGeometry.cornerHsl(edited, 0.7)[0], hsl2[0]);
-		DesignColours.unregister(mine.id);
-	}
-
-	@Test
-	public void playerAndPartyDesignsLeaveNothingBehind()
-	{
-		BakedBoardGeometry.Mesh grip = null;
-		for (BakedBoardGeometry.Mesh m : BakedBoardGeometry.sharedBoard(false))
-		{
-			if (m.part == BakedBoardGeometry.GRIP)
-			{
-				grip = m;
-			}
-		}
-		assertNotNull(grip);
-		// drawn for a frame before (or after) it is registered: no entry is kept for it
-		assertNull(DesignColours.colours("CUSTOM_7E570002", false, grip));
-		assertNull(DesignColours.colours("PARTY_1f_0a1b2c3d", false, grip));
-		assertFalse(held("CUSTOM_7E570002"));
-		assertFalse(held("PARTY_1f_0a1b2c3d"));
-		// converted colours of every revision go with forgetDesign
-		int[] colours = new int[grip.cornerRgb.length];
-		Arrays.fill(colours, 0x445566);
-		DesignColours.register("CUSTOM_7E570002", null, colours);
-		for (int rev = 1; rev <= 3; rev++)
-		{
-			BoardDesign d = BoardDesign.custom("CUSTOM_7E570002", "Mine", com.gielinorskate.progression.DesignPart.GRIP,
-				rev);
-			BakedBoardModel.partHsl(grip, BoardLook.defaults(DESIGNS).with(d), false, 0.7);
-		}
-		assertTrue(hslHeld("CUSTOM_7E570002"));
-		DesignColours.unregister("CUSTOM_7E570002");
-		BakedBoardModel.forgetDesign("CUSTOM_7E570002");
-		assertFalse(hslHeld("CUSTOM_7E570002"));
-		assertFalse(held("CUSTOM_7E570002"));
-	}
-
-	/** Whether converted colours of design {@code id} are kept. */
-	private static boolean hslHeld(String id)
-	{
-		synchronized (BakedBoardModel.HSL_CACHE)
-		{
-			return BakedBoardModel.HSL_CACHE.keySet().stream().anyMatch(k -> k.startsWith(id + "#"));
-		}
-	}
-
-	/** Whether anything is kept for design {@code id}. */
-	private static boolean held(String id)
-	{
-		synchronized (DesignColours.CACHE)
-		{
-			return DesignColours.CACHE.containsKey(id + ".high") || DesignColours.CACHE.containsKey(id + ".low");
-		}
 	}
 }

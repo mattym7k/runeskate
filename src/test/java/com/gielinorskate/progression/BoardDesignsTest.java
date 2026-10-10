@@ -37,7 +37,7 @@ public class BoardDesignsTest
 
 	/**
 	 * The manifest's rules (also checked by tools/designs.py when it writes the manifest): ids in uppercase A-Z,
-	 * 0-9 and _, unique and never with the custom designs' prefix; a known part; a name; an unlock level 1..99;
+	 * 0-9 and _, unique; a known part; a name; an unlock level 1..99;
 	 * wire names short and unique within a part; each part has designs and its first (the default) unlocks at 1.
 	 */
 	private static BoardDesigns checked(BoardDesigns d)
@@ -47,7 +47,7 @@ public class BoardDesignsTest
 		Set<DesignPart> parts = new HashSet<>();
 		for (BoardDesign b : d.all())
 		{
-			check(ID.matcher(b.id).matches() && !b.id.startsWith(BoardDesigns.CUSTOM_PREFIX) && ids.add(b.id), b);
+			check(ID.matcher(b.id).matches() && ids.add(b.id), b);
 			check(b.part != null && !b.name.trim().isEmpty() && b.unlock >= 1 && b.unlock <= SkateLevels.MAX_LEVEL, b);
 			check(b.wireName().length() <= BoardDesigns.WIRE_MAX && wires.add(b.part + ":" + b.wireName()), b);
 			check(!parts.add(b.part) || b.unlock == 1, b);
@@ -247,73 +247,13 @@ public class BoardDesignsTest
 	}
 
 	@Test
-	public void customDesignsComeAfterTheShippedOnesAndAreAlwaysUnlocked()
+	public void aSavedIdThatIsNoDesignFallsBackToTheDefault()
 	{
 		BoardDesigns d = small();
-		BoardDesign mine = BoardDesign.custom("CUSTOM_0A1B2C3D", "My grip", DesignPart.GRIP, 1);
-		d.setCustom(Arrays.asList(mine, BoardDesign.custom("CUSTOM_00000001", "My deck", DesignPart.DECK, 1)));
-		assertEquals(Arrays.asList("GRIP_A", "GRIP_B", "CUSTOM_0A1B2C3D"), ids(d.of(DesignPart.GRIP)));
-		assertEquals(Arrays.asList("DECK_A", "RUNE", "CUSTOM_00000001"), ids(d.of(DesignPart.DECK)));
-		assertSame(mine, d.byId("CUSTOM_0A1B2C3D"));
-		assertSame(mine, d.usable(DesignPart.GRIP, "CUSTOM_0A1B2C3D", 1));
-		assertTrue(mine.custom);
-		// on another part's key it is the default; the shipped catalogue leaves it out
-		assertEquals("DECK_A", d.find(DesignPart.DECK, "CUSTOM_0A1B2C3D").id);
-		assertEquals(6, d.all().size());
-		assertEquals(2, custom(d).size());
-	}
-
-	@Test
-	public void aMissingCustomDesignFallsBackToTheDefault()
-	{
-		BoardDesigns d = small();
-		d.setCustom(Arrays.asList(BoardDesign.custom("CUSTOM_0A1B2C3D", "My grip", DesignPart.GRIP, 1)));
-		d.setCustom(new ArrayList<>());
 		assertEquals("GRIP_A", d.usable(DesignPart.GRIP, "CUSTOM_0A1B2C3D", 99).id);
+		assertEquals("DECK_A", d.find(DesignPart.DECK, "CUSTOM_0A1B2C3E").id);
+		assertEquals("GRIP_A", d.fromWire(DesignPart.GRIP, "C:0a1b2c3d").id);
 		assertEquals(Arrays.asList("GRIP_A", "GRIP_B"), ids(d.of(DesignPart.GRIP)));
-	}
-
-	@Test
-	public void customDesignsNeverResolveFromTheWire()
-	{
-		BoardDesigns d = small();
-		d.setCustom(Arrays.asList(BoardDesign.custom("CUSTOM_0A1B2C3D", "Mine", DesignPart.GRIP, 1)));
-		assertEquals("GRIP_A", d.fromWire(DesignPart.GRIP, "CUSTOM_0A1B2C3D").id);
-	}
-
-	@Test
-	public void onlyCustomDesignsWithCustomIdsAreTaken()
-	{
-		BoardDesigns d = small();
-		d.setCustom(Arrays.asList(new BoardDesign("CUSTOM_0A1B2C3D", "x", DesignPart.GRIP, 1, null),
-			BoardDesign.custom("GRIP_A", "shadow", DesignPart.GRIP, 1),
-			BoardDesign.custom("CUSTOM_00000002", "ok", DesignPart.WHEELS, 1)));
-		assertEquals(Arrays.asList("CUSTOM_00000002"), ids(custom(d)));
-		assertEquals("A", d.byId("GRIP_A").name);
-		refused("{\"designs\": [{\"id\": \"CUSTOM_1\", \"name\": \"A\", \"part\": \"grip\", \"unlock\": 1}]}");
-	}
-
-	@Test
-	public void anEditedCustomDesignMakesADifferentLook()
-	{
-		BoardDesigns d = small();
-		BoardLook before = BoardLook.defaults(d).with(BoardDesign.custom("CUSTOM_0A1B2C3D", "Mine", DesignPart.GRIP, 1));
-		BoardLook same = BoardLook.defaults(d).with(BoardDesign.custom("CUSTOM_0A1B2C3D", "Renamed", DesignPart.GRIP, 1));
-		BoardLook edited = BoardLook.defaults(d).with(BoardDesign.custom("CUSTOM_0A1B2C3D", "Mine", DesignPart.GRIP, 2));
-		assertEquals(before, same);
-		assertEquals(before.hashCode(), same.hashCode());
-		assertFalse(before.equals(edited));
-	}
-
-	/** The player's own designs in {@code d}. */
-	private static List<BoardDesign> custom(BoardDesigns d)
-	{
-		List<BoardDesign> out = new ArrayList<>();
-		for (DesignPart p : DesignPart.values())
-		{
-			d.of(p).stream().filter(b -> b.custom).forEach(out::add);
-		}
-		return out;
 	}
 
 	private static List<String> ids(List<BoardDesign> list)

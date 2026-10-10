@@ -44,16 +44,15 @@ BoardLook l = (BoardLook) o;
 return same(grip, l.grip) && same(deck, l.deck) && same(wheels, l.wheels);
 }
 
-/** The same design in the same colours (an edited custom design has a new revision). */
 private static boolean same(BoardDesign a, BoardDesign b)
 {
-return a.id.equals(b.id) && a.revision == b.revision;
+return a.id.equals(b.id);
 }
 
 @Override
 public int hashCode()
 {
-return Objects.hash(grip.id, deck.id, wheels.id, grip.revision, deck.revision, wheels.revision);
+return Objects.hash(grip.id, deck.id, wheels.id);
 }
 
 @Override

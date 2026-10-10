@@ -146,13 +146,6 @@ land across the rail for slides.
 - From the start: Classic black grip, Tropical deck and Natural wheels (the defaults) and the Bronze set. Then a set (grip, deck graphic and wheels) per level: Iron (10), Steel
   (20), Mithril (30), Adamant (40), Rune (50), Dragon (60), the gods (70: Bandos, Armadyl, Guthix, Zamorak and
   Saradomin) and Torva (99). Mix them freely. A level-up names the designs it unlocks.
-- **Your own designs**: the **+ Custom** tile after each part's designs makes one from an image (PNG, JPG, GIF or
-  BMP, up to 4096 px a side and 20 MB). Place it under the part's outline (drag, mouse wheel, arrow keys, Rotate,
-  Flip, Fit, Fill), watch the in-game preview, name it and Save: it goes on your board at once. Right-click a
-  custom design to edit, rename or delete it. Up to 50 are kept on this computer (in RuneLite's plugin data
-  folder). Party members who turn on **Show party members' custom designs** see them on your skater (a small
-  picture of each goes through RuneLite's party; they show the default until it arrives, and keep it in memory
-  only). **Download template** saves the part's outline to paint on.
 - Each session gets three random goals ("Land 5 different flips"), each worth 2,000 Skating XP.
 - Variety pays: the first landing of each trick in a session scores 25% more, and a combo longer than 8 seconds
   gets one more multiplier.
@@ -162,10 +155,8 @@ land across the rail for slides.
 - **RuneSkate**: the skate mode key, **Controller mode**, **Controller preset** (Skate 3, Tony Hawk's American Wasteland or Custom), **Submit
   scores to the leaderboard** (opt-in) and showing the leaderboard on screen.
 - **Play together**: to skate with friends, join a RuneLite Party (Party plugin, Create/Join party) on the same
-  world. Then share your skater and see theirs, share your custom designs, and allow Skate Duel challenges (all
-  on by default; sharing designs needs sharing your skater). **Show party members' custom designs** is off by
-  default: turn it on to see the images your party members made for their boards. Friends are played back
-  smoothly a little under a second behind (every update carries their last few positions and when their tricks
+  world. Then share your skater and see theirs, and allow Skate Duel challenges (all on by default). Friends are
+  played back smoothly a little under a second behind (every update carries their last few positions and when their tricks
   happened, so jumps, flips and pushes line up with the path).
 - **Gameplay**: trick controls (mouse flicks, keyboard or both), **Easy mode** (fewer bails) and **After a bail**
   (get knocked off and walk back to your board, or hop straight back on).

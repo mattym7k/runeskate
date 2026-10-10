@@ -84,8 +84,8 @@ public class GhostWireFormatTest
 		SkateGhostUpdate m = GhostCodec.encode(f, 0, null);
 		BoardLook sara = new BoardLook(designs.byId("GRIP_SARADOMIN"), designs.byId("SARADOMIN"),
 			designs.byId("WHEELS_SARADOMIN"));
-		m.dk = GhostCodec.deckWire(sara, null);
-		m.gw = GhostCodec.lookWire(sara, null);
+		m.dk = GhostCodec.deckWire(sara);
+		m.gw = GhostCodec.lookWire(sara);
 		String json = GSON.toJson(m, WebsocketMessage.class);
 		// an old ladder deck goes under its old name, so older versions still draw it
 		assertTrue(json, json.contains("\"dk\":\"SARADOMIN\""));
@@ -93,31 +93,24 @@ public class GhostWireFormatTest
 		SkateGhostUpdate back = (SkateGhostUpdate) GSON.fromJson(json, WebsocketMessage.class);
 		assertEquals("SARADOMIN", back.dk);
 		assertTrue(back.sameState(m));
-		assertEquals(sara, GhostCodec.decodeLook(back.dk, back.gw, null, designs, null));
+		assertEquals(sara, GhostCodec.decodeLook(back.dk, back.gw, null, designs));
 		// the default deck is not sent at all
-		assertEquals(null, GhostCodec.deckWire(BoardLook.defaults(designs), null));
+		assertEquals(null, GhostCodec.deckWire(BoardLook.defaults(designs)));
 	}
 
 	@Test
-	public void customDesignsGoToThePartyAsTheDefaults()
+	public void unknownDesignNamesDrawTheDefaults()
 	{
 		BoardDesigns designs = BoardDesigns.bundled();
-		BoardLook mine = BoardLook.defaults(designs)
-			.with(com.gielinorskate.progression.BoardDesign.custom("CUSTOM_0A1B2C3D", "Mine", DesignPart.GRIP, 1))
-			.with(com.gielinorskate.progression.BoardDesign.custom("CUSTOM_0A1B2C3E", "Mine", DesignPart.DECK, 1))
-			.with(com.gielinorskate.progression.BoardDesign.custom("CUSTOM_0A1B2C3F", "Mine", DesignPart.WHEELS, 1));
-		assertEquals(null, GhostCodec.deckWire(mine, null));
-		assertEquals(GhostCodec.lookWire(BoardLook.defaults(designs), null), GhostCodec.lookWire(mine, null));
-		assertFalse(GhostCodec.lookWire(mine, null).contains("CUSTOM"));
+		assertEquals(BoardLook.defaults(designs),
+			GhostCodec.decodeLook("C:0a1b2c3e", "C:0a1b2c3d.C:0a1b2c3f", null, designs));
+		assertEquals(BoardLook.defaults(designs), GhostCodec.decodeLook("NO_SUCH", "NOPE.NADA", null, designs));
 	}
 
-	/**
-	 * The longest name a part can have in an update: the longest wire name of the bundled designs, or a shared
-	 * custom design's reference ("C:" and 8 hex digits), whichever is longer.
-	 */
+	/** The longest name a part can have in an update: the longest wire name of the bundled designs. */
 	private static String longest(DesignPart part)
 	{
-		String w = GhostCodec.CUSTOM_REF + "ffffffff";
+		String w = "";
 		for (BoardDesign d : BoardDesigns.bundled().of(part))
 		{
 			if (d.wireName().length() > w.length())
@@ -132,9 +125,8 @@ public class GhostWireFormatTest
 	public void theBiggestUpdatesWithDesignsStayWithinTheBound()
 	{
 		// a flip on the wire never carries the grip and wheels (the hub holds them back): the busiest update of
-		// aBusyUpdateIsSmallAndRoundTrips with the longest deck name and the duel version. A shared custom deck
-		// ("C:" and 8 hex digits, 10 characters) is one longer than the longest shipped deck name: 281 measured, so
-		// the bound here is 284 (still about 1.1 KB/s at the 4 msg/s cap)
+		// aBusyUpdateIsSmallAndRoundTrips with the longest deck name and the duel version: the bound here is 284
+		// (still about 1.1 KB/s at the 4 msg/s cap)
 		GhostState busy = GhostFeed.frame(330, 2, 1_409_664f, 1_411_200f, -1237f, -3.14159f, -2600f, -2600f, -1820f,
 			SkaterState.AIRBORNE, Trick.BOARDSLIDE, Trick.NOLLIE_INWARD_HEELFLIP, 0.5f, -TurnRateMeter.MAX_RATE,
 			-4 * (float) Math.PI, -11.424f);
@@ -182,9 +174,9 @@ public class GhostWireFormatTest
 		String json = "{\"type\":\"SkateGhostUpdate\",\"w\":330,\"x\":5,\"st\":\"ROLLING\",\"seq\":3}";
 		SkateGhostUpdate back = (SkateGhostUpdate) GSON.fromJson(json, WebsocketMessage.class);
 		assertNull(back.gw);
-		assertEquals(BoardLook.defaults(designs), GhostCodec.decodeLook(back.dk, back.gw, null, designs, null));
+		assertEquals(BoardLook.defaults(designs), GhostCodec.decodeLook(back.dk, back.gw, null, designs));
 		// an old version's ladder deck still shows
-		assertEquals("BANDOS", GhostCodec.decodeLook("BANDOS", null, null, designs, null).deck.id);
+		assertEquals("BANDOS", GhostCodec.decodeLook("BANDOS", null, null, designs).deck.id);
 	}
 
 	@Test

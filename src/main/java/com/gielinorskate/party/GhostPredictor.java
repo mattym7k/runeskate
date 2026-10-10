@@ -5,7 +5,6 @@ import com.gielinorskate.progression.*;
 import com.gielinorskate.render.KnockdownPose;
 import com.gielinorskate.render.RenderPose;
 import com.gielinorskate.tricks.Trick;
-import java.util.function.BiFunction;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 
@@ -150,9 +149,9 @@ duelVersion = Math.max(0, version);
 }
 
 /** The look worked out again from the latest deck and grip-and-wheels fields. */
-void relook(BoardDesigns designs, BiFunction<DesignPart, String, BoardDesign> custom)
+void relook(BoardDesigns designs)
 {
-look = GhostCodec.decodeLook(deckWire, lookWire, look, designs, custom);
+look = GhostCodec.decodeLook(deckWire, lookWire, look, designs);
 }
 
 /** The state being drawn: the update the playback has reached (its board, knockdown, hold...), else the latest. */

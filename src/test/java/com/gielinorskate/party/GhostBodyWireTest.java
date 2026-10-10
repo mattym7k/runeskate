@@ -139,7 +139,7 @@ public class GhostBodyWireTest
 
 	private static String longest(DesignPart part)
 	{
-		String w = GhostCodec.CUSTOM_REF + "ffffffff";
+		String w = "";
 		for (BoardDesign d : BoardDesigns.bundled().of(part))
 		{
 			if (d.wireName().length() > w.length())

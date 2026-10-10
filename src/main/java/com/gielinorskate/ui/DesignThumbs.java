@@ -8,8 +8,7 @@ import javax.imageio.ImageIO;
 import lombok.extern.slf4j.Slf4j;
 
 /**
-* The board designs' thumbnails (designs/thumbs/ID.png, drawn by the bake at about in-game size; players' own designs
-* drawn at runtime and {@link #put}), and their greyed "locked" look. Loaded once each. EDT only.
+* The board designs' thumbnails (designs/thumbs/ID.png, drawn by the bake at about in-game size), and their greyed "locked" look. Loaded once each. EDT only.
 */
 @Slf4j
 final class DesignThumbs
@@ -31,20 +30,6 @@ return plain.computeIfAbsent(id, DesignThumbs::load);
 BufferedImage locked(String id)
 {
 return locked.computeIfAbsent(id, k -> grey(get(k)));
-}
-
-/** A custom design's thumbnail (drawn at runtime), replacing any before. */
-void put(String id, BufferedImage img)
-{
-plain.put(id, img);
-locked.remove(id);
-}
-
-/** Drops the thumbnails of players' own designs not in {@code ids} (deleted ones). */
-void retainCustom(Set<String> ids)
-{
-plain.keySet().removeIf(id -> id.startsWith("CUSTOM_") && !ids.contains(id));
-locked.keySet().removeIf(id -> id.startsWith("CUSTOM_") && !ids.contains(id));
 }
 
 /** How many thumbnails are kept, plain and locked (tests). */

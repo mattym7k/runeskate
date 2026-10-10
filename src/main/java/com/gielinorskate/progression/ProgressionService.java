@@ -210,16 +210,6 @@ progression.select(design);
 lookMaybeChanged(before);
 }
 
-/**
-* The player's own designs were loaded, edited or deleted: the board is drawn again in the designs in use (a
-* saved custom design that is now there, or gone, or in new colours) and the panel told. Client thread.
-*/
-public void designsChanged()
-{
-// the renderer skips a look it already draws
-lookMaybeChanged(null);
-}
-
 /** Who recolours the board when the designs in use change. */
 public void setLookListener(Consumer<BoardLook> listener)
 {
