@@ -160,19 +160,17 @@ public class GhostBodyWireTest
 		SkateGhostUpdate g = GhostCodec.encode(grind, 0x7ff, null);
 		g.seq = 1_234_567_890;
 		g.dk = longest(DesignPart.DECK);
-		g.dv = GhostHub.DUEL_VERSION;
 		assertFalse(GhostCodec.mayCarryLook(g));
 		String gj = GSON.toJson(g, WebsocketMessage.class);
 		assertTrue(gj.length() + " " + gj, gj.length() <= 284);
 
-		// the busiest knockdown: every number at its longest, the longest deck, the duel version (with the vertical
+		// the busiest knockdown: every number at its longest, the longest deck (with the vertical
 		// speed, tumble angle and rate and a progress it measured 298)
 		SkateGhostUpdate k = GhostCodec.encode(GhostFeed.knockdown(330, 2, 1_409_664f, 1_411_200f, -1237f,
 			-3.14159f, -2600f, -2600f, true, KnockdownPose.Stage.GET_UP, -7 * HALF_PI, 1_409_000f, 1_411_999f,
 			-1237f, -3.14159f), 0x7ff, null);
 		k.seq = 1_234_567_890;
 		k.dk = longest(DesignPart.DECK);
-		k.dv = GhostHub.DUEL_VERSION;
 		String kj = GSON.toJson(k, WebsocketMessage.class);
 		assertTrue(kj.length() + " " + kj, kj.length() <= 284);
 	}

@@ -4,10 +4,7 @@ import static com.gielinorskate.GielinorSkateConfig.GROUP;
 
 import com.gielinorskate.controller.LayoutCode;
 import com.gielinorskate.controller.PadPresets;
-import com.gielinorskate.duel.*;
 import com.gielinorskate.input.InputController;
-import com.gielinorskate.leaderboard.LeaderboardService;
-import com.gielinorskate.leaderboard.RunService;
 import com.gielinorskate.overlay.*;
 import com.gielinorskate.party.*;
 import com.gielinorskate.progression.ProgressionService;
@@ -43,423 +40,342 @@ import net.runelite.client.util.*;
 
 @Slf4j
 @PluginDescriptor(
-name = "RuneSkate",
-description = "Skateboard around Gielinor: Ctrl+K to start, flick the mouse for tricks",
-tags = {"skate", "skateboard", "fun", "minigame"},
-internalName = "rune-skate"
+	name = "RuneSkate",
+	description = "Skateboard around Gielinor: Ctrl+K to start, flick the mouse for tricks",
+	tags = {"skate", "skateboard", "fun", "minigame"},
+	internalName = "rune-skate"
 )
 public class GielinorSkatePlugin extends Plugin
 {
-/** The overlays, all singletons (the plugin injector gives the same one to add and remove). */
-private static final List<Class<? extends Overlay>> OVERLAYS = List.of(ScoreOverlay.class,
-GrindEdgesOverlay.class, ControlsCardOverlay.class, GhostLabelOverlay.class, ComfortHintsOverlay.class,
-RunOverlay.class, LeaderboardOverlay.class, DuelOverlay.class);
-/** The party messages, registered while the plugin runs. */
-private static final List<Class<? extends PartyMemberMessage>> MESSAGES = List.of(SkateGhostUpdate.class,
-SkateGhostStop.class, SkateDuelChallenge.class, SkateDuelReply.class, SkateDuelHit.class, SkateDuelEnd.class);
+	/** The overlays, all singletons (the plugin injector gives the same one to add and remove). */
+	private static final List<Class<? extends Overlay>> OVERLAYS = List.of(ScoreOverlay.class,
+		GrindEdgesOverlay.class, ControlsCardOverlay.class, GhostLabelOverlay.class, ComfortHintsOverlay.class);
+	/** The party messages, registered while the plugin runs. */
+	private static final List<Class<? extends PartyMemberMessage>> MESSAGES = List.of(SkateGhostUpdate.class,
+		SkateGhostStop.class);
 
-@Inject
-private Client client;
-@Inject
-private SkateChat skateChat;
-@Inject
-private ClientThread clientThread;
-@Inject
-private KeyManager keyManager;
-@Inject
-private MouseManager mouseManager;
-@Inject
-private RenderCallbackManager renderCallbackManager;
-@Inject
-private GielinorSkateConfig config;
-@Inject
-private InputController input;
-@Inject
-private SkateSession session;
-@Inject
-private OverlayManager overlayManager;
-@Inject
-private EventBus eventBus;
-@Inject
-private WSClient wsClient;
-@Inject
-private PartyGhostService partyGhosts;
-@Inject
-private ConfigManager configManager;
-@Inject
-private DuelService duel;
-@Inject
-private ClientToolbar clientToolbar;
-@Inject
-private ProgressionService progression;
-@Inject
-private LeaderboardService leaderboard;
-@Inject
-private RunService runs;
-@Inject
-private ScheduledExecutorService executor;
+	@Inject
+	private Client client;
+	@Inject
+	private SkateChat skateChat;
+	@Inject
+	private ClientThread clientThread;
+	@Inject
+	private KeyManager keyManager;
+	@Inject
+	private MouseManager mouseManager;
+	@Inject
+	private RenderCallbackManager renderCallbackManager;
+	@Inject
+	private GielinorSkateConfig config;
+	@Inject
+	private InputController input;
+	@Inject
+	private SkateSession session;
+	@Inject
+	private OverlayManager overlayManager;
+	@Inject
+	private EventBus eventBus;
+	@Inject
+	private WSClient wsClient;
+	@Inject
+	private PartyGhostService partyGhosts;
+	@Inject
+	private ConfigManager configManager;
+	@Inject
+	private ClientToolbar clientToolbar;
+	@Inject
+	private ProgressionService progression;
+	@Inject
+	private ScheduledExecutorService executor;
 
-/** The sidebar panel and its button; built in startUp. */
-private SkatePanel panel;
-private NavigationButton navButton;
+	/** The sidebar panel and its button; built in startUp. */
+	private SkatePanel panel;
+	private NavigationButton navButton;
 
-private final RenderCallback playerHider = new RenderCallback()
-{
-@Override
-public boolean addEntity(Renderable renderable, boolean ui)
-{
-return !session.shouldHide(renderable);
-}
-};
+	private final RenderCallback playerHider = new RenderCallback()
+	{
+		@Override
+		public boolean addEntity(Renderable renderable, boolean ui)
+		{
+			return !session.shouldHide(renderable);
+		}
+	};
 
-private final HotkeyListener toggleListener = new HotkeyListener(() -> config.toggleKey())
-{
-@Override
-public void hotkeyPressed()
-{
-clientThread.invoke(session::toggle);
-}
-};
+	private final HotkeyListener toggleListener = new HotkeyListener(() -> config.toggleKey())
+	{
+		@Override
+		public void hotkeyPressed()
+		{
+			clientThread.invoke(session::toggle);
+		}
+	};
 
-@Override
-protected void startUp()
-{
-// the first sans-serif font of the JVM is slow to make: not on the client thread when the card first shows
-executor.execute(ControlsCardOverlay::warmFonts);
-renderCallbackManager.register(playerHider);
-keyManager.registerKeyListener(toggleListener);
-keyManager.registerKeyListener(input);
-mouseManager.registerMouseListener(input);
-mouseManager.registerMouseWheelListener(input);
-OVERLAYS.forEach(c -> overlayManager.add(injector.getInstance(c)));
-MESSAGES.forEach(wsClient::registerMessage);
-partyGhosts.startUp();
-eventBus.register(partyGhosts);
-duel.startUp();
-eventBus.register(duel);
+	@Override
+	protected void startUp()
+	{
+		// the first sans-serif font of the JVM is slow to make: not on the client thread when the card first shows
+		executor.execute(ControlsCardOverlay::warmFonts);
+		renderCallbackManager.register(playerHider);
+		keyManager.registerKeyListener(toggleListener);
+		keyManager.registerKeyListener(input);
+		mouseManager.registerMouseListener(input);
+		mouseManager.registerMouseWheelListener(input);
+		OVERLAYS.forEach(c -> overlayManager.add(injector.getInstance(c)));
+		MESSAGES.forEach(wsClient::registerMessage);
+		partyGhosts.startUp();
+		eventBus.register(partyGhosts);
 
-leaderboard.startUp();
-panel = new SkatePanel(() -> clientThread.invoke(session::toggle), this::set,
-design -> clientThread.invoke(() -> progression.selectDesign(design)));
-LeaderboardSection boards = new LeaderboardSection(
-() -> clientThread.invoke(() -> runs.toggle(session.isActive())),
-(category, period, refresh) -> clientThread.invoke(() -> leaderboard.fetch(category, period, refresh)));
-panel.addSection(boards);
-DuelSection duels = new DuelSection(new DuelSection.Actions()
-{
-@Override
-public void challenge(long memberId)
-{
-clientThread.invoke(() -> duel.challenge(memberId));
-}
+		panel = new SkatePanel(() -> clientThread.invoke(session::toggle), this::set,
+			design -> clientThread.invoke(() -> progression.selectDesign(design)));
+		panel.setControllerActions(new SkatePanel.ControllerActions()
+		{
+			@Override
+			public void saveCustomLayout(String code)
+			{
+				set("customControllerLayout", code);
+				set("controllerPreset", GielinorSkateConfig.ControllerPreset.CUSTOM);
+			}
 
-@Override
-public void accept()
-{
-clientThread.invoke(duel::accept);
-}
+			@Override
+			public void openReleases()
+			{
+				LinkBrowser.browse("https://github.com/AntiMicroX/antimicrox/releases");
+			}
 
-@Override
-public void decline()
-{
-clientThread.invoke(duel::decline);
-}
+			@Override
+			public void saveProfile(Component from)
+			{
+				saveControllerProfile(from);
+			}
 
-@Override
-public void withdraw()
-{
-clientThread.invoke(duel::withdraw);
-}
-});
-panel.addSection(duels);
-panel.setOnActivate(() -> boards.request(false));
-panel.setControllerActions(new SkatePanel.ControllerActions()
-{
-@Override
-public void saveCustomLayout(String code)
-{
-set("customControllerLayout", code);
-set("controllerPreset", GielinorSkateConfig.ControllerPreset.CUSTOM);
-}
+			@Override
+			public void watchKeys(KeyListener l, boolean on)
+			{
+				if (on)
+					keyManager.registerKeyListener(l);
+				else
+					keyManager.unregisterKeyListener(l);
+			}
+		});
+		refreshPanelSettings();
+		navButton = NavigationButton.builder()
+			.tooltip("RuneSkate")
+			.icon(ImageUtil.loadImageResource(GielinorSkatePlugin.class, "panel_icon.png"))
+			.priority(8)
+			.panel(panel)
+			.build();
+		clientToolbar.addNavigation(navButton);
+		SkatePanel shown = panel;
+		clientThread.invoke(() ->
+		{
+			// panel state is made on the client thread and handed to Swing
+			session.setPanelListener(state -> SwingUtilities.invokeLater(() -> shown.update(state)));
+			session.publishPanel();
+			progression.setListener(state -> SwingUtilities.invokeLater(() -> shown.updateProgress(state)));
+			progression.setLookListener(session::applyLook);
+			// the logged-in account's XP (none until a profile is known: RuneScapeProfileChanged loads it then)
+			progression.load();
+		});
+	}
 
-@Override
-public void openReleases()
-{
-LinkBrowser.browse("https://github.com/AntiMicroX/antimicrox/releases");
-}
+	@Override
+	protected void shutDown()
+	{
+		clientToolbar.removeNavigation(navButton);
+		navButton = null;
+		SkatePanel closing = panel;
+		if (closing != null)
+			// the pad test's key watcher goes with the panel
+			SwingUtilities.invokeLater(closing::dispose);
+		panel = null;
+		eventBus.unregister(partyGhosts);
+		// the party hears that we stopped while the types are registered
+		partyGhosts.shutDown();
+		MESSAGES.forEach(wsClient::unregisterMessage);
+		OVERLAYS.forEach(c -> overlayManager.remove(injector.getInstance(c)));
+		clientThread.invoke(() ->
+		{
+			session.exit(null);
+			session.setPanelListener(null);
+			progression.setListener(null);
+			progression.setLookListener(null);
+			progression.flush();
+		});
+		mouseManager.unregisterMouseWheelListener(input);
+		mouseManager.unregisterMouseListener(input);
+		keyManager.unregisterKeyListener(input);
+		keyManager.unregisterKeyListener(toggleListener);
+		renderCallbackManager.unregister(playerHider);
+	}
 
-@Override
-public void saveProfile(Component from)
-{
-saveControllerProfile(from);
-}
+	@Subscribe
+	public void onBeforeRender(BeforeRender e)
+	{
+		session.onFrame();
+	}
 
-@Override
-public void watchKeys(KeyListener l, boolean on)
-{
-if (on)
-keyManager.registerKeyListener(l);
-else
-keyManager.unregisterKeyListener(l);
-}
-});
-refreshPanelSettings();
-navButton = NavigationButton.builder()
-.tooltip("RuneSkate")
-.icon(ImageUtil.loadImageResource(GielinorSkatePlugin.class, "panel_icon.png"))
-.priority(8)
-.panel(panel)
-.build();
-clientToolbar.addNavigation(navButton);
-SkatePanel shown = panel;
-clientThread.invoke(() ->
-{
-// panel state is made on the client thread and handed to Swing
-session.setPanelListener(state -> SwingUtilities.invokeLater(() ->
-{
-shown.update(state);
-boards.setSkating(state.active);
-}));
-runs.setListener(run -> SwingUtilities.invokeLater(() -> boards.setRun(run.running, run.best)));
-duel.setViewListener(view -> SwingUtilities.invokeLater(() -> duels.display(view)));
-leaderboard.setViewListener(boards::display);
-leaderboard.onConfigChanged();
-session.publishPanel();
-progression.setListener(state -> SwingUtilities.invokeLater(() -> shown.updateProgress(state)));
-progression.setLookListener(session::applyLook);
-// the logged-in account's XP (none until a profile is known: RuneScapeProfileChanged loads it then)
-progression.load();
-});
-}
+	@Subscribe
+	public void onGameTick(GameTick e)
+	{
+		session.checkPlayerMoved();
+		progression.tick();
+	}
 
-@Override
-protected void shutDown()
-{
-// nothing more goes to the leaderboard, not even from an answer still on its way
-leaderboard.shutDown();
-clientToolbar.removeNavigation(navButton);
-navButton = null;
-SkatePanel closing = panel;
-if (closing != null)
-// the pad test's key watcher goes with the panel
-SwingUtilities.invokeLater(closing::dispose);
-panel = null;
-eventBus.unregister(duel);
-eventBus.unregister(partyGhosts);
-// a duel is forfeit (queued), then the party hears it and that we stopped, while the types are registered
-duel.shutDown();
-partyGhosts.shutDown();
-MESSAGES.forEach(wsClient::unregisterMessage);
-OVERLAYS.forEach(c -> overlayManager.remove(injector.getInstance(c)));
-clientThread.invoke(() ->
-{
-session.exit(null);
-session.setPanelListener(null);
-progression.setListener(null);
-progression.setLookListener(null);
-progression.flush();
-runs.setListener(null);
-leaderboard.setViewListener(null);
-// stopped above: this drops what is still queued
-leaderboard.onConfigChanged();
-});
-mouseManager.unregisterMouseWheelListener(input);
-mouseManager.unregisterMouseListener(input);
-keyManager.unregisterKeyListener(input);
-keyManager.unregisterKeyListener(toggleListener);
-renderCallbackManager.unregister(playerHider);
-}
+	/** Skate XP and decks are per account: save the old account's, load the new one's. */
+	@Subscribe
+	public void onRuneScapeProfileChanged(RuneScapeProfileChanged e)
+	{
+		clientThread.invoke(progression::load);
+	}
 
-@Subscribe
-public void onBeforeRender(BeforeRender e)
-{
-session.onFrame();
-duel.tick(session.isActive());
-}
+	@Subscribe
+	public void onGameStateChanged(GameStateChanged e)
+	{
+		GameState state = e.getGameState();
+		if (state == GameState.LOGGED_IN)
+		{
+			if (!config.seenIntro())
+			{
+				set("seenIntro", true);
+				skateChat.send(ComfortHints.welcome(config.toggleKey().toString()));
+			}
+			tellControllerSetup();
+			return;
+		}
+		// on LOADING the scene is rebuilt (the skate world with it): say why skating stopped
+		session.exit(state == GameState.LOADING ? Text.get("pl.loading", config.toggleKey()) : null);
+		if (state == GameState.HOPPING || state == GameState.LOGIN_SCREEN)
+		{
+			partyGhosts.onSceneLost();
+			progression.flush();
+		}
+	}
 
-@Subscribe
-public void onGameTick(GameTick e)
-{
-session.checkPlayerMoved();
-progression.tick();
-leaderboard.tick();
-}
+	/**
+	 * RuneLite does not stop plugins on exit, so {@link #shutDown} is not guaranteed to run before the JVM
+	 * closes. {@link ConfigManager#onClientShutdown} only sends what is already set, so any XP still debounced
+	 * (up to {@code Progression.MAX_UNSAVED_SECONDS}) would otherwise be lost. Flush it on the client thread and
+	 * make the shutdown wait for that to finish; ConfigManager's own handler (priority -100) runs after ours.
+	 */
+	@Subscribe
+	public void onClientShutdown(ClientShutdown e)
+	{
+		FutureTask<Void> flushed = new FutureTask<>(progression::flush, null);
+		clientThread.invoke(flushed);
+		e.waitFor(flushed);
+	}
 
-/** Skate XP and decks are per account: save the old account's, load the new one's. */
-@Subscribe
-public void onRuneScapeProfileChanged(RuneScapeProfileChanged e)
-{
-clientThread.invoke(() ->
-{
-progression.load();
-runs.onProfileChanged();
-duel.onProfileChanged();
-});
-}
+	@Subscribe
+	public void onConfigChanged(ConfigChanged e)
+	{
+		String key = e.getKey();
+		// per-account progress (saved in the RuneScape profile) is not a setting
+		if (!GROUP.equals(e.getGroup()) || ProgressionService.isProgressKey(key))
+			return;
+		clientThread.invoke(() ->
+		{
+			session.onConfigChanged(key);
+			if ("controllerMode".equals(key) && client.getGameState() == GameState.LOGGED_IN)
+				tellControllerSetup();
+		});
+		refreshPanelSettings();
+	}
 
-@Subscribe
-public void onGameStateChanged(GameStateChanged e)
-{
-GameState state = e.getGameState();
-if (state == GameState.LOGGED_IN)
-{
-if (!config.seenIntro())
-{
-set("seenIntro", true);
-skateChat.send(ComfortHints.welcome(config.toggleKey().toString()));
-}
-tellControllerSetup();
-// another account's boards (and the on-screen one) are fetched again
-leaderboard.onLoggedIn();
-return;
-}
-// on LOADING the scene is rebuilt (the skate world with it): say why skating stopped
-session.exit(state == GameState.LOADING ? Text.get("pl.loading", config.toggleKey()) : null);
-if (state == GameState.LOGIN_SCREEN)
-{
-// the latest XP goes up once; anything still queued is dropped
-leaderboard.onLogout();
-// a duel is forfeit while the party can still hear it
-duel.onLogout();
-}
-if (state == GameState.HOPPING)
-// duels are fought on one world
-duel.onHop();
-if (state == GameState.HOPPING || state == GameState.LOGIN_SCREEN)
-{
-partyGhosts.onSceneLost();
-progression.flush();
-}
-}
+	/**
+	 * While skating the camera is detached from the player: any menu action on the game world is cancelled
+	 * (Plugin Hub rule: no world interaction from a detached camera). Interface actions still go through.
+	 */
+	@Subscribe
+	public void onMenuOptionClicked(MenuOptionClicked e)
+	{
+		if (session.isActive() && WorldActions.isWorldAction(e.getMenuAction()))
+			e.consume();
+	}
 
-/**
-* RuneLite does not stop plugins on exit, so {@link #shutDown} is not guaranteed to run before the JVM
-* closes. {@link ConfigManager#onClientShutdown} only sends what is already set, so any XP still debounced
-* (up to {@code Progression.MAX_UNSAVED_SECONDS}) would otherwise be lost. Flush it on the client thread and
-* make the shutdown wait for that to finish; ConfigManager's own handler (priority -100) runs after ours.
-*/
-@Subscribe
-public void onClientShutdown(ClientShutdown e)
-{
-FutureTask<Void> flushed = new FutureTask<>(progression::flush, null);
-clientThread.invoke(flushed);
-e.waitFor(flushed);
-}
+	@Subscribe
+	public void onHitsplatApplied(HitsplatApplied e)
+	{
+		if (session.isActive() && e.getActor() == client.getLocalPlayer())
+			// poison and venom get their own message: their damage still ends skating
+			session.exit(ComfortHints.damageMessage(e.getHitsplat().getHitsplatType()));
+	}
 
-@Subscribe
-public void onConfigChanged(ConfigChanged e)
-{
-String key = e.getKey();
-// per-account progress (saved in the RuneScape profile) is not a setting
-if (!GROUP.equals(e.getGroup()) || ProgressionService.isProgressKey(key))
-return;
-clientThread.invoke(() ->
-{
-session.onConfigChanged(key);
-if ("controllerMode".equals(key) && client.getGameState() == GameState.LOGGED_IN)
-tellControllerSetup();
-if ("submitScores".equals(key))
-leaderboard.onConfigChanged();
-else if (key.startsWith("leaderboardOverlay") || "showLeaderboardOverlay".equals(key))
-leaderboard.onHudConfigChanged();
-});
-refreshPanelSettings();
-}
+	private void set(String key, Object value)
+	{
+		configManager.setConfiguration(GROUP, key, value);
+	}
 
-/**
-* While skating the camera is detached from the player: any menu action on the game world is cancelled
-* (Plugin Hub rule: no world interaction from a detached camera). Interface actions still go through.
-*/
-@Subscribe
-public void onMenuOptionClicked(MenuOptionClicked e)
-{
-if (session.isActive() && WorldActions.isWorldAction(e.getMenuAction()))
-e.consume();
-}
+	/** The first time Controller mode is on while logged in, the player is told how to set the controller up. */
+	private void tellControllerSetup()
+	{
+		if (config.controllerMode() && !config.controllerSetupHint())
+		{
+			set("controllerSetupHint", true);
+			skateChat.send(Text.get("ch.pad.setup"));
+		}
+	}
 
-@Subscribe
-public void onHitsplatApplied(HitsplatApplied e)
-{
-if (session.isActive() && e.getActor() == client.getLocalPlayer())
-// poison and venom get their own message: their damage still ends skating
-session.exit(ComfortHints.damageMessage(e.getHitsplat().getHitsplatType()));
-}
+	/** Save the RuneSkate AntiMicroX profile: where to (a save dialog, EDT), then the file written (executor). */
+	private void saveControllerProfile(Component from)
+	{
+		List<Filepath> picked = new Filepath.Chooser()
+			.setIsSave()
+			.setAcceptsFiles()
+			.setDialogTitle("Save the RuneSkate controller profile")
+			.addExtensionFilter("AntiMicroX profile", "amgp")
+			.setDefaultExtension("amgp")
+			.setFileName("RuneSkate.amgp")
+			.showDialog(from);
+		if (picked == null || picked.isEmpty())
+			return;
+		Filepath file = picked.get(0);
+		executor.execute(() ->
+		{
+			try (InputStream in = GielinorSkatePlugin.class.getResourceAsStream("RuneSkate.amgp");
+				OutputStream out = file.openOutputStream())
+			{
+				in.transferTo(out);
+				SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(from, Text.get("pl.saved", file.getFileName()),
+					"RuneSkate", JOptionPane.INFORMATION_MESSAGE));
+			}
+			catch (IOException | RuntimeException ex)
+			{
+				log.warn(Text.get("pl.log.profile"), ex);
+				SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(from,
+					Text.get("pl.unsaved", ex.getMessage()), "RuneSkate", JOptionPane.WARNING_MESSAGE));
+			}
+		});
+	}
 
-private void set(String key, Object value)
-{
-configManager.setConfiguration(GROUP, key, value);
-}
+	/** Hands the settings the panel shows (its toggles, keys, trick and controller controls) to Swing. */
+	private void refreshPanelSettings()
+	{
+		SkatePanel p = panel;
+		if (p == null)
+			return;
+		SwingUtilities.invokeLater(() ->
+		{
+			GielinorSkateConfig.TrickControls controls = config.trickControls();
+			GielinorSkateConfig.ControllerPreset which = config.controllerPreset();
+			String customCode = config.customControllerLayout();
+			LayoutCode.Result saved = LayoutCode.decode(customCode);
+			p.setController(PadPresets.resolve(which, customCode), PadPresets.customIsBroken(which, customCode)
+				? Text.get("pl.broken") : which.toString(), saved.ok() ? saved.preset : null);
+			p.setKeyNames(config.flickButton().toString().toLowerCase(), config.brakeKey().toString(),
+				config.leanForwardKey().toString(), config.leanBackKey().toString());
+			p.setSettings(config.toggleKey().toString(), ComfortHints.manualKeyLabel(config.manualKey().toString(),
+				config.manualKey().getKeyCode(), controls.keyboard()), controls.mouse(), controls.keyboard(),
+				config.mirrorFlicks(), config.showGrindEdges(), config.showControlsCard(), config.controllerMode(),
+				ComfortHints.boardKeyLabel(config.boardKey().toString(), config.boardKey().getKeyCode(),
+				controls.keyboard()));
+			p.setShowGoals(config.showSessionGoals());
+		});
+	}
 
-/** The first time Controller mode is on while logged in, the player is told how to set the controller up. */
-private void tellControllerSetup()
-{
-if (config.controllerMode() && !config.controllerSetupHint())
-{
-set("controllerSetupHint", true);
-skateChat.send(Text.get("ch.pad.setup"));
-}
-}
-
-/** Save the RuneSkate AntiMicroX profile: where to (a save dialog, EDT), then the file written (executor). */
-private void saveControllerProfile(Component from)
-{
-List<Filepath> picked = new Filepath.Chooser()
-.setIsSave()
-.setAcceptsFiles()
-.setDialogTitle("Save the RuneSkate controller profile")
-.addExtensionFilter("AntiMicroX profile", "amgp")
-.setDefaultExtension("amgp")
-.setFileName("RuneSkate.amgp")
-.showDialog(from);
-if (picked == null || picked.isEmpty())
-return;
-Filepath file = picked.get(0);
-executor.execute(() ->
-{
-try (InputStream in = GielinorSkatePlugin.class.getResourceAsStream("RuneSkate.amgp");
-OutputStream out = file.openOutputStream())
-{
-in.transferTo(out);
-SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(from, Text.get("pl.saved", file.getFileName()),
-"RuneSkate", JOptionPane.INFORMATION_MESSAGE));
-}
-catch (IOException | RuntimeException ex)
-{
-log.warn(Text.get("pl.log.profile"), ex);
-SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(from,
-Text.get("pl.unsaved", ex.getMessage()), "RuneSkate", JOptionPane.WARNING_MESSAGE));
-}
-});
-}
-
-/** Hands the settings the panel shows (its toggles, keys, trick and controller controls) to Swing. */
-private void refreshPanelSettings()
-{
-SkatePanel p = panel;
-if (p == null)
-return;
-SwingUtilities.invokeLater(() ->
-{
-GielinorSkateConfig.TrickControls controls = config.trickControls();
-GielinorSkateConfig.ControllerPreset which = config.controllerPreset();
-String customCode = config.customControllerLayout();
-LayoutCode.Result saved = LayoutCode.decode(customCode);
-p.setController(PadPresets.resolve(which, customCode), PadPresets.customIsBroken(which, customCode)
-? Text.get("pl.broken") : which.toString(), saved.ok() ? saved.preset : null);
-p.setKeyNames(config.flickButton().toString().toLowerCase(), config.brakeKey().toString(),
-config.leanForwardKey().toString(), config.leanBackKey().toString());
-p.setSettings(config.toggleKey().toString(), ComfortHints.manualKeyLabel(config.manualKey().toString(),
-config.manualKey().getKeyCode(), controls.keyboard()), controls.mouse(), controls.keyboard(),
-config.mirrorFlicks(), config.showGrindEdges(), config.showControlsCard(), config.controllerMode(),
-ComfortHints.boardKeyLabel(config.boardKey().toString(), config.boardKey().getKeyCode(),
-controls.keyboard()));
-p.setShowGoals(config.showSessionGoals());
-});
-}
-
-@Provides
-GielinorSkateConfig provideConfig(ConfigManager configManager)
-{
-return configManager.getConfig(GielinorSkateConfig.class);
-}
+	@Provides
+	GielinorSkateConfig provideConfig(ConfigManager configManager)
+	{
+		return configManager.getConfig(GielinorSkateConfig.class);
+	}
 }

@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import com.gielinorskate.GielinorSkateConfig.AfterBail;
-import com.gielinorskate.duel.DuelStateMachine;
 import com.gielinorskate.physics.BailReason;
 import com.gielinorskate.physics.CollisionWorld;
 import com.gielinorskate.physics.SkateEvent;
@@ -22,7 +21,7 @@ import org.junit.Test;
 
 /**
  * The knockdown changes only what a bail looks like and what follows it: the bail itself (its cause, its events),
- * the lost combo and the duel's self damage are what they were, whichever "After a bail" is chosen.
+ * the lost combo are what they were, whichever "After a bail" is chosen.
  */
 public class KnockdownRegressionTest
 {
@@ -77,7 +76,7 @@ public class KnockdownRegressionTest
 		assertEquals(-1f, p.getBailWallNy(), 1e-3f);
 		Knockdown k = new Knockdown(wallAt(300f), T.gravity, T.skaterRadius);
 		k.start(p.getX(), p.getY(), p.getH(), p.getVelocityX(), p.getVelocityY(), p.getHeading(), p.isBailWall(),
-			p.getBailWallNx(), p.getBailWallNy(), false, new Random(4));
+			p.getBailWallNx(), p.getBailWallNy(), new Random(4));
 		while (!k.isDone())
 		{
 			k.step(DT);
@@ -100,18 +99,11 @@ public class KnockdownRegressionTest
 	}
 
 	@Test
-	public void aDuelBailStillCostsFourHp()
-	{
-		assertEquals(4, DuelStateMachine.BAIL_DAMAGE);
-	}
-
-	@Test
-	public void bothSettingsAndDuelsKeepTheBail()
+	public void bothSettingsKeepTheBail()
 	{
 		// the choice only decides what follows the bail; it is never a reason not to bail
-		assertTrue(BailRules.knocksOff(AfterBail.KNOCKED_OFF, false));
-		assertFalse(BailRules.knocksOff(AfterBail.HOP_BACK_ON, false));
-		assertTrue(BailRules.knocksOff(AfterBail.HOP_BACK_ON, true));
+		assertTrue(BailRules.knocksOff(AfterBail.KNOCKED_OFF));
+		assertFalse(BailRules.knocksOff(AfterBail.HOP_BACK_ON));
 		assertEquals(AfterBail.KNOCKED_OFF, new com.gielinorskate.GielinorSkateConfig()
 		{
 		}.afterBail());

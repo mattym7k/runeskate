@@ -29,7 +29,7 @@ with a drawing of its mouse flick.
 | A / D in the air | Spin (180, 360, ...) |
 | Shift + W / Shift + S in the air | Front flip / back flip |
 | F | Step off and carry the board (see On foot). Rebindable. |
-| R | After a bail: straight back on the board (skips the knockdown), or stop. Off in a Skate Duel |
+| R | After a bail: straight back on the board (skips the knockdown), or stop |
 | H | Controls card: next page / hide |
 | Esc | Stop skating |
 
@@ -40,10 +40,8 @@ Chat typing and world clicks are paused while you skate; the sidebar and chatbox
 A bail knocks you off the board: you tumble along the way you were going, hit the ground, lie still for half a
 second and get up on foot, about a second and a half in all (never over two). The board flies off on its own and
 lands nearby. A move key or Space while you are down gets you up at once; **F** while down gets your board back
-straight away; **R** puts you straight back on the board where you fell. The combo is lost and a Skate Duel bail
-costs 4 HP, as always. In a Skate Duel the whole knockdown plays and R does nothing, so it is the same for both
-of you. Prefer a quick fall and straight back on? Set **After a bail** (Gameplay) to **Hop straight back
-on**.
+straight away; **R** puts you straight back on the board where you fell. The combo is lost, as always. Prefer a
+quick fall and straight back on? Set **After a bail** (Gameplay) to **Hop straight back on**.
 
 ### On foot
 
@@ -152,10 +150,10 @@ land across the rail for slides.
 
 ## Settings
 
-- **RuneSkate**: the skate mode key, **Controller mode**, **Controller preset** (Skate 3, Tony Hawk's American Wasteland or Custom), **Submit
-  scores to the leaderboard** (opt-in) and showing the leaderboard on screen.
+- **RuneSkate**: the skate mode key, **Controller mode** and **Controller preset** (Skate 3, Tony Hawk's American
+  Wasteland or Custom).
 - **Play together**: to skate with friends, join a RuneLite Party (Party plugin, Create/Join party) on the same
-  world. Then share your skater and see theirs, and allow Skate Duel challenges (all on by default). Friends are
+  world. Then share your skater and see theirs (both on by default). Friends are
   played back smoothly a little under a second behind (every update carries their last few positions and when their tricks
   happened, so jumps, flips and pushes line up with the path).
 - **Gameplay**: trick controls (mouse flicks, keyboard or both), **Easy mode** (fewer bails) and **After a bail**
@@ -174,16 +172,9 @@ Skating is blocked in combat, in instances and PvP minigames, and (unless you op
 PvP worlds. Taking damage, moving your real character or a loading screen ends skating. Your real character
 stands still while you skate.
 
-## Leaderboards
-
-The online leaderboards (best combo, timed 2-minute run and Skating XP, weekly and all time) are opt-in: turn on
-**Submit scores to the leaderboard** in the RuneSkate settings. This sends your scores and your RuneScape name to
-the RuneSkate leaderboard server, a 3rd-party server not controlled or verified by RuneLite developers, which also
-sees your IP address. Scores are only sent from normal worlds. With the setting off, nothing is sent.
-
 ## Chat messages
 
-Every chat line from the plugin (level-ups, goals, duel calls, bail jokes, hints) starts with **[RuneSkate]**, so
+Every chat line from the plugin (level-ups, goals, bail jokes, hints) starts with **[RuneSkate]**, so
 it is never mistaken for a game message.
 
 ## Development

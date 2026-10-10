@@ -184,7 +184,6 @@ public class TrickBookTest
 		assertTrue(scoring, scoring.contains("multiplier"));
 		assertTrue(scoring.contains("+25%"));
 		assertTrue(scoring.contains("2,000 XP"));
-		assertTrue(scoring.contains("2-minute"));
 		for (BoardDesign d : BoardDesigns.bundled().all())
 		{
 			assertTrue(d.name, scoring.contains(d.name));

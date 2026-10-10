@@ -6,18 +6,18 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public final class LevelUp
 {
-public final int from;
-public final int to;
+	public final int from;
+	public final int to;
 
-/** The level-up chat line (sent tagged as a RuneSkate message). */
-public String message()
-{
-return "You reached Skating level " + to + "!";
-}
+	/** The level-up chat line (sent tagged as a RuneSkate message). */
+	public String message()
+	{
+		return "You reached Skating level " + to + "!";
+	}
 
-/** The HUD banner for reaching a multiple of ten (or 99), or null. */
-public String banner()
-{
-return to >= SkateLevels.MAX_LEVEL ? "99 Skating!" : to / 10 > from / 10 ? "Skating level " + to + "!" : null;
-}
+	/** The HUD banner for reaching a multiple of ten (or 99), or null. */
+	public String banner()
+	{
+		return to >= SkateLevels.MAX_LEVEL ? "99 Skating!" : to / 10 > from / 10 ? "Skating level " + to + "!" : null;
+	}
 }

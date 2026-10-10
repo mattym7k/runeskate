@@ -7,14 +7,14 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor(access = AccessLevel.PACKAGE)
 public final class GhostLabel
 {
-/** The party member the ghost is. */
-public final long memberId;
-public final int x;
-public final int y;
-public final int z;
-public final String name;
-/** Trick name, or null when none is showing. */
-public final String trick;
-public final float trickAlpha;
+	/** The party member the ghost is. */
+	public final long memberId;
+	public final int x;
+	public final int y;
+	public final int z;
+	public final String name;
+	/** Trick name, or null when none is showing. */
+	public final String trick;
+	public final float trickAlpha;
 
 }

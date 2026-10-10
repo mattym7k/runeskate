@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import com.gielinorskate.duel.SkateDuelHit;
 import static org.junit.Assert.assertTrue;
 import com.gielinorskate.physics.SkaterState;
 import com.gielinorskate.progression.BoardDesigns;
@@ -489,186 +488,15 @@ public class GhostHubTest
 		}
 	}
 
-	// ---- Skate Duel messages share the budget
-
-	private int duels()
-	{
-		return (int) link.sent.stream().filter(m -> m instanceof SkateDuelHit).count();
-	}
-
 	@Test
-	public void duelMessagesGoBeforeGhostUpdatesAndCountInTheBudget()
+	public void aRemoteUpdateWithUnknownEventBitsIsStillDrawn()
 	{
-		audience();
-		hub.sendDuel(new SkateDuelHit(), false);
-		frame(0f, frame(0f), GhostCodec.EV_POP, false, true);
-		assertEquals(1, duels());
-		// the duel message took a token; the event still fits (2 per second)
-		assertEquals(1, link.updates());
-		assertTrue(link.sent.get(0) instanceof SkateDuelHit);
-		hub.sendDuel(new SkateDuelHit(), false);
-		frame(0.1f, frame(1f), GhostCodec.EV_POP, false, true);
-		// no token left in this second: neither goes, and the duel message is kept, not dropped
-		assertEquals(1, duels());
-		assertEquals(1, link.updates());
-		frame(1.0f, frame(2f), GhostCodec.EV_POP, false, true);
-		assertEquals("the waiting duel message goes first", 2, duels());
-		assertTrue(link.sent.get(2) instanceof SkateDuelHit);
-	}
-
-	@Test
-	public void aWaitingDuelMessageHoldsBackGhostUpdatesUntilItIsOut()
-	{
-		audience();
-		for (int i = 0; i < 5; i++)
-		{
-			hub.sendDuel(new SkateDuelHit(), false);
-		}
-		for (int i = 0; i < 200; i++)
-		{
-			frame(i * FRAME, frame(i), GhostCodec.EV_POP, false, true);
-		}
-		// 4 s: 8 tokens, the 5 duel messages first, then updates
-		assertEquals(5, duels());
-		int firstUpdate = -1;
-		for (int i = 0; i < link.sent.size(); i++)
-		{
-			if (link.sent.get(i) instanceof SkateGhostUpdate)
-			{
-				firstUpdate = i;
-				break;
-			}
-		}
-		assertEquals(5, firstUpdate);
-		assertLimit();
-	}
-
-	@Test
-	public void duelMessagesFlushWithoutSkatingAndStayInTheLimit()
-	{
-		for (int i = 0; i < 4; i++)
-		{
-			hub.sendDuel(new SkateDuelHit(), false);
-		}
-		link.now = 0f;
-		hub.flushDuel(0f, false);
-		link.now = 0.5f;
-		hub.flushDuel(0.5f, false);
-		assertEquals(2, duels());
-		link.now = 1f;
-		hub.flushDuel(1f, false);
-		assertEquals(4, duels());
-		assertLimit();
-	}
-
-	@Test
-	public void duelMessagesAreDroppedOutsideAParty()
-	{
-		hub.sendDuel(new SkateDuelHit(), false);
-		link.inParty = false;
-		hub.flushDuel(0f, false);
-		link.inParty = true;
-		hub.flushDuel(1f, false);
-		assertEquals(0, duels());
-	}
-
-	@Test
-	public void closingSendsOnlyTheLatestLastWord()
-	{
-		SkateDuelHit forfeit = new SkateDuelHit();
-		hub.sendDuel(new SkateDuelHit(), false);
-		hub.sendDuel(new SkateDuelHit(), false);
-		hub.sendDuel(forfeit, true);
-		hub.sendDuel(new SkateDuelHit(), false);
-		hub.close();
-		// queued hits would go over the budget in a burst: only the duel's last word goes
-		assertEquals(1, duels());
-		assertTrue(link.sent.get(0) == forfeit);
-		hub.sendDuel(new SkateDuelHit(), true);
-		hub.flushDuel(5f, false);
-		assertEquals("closed: nothing more", 1, duels());
-	}
-
-	@Test
-	public void closingWithNoLastWordSendsNoDuelMessage()
-	{
-		hub.sendDuel(new SkateDuelHit(), false);
-		hub.close();
-		assertEquals(0, duels());
-	}
-
-	@Test
-	public void closingInAPvpAreaAfterTheLastWordSendsNoOther()
-	{
-		hub.sendDuel(new SkateDuelHit(), true);
-		hub.flushDuel(0f, true);
-		hub.sendDuel(new SkateDuelHit(), true);
-		hub.close();
-		assertEquals(1, duels());
-	}
-
-	@Test
-	public void whileBlockedOnlyOneLastWordGoesOut()
-	{
-		SkateDuelHit last = new SkateDuelHit();
-		hub.sendDuel(new SkateDuelHit(), false);
-		hub.sendDuel(new SkateDuelHit(), false);
-		hub.sendDuel(last, true);
-		hub.sendDuel(new SkateDuelHit(), false);
-		link.now = 0f;
-		hub.flushDuel(0f, true);
-		assertEquals(1, duels());
-		assertTrue(link.sent.get(0) == last);
-		// a second last word in the same stretch is dropped too
-		hub.sendDuel(new SkateDuelHit(), true);
-		hub.flushDuel(5f, true);
-		assertEquals(1, duels());
-		// out again: sending resumes
-		hub.flushDuel(6f, false);
-		hub.sendDuel(new SkateDuelHit(), false);
-		hub.flushDuel(7f, false);
-		assertEquals(2, duels());
-	}
-
-	@Test
-	public void aSkateFrameInAPvpAreaDropsWaitingDuelMessages()
-	{
-		audience();
-		hub.sendDuel(new SkateDuelHit(), false);
-		frame(0f, frame(0f), 0, true, true);
-		hub.flushDuel(1f, false);
-		assertEquals(0, duels());
-	}
-
-	@Test
-	public void theDuelCapabilityGoesOutOnlyWhenOn()
-	{
-		frame(0f, frame(0f), 0, false, true);
-		assertNull(((SkateGhostUpdate) link.sent.get(0)).dv);
-		hub.setDuelCapable(true);
-		frame(6f, frame(0f), 0, false, true);
-		assertEquals(Integer.valueOf(GhostHub.DUEL_VERSION), ((SkateGhostUpdate) link.sent.get(1)).dv);
-	}
-
-	@Test
-	public void aRemoteDuelCapabilityIsKeptAndMissingMeansNone()
-	{
-		hub.onRemoteUpdate(7L, remote(0f, 1), 0f, null);
-		assertEquals(0, hub.ghosts().get(7L).duelVersion());
-		SkateGhostUpdate m = remote(0f, 2);
-		m.dv = 1;
-		hub.onRemoteUpdate(7L, m, 0.1f, null);
-		assertEquals(1, hub.ghosts().get(7L).duelVersion());
-	}
-
-	/** Never more than 2 messages of any kind in any 1-second window. */
-	private void assertLimit()
-	{
-		for (int i = 0; i + 2 < link.times.size(); i++)
-		{
-			assertTrue("3 messages within 1 s at " + link.times.get(i),
-				link.times.get(i + 2) - link.times.get(i) >= 1f - 1e-4f);
-		}
+		// bits 12 and 13 come from other builds of the plugin: ignored, the update itself still counts
+		SkateGhostUpdate m = remote(0f, 1);
+		m.ev = (1 << 12) | (1 << 13);
+		hub.onRemoteUpdate(7L, m, 0f, null);
+		assertNotNull(hub.ghosts().get(7L));
+		assertNotNull(hub.ghosts().get(7L).pose(0.5f, null));
 	}
 
 	@Test

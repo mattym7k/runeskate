@@ -410,7 +410,7 @@ public class BakedBoardTest
 		int[] c1 = {OsrsColor.light(BakedBoardModel.PROBE, 128), OsrsColor.light(BakedBoardModel.PROBE, 90), 5};
 		int[] c2 = {OsrsColor.light(BakedBoardModel.PROBE, 64), 0, 6};
 		int[] c3 = {OsrsColor.light(BakedBoardModel.PROBE, 160), -1, -2};
-		BakedBoardModel.shade(c1, c2, c3, corners, null);
+		BakedBoardModel.shade(c1, c2, c3, corners);
 
 		// smooth face: each corner its own intensity (within the probe's one-step precision)
 		assertLit(a, 128, c1[0]);

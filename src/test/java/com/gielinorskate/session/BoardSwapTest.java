@@ -29,21 +29,6 @@ public class BoardSwapTest
 	}
 
 	@Test
-	public void aTantrumLeavesAFreshBoardInHandWithoutABlend()
-	{
-		// from the board, mid step-off, or with the board lying far away
-		s.freshBoardInHand();
-		assertEquals(SkateMode.ON_FOOT, s.getMode());
-		assertEquals(BoardState.CARRIED, s.getBoard());
-		assertEquals(BoardTransition.NONE, s.getTransition());
-		assertEquals(1f, s.getTransitionProgress(), 0f);
-		assertEquals(BoardSwap.Action.DROP, s.onDropPickup(5000, 0, 5, 1f));
-		s.freshBoardInHand();
-		assertEquals(BoardState.CARRIED, s.getBoard());
-		assertEquals(BoardTransition.NONE, s.getTransition());
-	}
-
-	@Test
 	public void theBoardKeyStepsOffOnlyOnTheGround()
 	{
 		assertEquals(BoardSwap.Action.NONE, s.onBoardKeyPressed(false, 0, 0));

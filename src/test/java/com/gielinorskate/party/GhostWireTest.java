@@ -108,7 +108,6 @@ public class GhostWireTest
 			m.bd = rnd.nextBoolean() ? rnd.nextInt(6000) : null;
 			m.cr = rnd.nextBoolean() ? rnd.nextInt(10) : null;
 			m.kd = rnd.nextBoolean() ? rnd.nextInt(99) : null;
-			m.dv = rnd.nextBoolean() ? 1 : null;
 			m.tj = rnd.nextBoolean() ? GhostWire.ALPHABET.substring(rnd.nextInt(64)) : null;
 			String json = GSON.toJson(m, WebsocketMessage.class);
 			assertEquals(json, json.length(), GhostWire.jsonLength(m));

@@ -15,32 +15,32 @@ import net.runelite.client.ui.overlay.*;
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class GhostLabelOverlay extends Overlay
 {
-private final Client client;
-private final PartyGhostService ghosts;
+	private final Client client;
+	private final PartyGhostService ghosts;
 
-{
-setPosition(OverlayPosition.DYNAMIC);
-setLayer(OverlayLayer.ABOVE_SCENE);
-}
+	{
+		setPosition(OverlayPosition.DYNAMIC);
+		setLayer(OverlayLayer.ABOVE_SCENE);
+	}
 
-@Override
-public Dimension render(Graphics2D g)
-{
-for (GhostLabel l : ghosts.getLabels())
-{
-Point p = Perspective.localToCanvas(client, l.x, l.y, l.z);
-if (p == null)
-continue;
-int y = p.getY();
-if (l.trick != null)
-{
-HudLayout.centred(g, l.trick, p.getX(), y, HudLayout.fade(new Color(255, 215, 64), l.trickAlpha),
-HudLayout.fade(Color.BLACK, l.trickAlpha), 1);
-y -= g.getFontMetrics().getHeight();
-}
-if (l.name != null)
-HudLayout.centred(g, l.name, p.getX(), y, Color.WHITE, Color.BLACK, 1);
-}
-return null;
-}
+	@Override
+	public Dimension render(Graphics2D g)
+	{
+		for (GhostLabel l : ghosts.getLabels())
+		{
+			Point p = Perspective.localToCanvas(client, l.x, l.y, l.z);
+			if (p == null)
+				continue;
+			int y = p.getY();
+			if (l.trick != null)
+			{
+				HudLayout.centred(g, l.trick, p.getX(), y, HudLayout.fade(new Color(255, 215, 64), l.trickAlpha),
+					HudLayout.fade(Color.BLACK, l.trickAlpha), 1);
+				y -= g.getFontMetrics().getHeight();
+			}
+			if (l.name != null)
+				HudLayout.centred(g, l.name, p.getX(), y, Color.WHITE, Color.BLACK, 1);
+		}
+		return null;
+	}
 }

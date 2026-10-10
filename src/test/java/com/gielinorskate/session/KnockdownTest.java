@@ -8,7 +8,7 @@ import com.gielinorskate.physics.SkateTuning;
 import java.util.Random;
 import org.junit.Test;
 
-/** The knockdown sequence: knock-off, lie down, get up; its timing, the skips and the duel rules. */
+/** The knockdown sequence: knock-off, lie down, get up; its timing and the skips. */
 public class KnockdownTest
 {
 	/** The longest the whole sequence can take (plus a physics step per phase). */
@@ -65,10 +65,10 @@ public class KnockdownTest
 		};
 	}
 
-	private static Knockdown knocked(CollisionWorld w, float speed, boolean dueling)
+	private static Knockdown knocked(CollisionWorld w, float speed)
 	{
 		Knockdown k = new Knockdown(w, T.gravity, T.skaterRadius);
-		k.start(0f, 0f, 0f, 0f, speed, 0f, false, 0f, 0f, dueling, new Random(1));
+		k.start(0f, 0f, 0f, 0f, speed, 0f, false, 0f, 0f, new Random(1));
 		return k;
 	}
 
@@ -94,7 +94,7 @@ public class KnockdownTest
 		assertTrue(Knockdown.GET_UP_SECONDS <= 0.4f);
 		for (float speed : new float[]{0f, 300f, 900f, 1500f, 2600f})
 		{
-			float t = runIdle(knocked(flat(), speed, false));
+			float t = runIdle(knocked(flat(), speed));
 			assertTrue("at " + speed + ": " + t, t <= 2.0f);
 			// a typical crash: about a second and a half at most, at least a second
 			assertTrue("at " + speed + ": " + t, t >= 0.9f && t <= 1.5f);
@@ -104,7 +104,7 @@ public class KnockdownTest
 	@Test
 	public void evenAVeryLongFallEndsWithinTwoSeconds()
 	{
-		Knockdown k = knocked(cliff(), 1500f, false);
+		Knockdown k = knocked(cliff(), 1500f);
 		float t = runIdle(k);
 		assertTrue("done: " + t, k.isDone());
 		assertTrue(t <= MAX_TOTAL + 3 * DT + 1e-4f);
@@ -114,7 +114,7 @@ public class KnockdownTest
 	@Test
 	public void phasesRunInOrder()
 	{
-		Knockdown k = knocked(flat(), 1500f, false);
+		Knockdown k = knocked(flat(), 1500f);
 		assertEquals(Knockdown.Phase.TUMBLE, k.getPhase());
 		boolean impact = false;
 		while (k.getPhase() == Knockdown.Phase.TUMBLE)
@@ -146,7 +146,7 @@ public class KnockdownTest
 	@Test
 	public void rSkipsTheRestAndPutsTheSkaterBackOnTheBoard()
 	{
-		Knockdown k = knocked(flat(), 1500f, false);
+		Knockdown k = knocked(flat(), 1500f);
 		k.step(DT);
 		assertEquals(Knockdown.Outcome.BACK_ON_BOARD, k.input(true, false, false, false));
 		assertTrue(k.isDone());
@@ -157,7 +157,7 @@ public class KnockdownTest
 	{
 		for (int which = 0; which < 2; which++)
 		{
-			Knockdown k = knocked(flat(), 1500f, false);
+			Knockdown k = knocked(flat(), 1500f);
 			k.input(false, false, false, false);
 			toLie(k);
 			k.step(DT);
@@ -169,7 +169,7 @@ public class KnockdownTest
 	@Test
 	public void aMoveKeyHeldThroughTheBailMustBePressedAgain()
 	{
-		Knockdown k = knocked(flat(), 1500f, false);
+		Knockdown k = knocked(flat(), 1500f);
 		k.input(false, true, false, false);
 		toLie(k);
 		k.step(DT);
@@ -183,7 +183,7 @@ public class KnockdownTest
 	@Test
 	public void theBoardKeyDuringTheLieDownGoesStraightToReclaiming()
 	{
-		Knockdown k = knocked(flat(), 1500f, false);
+		Knockdown k = knocked(flat(), 1500f);
 		toLie(k);
 		assertEquals(Knockdown.Outcome.RECLAIM, k.input(false, false, false, true));
 		assertTrue(k.isDone());
@@ -192,55 +192,16 @@ public class KnockdownTest
 	@Test
 	public void inputInTheAirIsIgnored()
 	{
-		Knockdown k = knocked(flat(), 1500f, false);
+		Knockdown k = knocked(flat(), 1500f);
 		k.step(DT);
 		assertEquals(Knockdown.Outcome.NONE, k.input(false, true, true, true));
 		assertEquals(Knockdown.Phase.TUMBLE, k.getPhase());
 	}
 
 	@Test
-	public void inADuelRDoesNothing()
-	{
-		Knockdown k = knocked(flat(), 1500f, true);
-		k.step(DT);
-		assertEquals(Knockdown.Outcome.NONE, k.input(true, false, false, false));
-		assertFalse(k.isDone());
-	}
-
-	@Test
-	public void inADuelInputDoesNotShortenTheLieDown()
-	{
-		Knockdown k = knocked(flat(), 1500f, true);
-		k.input(false, false, false, false);
-		toLie(k);
-		float lie = 0f;
-		boolean held = false;
-		while (k.getPhase() == Knockdown.Phase.LIE)
-		{
-			held = !held;
-			assertEquals(Knockdown.Outcome.NONE, k.input(true, held, true, true));
-			k.step(DT);
-			lie += DT;
-		}
-		assertEquals(Knockdown.LIE_SECONDS, lie, DT + 1e-4f);
-		while (!k.isDone())
-		{
-			assertEquals(Knockdown.Outcome.NONE, k.input(true, true, true, true));
-			k.step(DT);
-		}
-	}
-
-	@Test
-	public void inADuelTheSequenceStillEndsByItself()
-	{
-		float t = runIdle(knocked(cliff(), 2600f, true));
-		assertTrue(t <= 2.0f);
-	}
-
-	@Test
 	public void theBodyFacesTheBoardOnceUp()
 	{
-		Knockdown k = knocked(flat(), 1500f, false);
+		Knockdown k = knocked(flat(), 1500f);
 		runIdle(k);
 		float[] board = {k.getBoard().getX(), k.getBoard().getY()};
 		float want = (float) Math.atan2(board[0] - k.getBody().getX(), board[1] - k.getBody().getY());
@@ -250,7 +211,7 @@ public class KnockdownTest
 	@Test
 	public void theBoardIsAtRestOnceTheSkaterStands()
 	{
-		Knockdown k = knocked(flat(), 2600f, false);
+		Knockdown k = knocked(flat(), 2600f);
 		runIdle(k);
 		assertTrue(k.getBoard().isAtRest());
 	}
@@ -258,7 +219,7 @@ public class KnockdownTest
 	@Test
 	public void theGetUpTurnsTheBodyUprightSmoothly()
 	{
-		Knockdown k = knocked(flat(), 1500f, false);
+		Knockdown k = knocked(flat(), 1500f);
 		while (k.getPhase() != Knockdown.Phase.GET_UP)
 		{
 			k.step(DT);

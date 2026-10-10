@@ -8,10 +8,10 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode
 public final class PanelState
 {
-public final boolean active;
-/** Why skating could not start last time (cleared when it starts), or null. */
-public final String refusal;
-public final int total;
-public final int bestCombo;
-public final int tricksLanded;
+	public final boolean active;
+	/** Why skating could not start last time (cleared when it starts), or null. */
+	public final String refusal;
+	public final int total;
+	public final int bestCombo;
+	public final int tricksLanded;
 }

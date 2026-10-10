@@ -160,7 +160,7 @@ public class DesignLookTest
 			Arrays.fill(c1, 64);
 			Arrays.fill(c2, 64);
 			Arrays.fill(c3, 64);
-			BakedBoardModel.shade(c1, c2, c3, looks[k], null);
+			BakedBoardModel.shade(c1, c2, c3, looks[k]);
 			lit[k] = c1;
 		}
 		assertFalse(Arrays.equals(lit[0], lit[1]));

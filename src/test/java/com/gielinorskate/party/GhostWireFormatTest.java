@@ -125,7 +125,7 @@ public class GhostWireFormatTest
 	public void theBiggestUpdatesWithDesignsStayWithinTheBound()
 	{
 		// a flip on the wire never carries the grip and wheels (the hub holds them back): the busiest update of
-		// aBusyUpdateIsSmallAndRoundTrips with the longest deck name and the duel version: the bound here is 284
+		// aBusyUpdateIsSmallAndRoundTrips with the longest deck name: the bound here is 284
 		// (still about 1.1 KB/s at the 4 msg/s cap)
 		GhostState busy = GhostFeed.frame(330, 2, 1_409_664f, 1_411_200f, -1237f, -3.14159f, -2600f, -2600f, -1820f,
 			SkaterState.AIRBORNE, Trick.BOARDSLIDE, Trick.NOLLIE_INWARD_HEELFLIP, 0.5f, -TurnRateMeter.MAX_RATE,
@@ -133,7 +133,6 @@ public class GhostWireFormatTest
 		SkateGhostUpdate m = GhostCodec.encode(busy, 255, null);
 		m.seq = 1_234_567_890;
 		m.dk = longest(DesignPart.DECK);
-		m.dv = GhostHub.DUEL_VERSION;
 		assertFalse(GhostCodec.mayCarryLook(m));
 		String json = GSON.toJson(m, WebsocketMessage.class);
 		assertTrue(json.length() + " " + json, json.length() <= 284);
@@ -145,7 +144,6 @@ public class GhostWireFormatTest
 		SkateGhostUpdate g = GhostCodec.encode(grind, 0x3ff, null);
 		g.seq = 1_234_567_890;
 		g.dk = longest(DesignPart.DECK);
-		g.dv = GhostHub.DUEL_VERSION;
 		assertTrue(GhostCodec.mayCarryLook(g));
 		g.gw = longest(DesignPart.GRIP) + "." + longest(DesignPart.WHEELS);
 		String gj = GSON.toJson(g, WebsocketMessage.class);
@@ -157,7 +155,6 @@ public class GhostWireFormatTest
 		SkateGhostUpdate o = GhostCodec.encode(foot, 0x3ff, null);
 		o.seq = 1_234_567_890;
 		o.dk = longest(DesignPart.DECK);
-		o.dv = GhostHub.DUEL_VERSION;
 		assertTrue(GhostCodec.mayCarryLook(o));
 		o.gw = longest(DesignPart.GRIP) + "." + longest(DesignPart.WHEELS);
 		String oj = GSON.toJson(o, WebsocketMessage.class);
@@ -197,20 +194,17 @@ public class GhostWireFormatTest
 	}
 
 	@Test
-	public void theDuelCapabilityIsOptionalOnTheWire()
+	public void fieldsAndEventBitsFromOtherBuildsAreIgnored()
 	{
-		GhostState f = GhostFeed.frame(330, 2, 0f, 0f, 0f, 0f, 0f, 0f, 0f, SkaterState.ROLLING, null, null, 0f);
-		SkateGhostUpdate m = GhostCodec.encode(f, 0, null);
-		String without = GSON.toJson(m, WebsocketMessage.class);
-		assertFalse(without, without.contains("\"dv\""));
-		m.dv = GhostHub.DUEL_VERSION;
-		String with = GSON.toJson(m, WebsocketMessage.class);
-		assertTrue(with, with.contains("\"dv\":1"));
-		SkateGhostUpdate back = (SkateGhostUpdate) GSON.fromJson(with, WebsocketMessage.class);
-		assertEquals(Integer.valueOf(1), back.dv);
-		// an older version's update has none: no duel support
-		SkateGhostUpdate old = (SkateGhostUpdate) GSON.fromJson(without, WebsocketMessage.class);
-		assertEquals(null, old.dv);
+		// another build of the plugin may send fields and event bits (12 and 13) this one does not know
+		String json = "{\"type\":\"SkateGhostUpdate\",\"w\":330,\"x\":5,\"hd\":1000,\"st\":\"ROLLING\",\"seq\":3,"
+			+ "\"ev\":12288,\"dv\":1}";
+		SkateGhostUpdate back = (SkateGhostUpdate) GSON.fromJson(json, WebsocketMessage.class);
+		GhostState s = GhostCodec.decode(back);
+		assertEquals(330, s.world);
+		assertEquals(1f, s.heading, 1e-6f);
+		String again = GSON.toJson(back, WebsocketMessage.class);
+		assertFalse(again, again.contains("\"dv\""));
 	}
 
 	/** A trail of a skater at full speed (2600 u/s), turning fast and falling, sampled for {@code seconds}. */
@@ -238,7 +232,6 @@ public class GhostWireFormatTest
 		SkateGhostUpdate m = GhostCodec.encode(busy, 0xfff, null);
 		m.seq = 1_234_567_890;
 		m.dk = longest(DesignPart.DECK);
-		m.dv = GhostHub.DUEL_VERSION;
 		fastTrail(1f).fit(m, 1f);
 		String json = GSON.toJson(m, WebsocketMessage.class);
 		assertEquals(json.length(), GhostWire.jsonLength(m));
@@ -251,7 +244,6 @@ public class GhostWireFormatTest
 		SkateGhostUpdate g = GhostCodec.encode(grind, 0xfff, null);
 		g.seq = 1_234_567_890;
 		g.dk = longest(DesignPart.DECK);
-		g.dv = GhostHub.DUEL_VERSION;
 		g.gw = longest(DesignPart.GRIP) + "." + longest(DesignPart.WHEELS);
 		fastTrail(1f).fit(g, 1f);
 		String gj = GSON.toJson(g, WebsocketMessage.class);
@@ -262,13 +254,12 @@ public class GhostWireFormatTest
 	@Test
 	public void aTypicalUpdateCarriesItsFourPositionsAndAPopItsTime()
 	{
-		// rolling at speed, a custom deck, seq of today's size, the duel version
+		// rolling at speed, a custom deck, seq of today's size
 		GhostState rolling = GhostFeed.frame(330, 2, 1_409_664f, 1_411_200f, -237f, 1.234f, 1200f, -900f, 0f,
 			SkaterState.ROLLING, null, null, 0f, 1.2f);
 		SkateGhostUpdate m = GhostCodec.encode(rolling, GhostCodec.EV_PUSH, null);
 		m.seq = 412_345_678;
 		m.dk = "C:0a1b2c3d";
-		m.dv = GhostHub.DUEL_VERSION;
 		GhostTrail trail = fastTrail(1f);
 		trail.sent(0.2f);
 		trail.fit(m, 1f);
@@ -287,7 +278,6 @@ public class GhostWireFormatTest
 		SkateGhostUpdate p = GhostCodec.encode(pop, GhostCodec.EV_POP | GhostCodec.EV_TRICK, Trick.KICKFLIP);
 		p.seq = 412_345_679;
 		p.dk = "C:0a1b2c3d";
-		p.dv = GhostHub.DUEL_VERSION;
 		fastTrail(1f).fit(p, 1f);
 		GhostTrajectory pb = GhostTrajectory.decode(p.tj, p.ev, p.x, p.y, p.h, p.hd);
 		assertTrue(pb.count >= 2);

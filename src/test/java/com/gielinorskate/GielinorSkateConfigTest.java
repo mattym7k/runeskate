@@ -107,11 +107,6 @@ public class GielinorSkateConfigTest
 		assertEquals(GielinorSkateConfig.FlickButton.RIGHT, defaults.flickButton());
 		assertEquals(java.awt.event.KeyEvent.VK_UP, defaults.leanForwardKey().getKeyCode());
 		assertEquals(java.awt.event.KeyEvent.VK_DOWN, defaults.leanBackKey().getKeyCode());
-		assertTrue(defaults.showLeaderboardOverlay());
-		assertFalse(defaults.leaderboardOverlayCollapsed());
-		assertEquals("combo", defaults.leaderboardOverlayBoard());
-		assertEquals("week", defaults.leaderboardOverlayPeriod());
-		assertTrue(defaults.duelEndings());
 		assertEquals(GielinorSkateConfig.CameraHeight.HIGH, defaults.cameraHeight());
 	}
 
@@ -120,13 +115,11 @@ public class GielinorSkateConfigTest
 	public void theCommonSettingsAreInTheTopSectionsAndTheRestInAdvanced() throws IOException
 	{
 		java.util.Map<String, String> expected = new java.util.HashMap<>();
-		for (String k : Arrays.asList("toggleKey", "controllerMode", "controllerPreset", "submitScores",
-			"showLeaderboardOverlay"))
+		for (String k : Arrays.asList("toggleKey", "controllerMode", "controllerPreset"))
 		{
 			expected.put(k, "GENERAL");
 		}
-		for (String k : Arrays.asList("shareWithParty", "showPartySkaters", "allowDuelChallenges",
-			"duelEndings"))
+		for (String k : Arrays.asList("shareWithParty", "showPartySkaters"))
 		{
 			expected.put(k, "PARTY");
 		}
@@ -168,16 +161,5 @@ public class GielinorSkateConfigTest
 		};
 		assertEquals(GielinorSkateConfig.ControllerPreset.SKATE_3, defaults.controllerPreset());
 		assertEquals("", defaults.customControllerLayout());
-	}
-
-	@Test
-	public void thirdPartyWarningUsesThePluginHubWordingVerbatim()
-	{
-		// plugin/AGENTS.md: the exact sentence the Plugin Hub requires for a third-party server feature
-		String required = "This feature submits your IP address to a 3rd-party server not controlled or verified by "
-			+ "RuneLite developers";
-		assertEquals(required, GielinorSkateConfig.THIRD_PARTY_WARNING);
-		assertTrue(GielinorSkateConfig.SUBMIT_SCORES_DESCRIPTION.contains(required));
-		assertTrue(GielinorSkateConfig.SUBMIT_SCORES_DESCRIPTION.contains("RuneScape name"));
 	}
 }
