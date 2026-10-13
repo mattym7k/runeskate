@@ -21,6 +21,8 @@ public final class SkateCamera
 	@Getter
 	private int baseZoom;
 	private int lastZoom;
+	/** Frames in a row the free camera would not stay on. */
+	private int lostFrames;
 
 	public void enter(float x, float y, float h, float heading, int zoom)
 	{
@@ -34,6 +36,7 @@ public final class SkateCamera
 		client.setCameraPitchRelaxerEnabled(true);
 		setBaseZoom(zoom);
 		lastZoom = Integer.MIN_VALUE;
+		lostFrames = 0;
 		rig.reset(x, y, h, heading);
 	}
 
@@ -64,13 +67,20 @@ public final class SkateCamera
 	/**
 	 * @param landedAirtime seconds in the air of a landing on this frame, 0 when none
 	 * @param pitchJau14 camera pitch (JAU14, 16384 per turn; smaller is flatter)
+	 * @return false once the free camera has stayed off for a second (the game or another plugin keeps it)
 	 */
-	public void update(float x, float y, float h, float cameraHeading, float speed, SkaterState state, float landedAirtime,
+	public boolean update(float x, float y, float h, float cameraHeading, float speed, SkaterState state, float landedAirtime,
 		float dt, int pitchJau14)
 	{
 		if (!active)
-			return;
+			return true;
 		rig.update(x, y, h, cameraHeading, speed, state, landedAirtime, dt);
+		// the game or another plugin can switch the free camera off: take it back, or wait a second for it
+		if (client.getCameraMode() != 1)
+			client.setCameraMode(1);
+		if (client.getCameraMode() != 1)
+			return ++lostFrames < 60;
+		lostFrames = 0;
 
 		client.setCameraFocalPointX(rig.getFocusX());
 		client.setCameraFocalPointZ(rig.getFocusY());
@@ -85,6 +95,7 @@ public final class SkateCamera
 			client.runScript(ScriptID.CAMERA_DO_ZOOM, zoom, zoom);
 			lastZoom = zoom;
 		}
+		return true;
 	}
 
 	/**

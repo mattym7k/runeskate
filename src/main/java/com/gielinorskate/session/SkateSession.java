@@ -554,7 +554,8 @@ public class SkateSession
 	private void follow(float x, float y, float h, float heading, float speed, SkaterState state, float landedAirtime,
 		float frameDt)
 	{
-		camera.update(x, y, h, heading, speed, state, landedAirtime, frameDt, config.cameraHeight().pitchJau14());
+		if (!camera.update(x, y, h, heading, speed, state, landedAirtime, frameDt, config.cameraHeight().pitchJau14()))
+			exit(Text.get("ss.camera"));
 	}
 
 	/** A plain click's one-time hint and H's controls card; both are dropped when not {@code live}. */
